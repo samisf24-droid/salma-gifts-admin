@@ -164,78 +164,80 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction
 
 /* ── PRINT STYLES ── */
 @media print{
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
-  body{background:#fff!important;margin:0;padding:0;font-family:'Tajawal',sans-serif;direction:rtl}
-  /* Hide everything except print view */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
   .hdr,.tabs,.main,.pmodal-bg,.panel-bg,.edit-bg,.toast{display:none!important}
-  /* Show only print container */
-  #print-container{display:block!important}
+  #print-container{display:block!important;padding:5mm}
+  @page{size:A4 portrait;margin:6mm}
 
-  /* PAGE SETUP */
-  @page{size:A4;margin:8mm}
-
-  /* DAY SECTION */
+  /* ── DAY HEADER ── */
   .pc-day-hdr{
-    background:#1A1410!important;color:#C9A96E!important;
-    padding:6px 12px;border-radius:4px;margin-bottom:4mm;
-    display:flex!important;align-items:center;gap:10px;
-    font-size:13px;font-weight:900;page-break-after:avoid;
+    background:#1A1410!important;
+    padding:4px 10px;border-radius:3px;
+    display:flex!important;align-items:center;gap:8px;
+    margin-bottom:2mm;page-break-after:avoid;
   }
-  .pc-day-hdr .pc-dname{color:#fff!important;font-size:14px}
-  .pc-day-hdr .pc-ddate{color:#C9A96E!important;font-size:12px}
-  .pc-day-hdr .pc-dcnt{background:#C9A96E!important;color:#1A1410!important;border-radius:99px;padding:1px 9px;font-size:11px;font-weight:900}
+  .pc-dname{color:#fff!important;font-size:11px;font-weight:900}
+  .pc-ddate{color:#C9A96E!important;font-size:10px;font-weight:700}
+  .pc-dcnt{background:#C9A96E!important;color:#1A1410!important;border-radius:99px;padding:1px 7px;font-size:9px;font-weight:900}
 
-  /* CARDS GRID — 2 per row */
-  .pc-grid{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:5mm!important;
-    margin-bottom:6mm;
-  }
+  /* ── GRID: 1 card per row (full width) ── */
+  .pc-grid{display:block!important;margin-bottom:3mm}
 
-  /* SINGLE CARD */
+  /* ── CARD: horizontal row layout ── */
   .pc-card{
     break-inside:avoid;
-    border:1.5px solid #CCC;
-    border-radius:6px;
+    border:1px solid #CCC;
+    border-radius:4px;
     overflow:hidden;
-    font-size:11px;
+    margin-bottom:2mm;
+    display:block;
   }
 
-  /* CARD HEADER */
+  /* CARD HEADER — single thin row */
   .pc-card-hdr{
     background:#1A1410!important;
-    padding:6px 10px;
-    display:flex!important;align-items:center;gap:8px;
+    padding:3px 8px;
+    display:flex!important;align-items:center;gap:6px;
   }
-  .pc-card-hdr .pc-id{
-    background:#C9A96E!important;color:#1A1410!important;
-    border-radius:4px;padding:2px 7px;font-size:10px;font-weight:900;
+  .pc-id{background:#C9A96E!important;color:#1A1410!important;border-radius:3px;padding:1px 5px;font-size:8px;font-weight:900;flex-shrink:0}
+  .pc-type{color:#E8D5B0!important;font-size:8px;font-weight:700;flex-shrink:0}
+  .pc-names{color:#fff!important;font-size:10px;font-weight:900;flex:1}
+  .pc-date-hdr{color:#C9A96E!important;font-size:8px;flex-shrink:0}
+  .pc-price{color:#C9A96E!important;font-size:10px;font-weight:900;white-space:nowrap;flex-shrink:0}
+
+  /* TWO SECTIONS SIDE BY SIDE — full width */
+  .pc-secs{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:0;
   }
-  .pc-card-hdr .pc-type{color:#E8D5B0!important;font-size:10px;font-weight:700}
-  .pc-card-hdr .pc-names{color:#fff!important;font-size:12px;font-weight:900;flex:1}
-  .pc-card-hdr .pc-price{color:#C9A96E!important;font-size:13px;font-weight:900;white-space:nowrap}
 
-  /* TWO SECTIONS */
-  .pc-secs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0}
-
-  .pc-sec{padding:7px 9px;border-top:1px solid #EEE}
-  .pc-sec-o{background:#FAF5EC!important;border-left:1px solid #EEE}
+  .pc-sec{padding:4px 8px;border-top:1px solid #EEE}
+  .pc-sec-o{background:#FAF5EC!important;border-left:1px solid #DDD}
   .pc-sec-d{background:#EFF6FF!important}
 
   .pc-sec-ttl{
-    font-size:8px;font-weight:900;text-transform:uppercase;
-    letter-spacing:.3px;margin-bottom:5px;padding-bottom:3px;
+    font-size:7px;font-weight:900;text-transform:uppercase;
+    color:#888!important;margin-bottom:3px;padding-bottom:2px;
     border-bottom:1px solid rgba(0,0,0,.08);
   }
-  .pc-sec-o .pc-sec-ttl{color:#8B7355!important}
   .pc-sec-d .pc-sec-ttl{color:#1E40AF!important}
 
-  .pc-row{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;gap:4px;border-bottom:1px solid rgba(0,0,0,.04)}
-  .pc-row:last-child{border-bottom:none}
-  .pc-k{font-size:8px;color:#888!important;flex-shrink:0}
-  .pc-v{font-size:10px;font-weight:700;color:#1A1410!important;text-align:left;word-break:break-word}
-  .pc-v-total{font-size:13px;font-weight:900;color:#C9A96E!important}
+  /* FIELDS: inline pairs */
+  .pc-fields{display:flex;flex-wrap:wrap;gap:0 8px}
+  .pc-row{
+    display:inline-flex;align-items:baseline;gap:3px;
+    margin-bottom:1px;white-space:nowrap;
+  }
+  .pc-k{font-size:7px;color:#888!important}
+  .pc-v{font-size:9px;font-weight:700;color:#1A1410!important}
+  .pc-v-total{font-size:11px;font-weight:900;color:#C9A96E!important}
+  .pc-v-total-row{
+    display:flex!important;justify-content:space-between;
+    padding-top:2px;margin-top:2px;
+    border-top:1px solid rgba(0,0,0,.1);width:100%;
+  }
 }
 
 /* ── FORM ── */
@@ -691,7 +693,8 @@ function miniCard(o){
   const id = o['Order ID']||'';
   const type = o['Product Type']||'';
   const groom=o['Groom']||''; const bride=o['Bride']||'';
-  const names = type==='Graduation' ? bride : [bride,groom].filter(Boolean).join(' ❤️ ');
+  const isBouquet2 = type==='Bouquet';
+  const names = type==='Graduation' ? bride : isBouquet2 ? ('مسكة عروس '+(o['Notes']||'')).trim() : [bride,groom].filter(Boolean).join(' ❤️ ');
   const status = o['Status']||'New';
   const st = STATUSES[status]||STATUSES.New;
   const total = parseFloat(o['Total']||0);
@@ -798,7 +801,7 @@ async function applyBulk(){
 // ── STATS ──
 function updateStats(){
   document.getElementById('st-all').textContent = allOrders.length;
-  const active = allOrders.filter(o=>o['Status']==='New'||o['Status']==='Preparing').length;
+  const active = allOrders.filter(o=>o['Status']==='New'||o['Status']==='Preparing'||o['Status']==='Shipped').length;
   document.getElementById('st-active').textContent = active;
   const days = getWeekDays(0);
   const weekOrds = allOrders.filter(o=>{
@@ -877,7 +880,7 @@ function openPanel(id){
     if(type==='Package'&&o['Additions']) oF+=pr('البكج',o['Additions']);
   }
   if(o['Phrase']) oF+=pr('العبارة',o['Phrase']);
-  oF+=pr('الآية','موجودة ✅');
+  if(['Tray','Guest Book','Package'].includes(type)) oF+=pr('الآية','موجودة ✅');
   if(o['Notes']) oF+=pr('ملاحظات',o['Notes']);
   if(o['Additions']&&type!=='Package') oF+=pr('إضافات',o['Additions']);
   oF+=pr('سعر المنتج',total+' د.أ');
@@ -1044,7 +1047,6 @@ document.getElementById('edit-panel').addEventListener('click',function(e){if(e.
 function buildDelDateOptions(){
   const sel = document.getElementById('f-deldate-sel');
   const today = new Date(); today.setHours(0,0,0,0);
-  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const dayNamesAr = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
   // Clear existing options except first
@@ -1220,7 +1222,9 @@ async function saveOrder(){
 
 function clearForm(){
   document.getElementById('f-deldate-sel').value='';
+  document.getElementById('f-deldate').value='';
   document.getElementById('f-deldate').style.display='none';
+  document.getElementById('deldate-hint').textContent='';
   ['f-type','f-deldate','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link'
@@ -1241,7 +1245,7 @@ function printOrders(){
 
 // ── TABS ──
 function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print'][i]===t));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   document.getElementById('view-'+t).classList.add('on');
 }
@@ -1255,25 +1259,36 @@ function openPrintModal(){
 function buildPrintDayOptions(){
   const sel = document.getElementById('print-day-sel');
   const today = new Date(); today.setHours(0,0,0,0);
-  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const DAY_JS3 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
+  const dayNamesAll = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
   // Keep only first option "كل الأوردرات"
   while(sel.options.length > 1) sel.remove(1);
 
-  // Get unique delivery days from orders + their next date
-  const seenDays = new Set();
-  // Always show all 7 days with their next occurrence
-  dayNames.forEach(day=>{
-    const target = DAY_JS3[day];
-    let diff = (target - today.getDay() + 7) % 7;
-    if(diff === 0) diff = 7;
-    const d = new Date(today);
-    d.setDate(today.getDate() + diff);
-    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1);
+  // Get unique DATES from actual orders
+  const dateSeen = new Set();
+  const dateOptions = [];
+
+  allOrders.forEach(o=>{
+    const dd = o['Delivery Date'];
+    if(dd && !dateSeen.has(dd)){
+      dateSeen.add(dd);
+      const d = parseDate(dd);
+      if(d){
+        const dayName = dayNamesAll[d.getDay()];
+        const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+        dateOptions.push({val:dd, label:dayName+' — '+dateStr, ts:d.getTime()});
+      }
+    }
+  });
+
+  // Sort by date
+  dateOptions.sort((a,b)=>a.ts-b.ts);
+
+  dateOptions.forEach(item=>{
     const opt = document.createElement('option');
-    opt.value = day;
-    opt.textContent = day + ' — ' + dateStr;
+    opt.value = item.val;       // القيمة = التاريخ الفعلي dd/mm/yyyy
+    opt.textContent = item.label;
     sel.appendChild(opt);
   });
 }
@@ -1286,14 +1301,11 @@ function doPrint(){
   const dayF = document.getElementById('print-day-sel').value;
   const stF  = document.getElementById('print-status-sel').value;
 
-  // Filter orders
+  // Filter orders by EXACT Delivery Date
   let orders = allOrders.filter(o=>{
     if(dayF!=='all'){
-      const dd = o['Delivery Date']||'';
-      const dday = o['Delivery Day']||'';
-      if(!dd.includes('') && !dday.includes(dayF)) return false;
-      // match by delivery day name
-      if(!String(dday).includes(dayF)) return false;
+      const dd = String(o['Delivery Date']||'').trim();
+      if(dd !== dayF) return false;
     }
     if(stF!=='all' && o['Status']!==stF) return false;
     return true;
@@ -1301,39 +1313,40 @@ function doPrint(){
 
   if(!orders.length){ toast('❌ ما في أوردرات للطباعة'); return; }
 
-  // Group by delivery day
-  const DAYS_PRINT = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','أخرى'];
-  const grouped = {}; DAYS_PRINT.forEach(d=>grouped[d]=[]);
+  // Group by exact Delivery Date
+  const grouped = {};
+  const dayNamesArr = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   orders.forEach(o=>{
-    const day = String(o['Delivery Day']||'');
-    let matched = false;
-    ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].forEach(d=>{
-      if(day.includes(d)){ grouped[d].push(o); matched=true; }
-    });
-    if(!matched) grouped['أخرى'].push(o);
+    const dd = String(o['Delivery Date']||'').trim()||'غير محدد';
+    if(!grouped[dd]) grouped[dd]=[];
+    grouped[dd].push(o);
   });
 
-  let html = '';
-  DAYS_PRINT.forEach(day=>{
-    const list = grouped[day];
+  // Sort groups by date
+  const sortedDates = Object.keys(grouped).sort((a,b)=>{
+    const da=parseDate(a), db=parseDate(b);
+    if(!da) return 1; if(!db) return -1;
+    return da-db;
+  });
+
+  let html='';
+  sortedDates.forEach(dateKey=>{
+    const list=grouped[dateKey];
     if(!list||!list.length) return;
-    const cnt = list.length;
-    const dd = day!=='أخرى' ? nextDateStr(day) : '';
-    html += `<div class="pc-day-section">
-      <div class="pc-day-hdr">
-        <span class="pc-dname">${day}</span>
-        ${dd?`<span class="pc-ddate">${dd}</span>`:''}
-        <span class="pc-dcnt">${cnt} أوردر</span>
-      </div>
-      <div class="pc-grid">`;
-    list.forEach(o=>{ html += printCard(o); });
-    html += '</div></div>';
+    const d=parseDate(dateKey);
+    const dayName=d?dayNamesArr[d.getDay()]:'';
+    const dateLabel=dayName?(dayName+' — '+dateKey):dateKey;
+    html+='<div class="pc-day-section"><div class="pc-day-hdr"><span class="pc-dname">'+dayName+'</span><span class="pc-ddate">'+dateKey+'</span><span class="pc-dcnt">'+list.length+' أوردر</span></div><div class="pc-grid">';
+    list.forEach(o=>{html+=printCard(o);});
+    html+='</div></div>';
   });
 
-  document.getElementById('print-container').innerHTML = html;
+  if(!html){toast('❌ ما في أوردرات للطباعة');return;}
+  document.getElementById('print-container').innerHTML=html;
   closePrintModal();
-  setTimeout(()=>window.print(), 200);
+  setTimeout(()=>window.print(),200);
 }
+
 
 function nextDateStr(dayName){
   const DAY_JS2 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
@@ -1350,47 +1363,54 @@ function printCard(o){
   const type=o['Product Type']||'';
   const typeAr=TYPE_AR[type]||type;
   const groom=o['Groom']||''; const bride=o['Bride']||'';
-  const names=type==='Graduation'?bride:[bride,groom].filter(Boolean).join(' ❤️ ');
+  const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
   const total=parseFloat(o['Total']||0);
   const prov=o['Governorate']||'';
   const grandTotal=prov?total+DELIVERY_FEE:total;
   const model=MODEL_AR[o['Model']]||o['Model']||'';
+  const delDate=o['Delivery Date']||o['Delivery Day']||'—';
 
-  // ORDER SECTION
-  let oRows='';
+  // ORDER FIELDS — inline
+  const oItems=[];
   if(type==='Graduation'){
-    oRows+=prow('الخريج',bride);
-    if(o['Model']) oRows+=prow('التخصص',o['Model']);
+    oItems.push(['الخريج',bride]);
+    if(o['Model']) oItems.push(['التخصص',o['Model']]);
+  } else if(type==='Bouquet'){
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
+    if(o['Additions']) oItems.push(['إضافات',o['Additions']]);
   } else {
-    if(groom) oRows+=prow('العريس',groom);
-    if(bride) oRows+=prow('العروس',bride);
-    if(o['Occasion Date']) oRows+=prow('تاريخ المناسبة',o['Occasion Date']);
-    if(model) oRows+=prow('الموديل',model);
-    if(o['Color']) oRows+=prow('الستراس',o['Color']);
-    if(type==='Package'&&o['Additions']) oRows+=prow('البكج',o['Additions']);
+    if(groom) oItems.push(['العريس',groom]);
+    if(bride) oItems.push(['العروس',bride]);
+    if(o['Occasion Date']) oItems.push(['تاريخ المناسبة',o['Occasion Date']]);
+    if(model) oItems.push(['الموديل',model]);
+    if(o['Color']) oItems.push(['الستراس',o['Color']]);
+    if(type==='Package'&&o['Additions']) oItems.push(['البكج',o['Additions']]);
+    if(['Tray','Guest Book','Package'].includes(type)) oItems.push(['الآية','✅']);
+    if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
+    if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions']]);
   }
-  oRows+=prow('الآية','موجودة ✅');
-  if(o['Phrase']) oRows+=prow('العبارة',o['Phrase']);
-  if(o['Notes']) oRows+=prow('ملاحظات',o['Notes']);
-  if(o['Additions']&&type!=='Package') oRows+=prow('إضافات',o['Additions']);
+  const oRows = '<div class="pc-fields">'+oItems.map(([k,v])=>prowInline(k,v)).join('')+'</div>';
 
-  // DELIVERY SECTION
-  let dRows='';
-  dRows+=prow('المستلم',o['Recipient']||'—');
-  dRows+=prow('الهاتف',o['Phone']||'—');
-  if(prov) dRows+=prow('المحافظة',prov);
-  if(o['Area']) dRows+=prow('المنطقة',o['Area']);
-  dRows+=prow('تاريخ التسليم',o['Delivery Date']||o['Delivery Day']||'—');
-  if(o['Delivery Notes']) dRows+=prow('ملاحظات',o['Delivery Notes']);
-  if(prov) dRows+=prow('رسوم التوصيل',DELIVERY_FEE+' د.أ');
-  dRows+=`<div class="pc-row"><span class="pc-k">الحساب الكامل</span><span class="pc-v pc-v-total">${grandTotal} د.أ</span></div>`;
+  // DELIVERY FIELDS — inline
+  const dItems=[];
+  dItems.push(['المستلم',o['Recipient']||'—']);
+  dItems.push(['الهاتف',o['Phone']||'—']);
+  if(prov) dItems.push(['المحافظة',prov]);
+  if(o['Area']) dItems.push(['المنطقة',o['Area']]);
+  dItems.push(['التسليم',delDate]);
+  if(o['Delivery Notes']) dItems.push(['ملاحظات',o['Delivery Notes']]);
+  const dRows='<div class="pc-fields">'+dItems.map(([k,v])=>prowInline(k,v)).join('')
+    +'<div class="pc-v-total-row"><span class="pc-k">الحساب الكامل</span><span class="pc-v pc-v-total">'+grandTotal+' د.أ</span></div>'
+    +'</div>';
 
   return `<div class="pc-card">
     <div class="pc-card-hdr">
       <span class="pc-id">${id}</span>
       <span class="pc-type">${typeAr}</span>
       <span class="pc-names">${names||'—'}</span>
-      <span class="pc-price">${grandTotal} د.أ</span>
+      <span class="pc-date-hdr">${delDate}</span>
+      <span class="pc-price">${grandTotal}د.أ</span>
     </div>
     <div class="pc-secs">
       <div class="pc-sec pc-sec-o">
@@ -1403,6 +1423,10 @@ function printCard(o){
       </div>
     </div>
   </div>`;
+}
+
+function prowInline(k,v){
+  return `<div class="pc-row"><span class="pc-k">${k}:</span><span class="pc-v">${v}</span></div>`;
 }
 
 function prow(k,v){
