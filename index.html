@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>هدايا سلمى — الإدارة</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction:rtl;font-size:15px;min-height:100vh}
+:root{
+  --gold:#C9A96E;--gold-l:#E8D5B0;--gold-p:#FAF5EC;
+  --dark:#1A1410;--dark2:#3D2F1F;
+  --text:#2C2218;--muted:#8B7355;
+  --surf:#FFFFFF;--border:#EDE0CC;
+  --r:10px;--r2:14px;
+}
+
+/* HDR */
+.hdr{background:var(--dark);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
+.hdr-brand{font-size:18px;font-weight:900;color:var(--gold)}
+.hdr-status{font-size:12px;color:var(--gold-l);opacity:.65;display:flex;align-items:center;gap:5px}
+.hdr-dot{width:7px;height:7px;border-radius:50%;background:#FF5252;flex-shrink:0}
+
+/* TABS */
+.tabs{background:var(--dark);display:flex;border-top:1px solid rgba(255,255,255,.08);overflow-x:auto}
+.tab{flex:1;min-width:60px;padding:10px 6px;text-align:center;font-size:13px;font-weight:700;color:var(--gold-l);opacity:.45;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;font-family:'Tajawal',sans-serif;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
+.tab.on{opacity:1;border-bottom-color:var(--gold);color:var(--gold)}
+
+/* MAIN */
+.main{padding:14px 12px 50px;max-width:1000px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surf);border-radius:var(--r);padding:11px 10px;border:1px solid var(--border);text-align:center}
+.stat-n{font-size:22px;font-weight:900;color:var(--gold)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── CALENDAR ── */
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cal-nav-btn{background:var(--surf);border:1.5px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.cal-nav-btn:hover{border-color:var(--gold);color:var(--dark)}
+.cal-nav-btn.today-btn{background:var(--dark);color:var(--gold);border-color:var(--dark)}
+.cal-week-lbl{font-size:14px;font-weight:800;color:var(--dark);flex:1;text-align:center}
+
+/* SEARCH BAR */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-inp{width:100%;background:var(--surf);border:1.5px solid var(--border);border-radius:99px;padding:10px 42px 10px 16px;font-family:'Tajawal',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
+.search-inp:focus{border-color:var(--gold)}
+.search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--muted);pointer-events:none}
+.search-results{background:var(--surf);border:1.5px solid var(--border);border-radius:var(--r2);margin-top:6px;overflow:hidden;display:none;box-shadow:0 4px 20px rgba(60,40,20,.12)}
+.search-results.show{display:block}
+.search-item{padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:10px}
+.search-item:last-child{border-bottom:none}
+.search-item:hover{background:var(--gold-p)}
+.si-id{font-size:11px;font-weight:800;color:var(--gold);background:var(--gold-p);border:1px solid var(--gold-l);border-radius:5px;padding:2px 7px;flex-shrink:0}
+.si-names{font-size:14px;font-weight:800;color:var(--dark);flex:1}
+.si-date{font-size:12px;color:var(--muted);flex-shrink:0}
+.si-status{font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;flex-shrink:0}
+
+/* FILTER CHIPS */
+.chips{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.chip{flex-shrink:0;background:var(--surf);border:1.5px solid var(--border);border-radius:99px;padding:5px 12px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
+.chip.on{background:var(--dark);color:var(--gold);border-color:var(--dark)}
+.chip.c-recv.on{background:#3B6D11;border-color:#3B6D11;color:#fff}
+.chip.c-prep.on{background:#856404;border-color:#856404;color:#fff}
+.chip.c-ship.on{background:#1E40AF;border-color:#1E40AF;color:#fff}
+.chip.c-done.on{background:#555;border-color:#555;color:#fff}
+
+/* BULK BAR */
+.bulk-bar{background:var(--dark);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bulk-bar.show{display:flex}
+.bulk-info{font-size:13px;font-weight:700;color:var(--gold)}
+.bulk-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bulk-sel{background:#2C2218;border:1px solid var(--gold-l);border-radius:8px;padding:7px 10px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:var(--gold-l);min-width:170px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A96E' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 8px center;padding-left:26px}
+.bulk-apply{background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:7px 14px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;cursor:pointer}
+.bulk-cancel{background:transparent;color:var(--gold-l);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 10px;font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer}
+
+/* CALENDAR TABLE */
+.cal-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:4px}
+.cal-table{width:100%;border-collapse:separate;border-spacing:0;min-width:560px}
+.cal-head th{background:var(--dark);color:var(--gold-l);font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)}
+.cal-head th:first-child{border-left:none;width:72px}
+.th-day{font-size:13px;font-weight:900;color:var(--gold);display:block}
+.th-date{font-size:11px;color:var(--gold-l);opacity:.6;display:block;margin-top:1px}
+.th-cnt{background:var(--gold);color:var(--dark);border-radius:99px;padding:1px 7px;font-size:10px;font-weight:900;display:inline-block;margin-top:3px}
+.today-th{background:#261A0E!important}
+.today-th .th-day{color:#fff}
+.today-th .th-date{opacity:1;color:var(--gold)}
+
+.week-row td{vertical-align:top;padding:6px;border-left:1px solid var(--border);border-top:1px solid var(--border);min-width:100px}
+.week-row td:first-child{border-left:none;background:#F8F3EB;padding:8px 10px;vertical-align:middle;text-align:center}
+.week-lbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;display:block}
+.week-lbl.cur{color:var(--dark)}
+.today-td{background:#FEFAF3!important}
+
+/* MINI CARD */
+.mc{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:6px 8px 6px 11px;margin-bottom:5px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;user-select:none}
+.mc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 8px 8px 0}
+.mc.s-New::before{background:#4CAF50}
+.mc.s-Preparing::before{background:#FF9800}
+.mc.s-Shipped::before{background:#2196F3}
+.mc.s-Done::before{background:#9E9E9E}
+.mc.s-Other::before{background:#9C27B0}
+.mc.selected{border-color:var(--gold);background:var(--gold-p)}
+.mc:active{transform:scale(.97)}
+.mc-names{font-size:12px;font-weight:800;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.mc-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.mc-type{font-size:10px;font-weight:700;color:var(--muted);background:#F5F0E8;border-radius:4px;padding:1px 5px}
+.mc-price{font-size:11px;font-weight:900;color:var(--gold);margin-right:auto}
+.mc-st{font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
+.mc-st.s-New{background:#EAF3DE;color:#3B6D11}
+.mc-st.s-Preparing{background:#FFF3CD;color:#856404}
+.mc-st.s-Shipped{background:#DBEAFE;color:#1E40AF}
+.mc-st.s-Done{background:#F0F0F0;color:#666}
+.mc-st.s-Other{background:#F3E8FF;color:#6B21A8}
+.mc-empty{font-size:11px;color:#D4C4A8;text-align:center;padding:8px 0}
+.mc-add{background:none;border:1px dashed var(--border);border-radius:7px;padding:5px;width:100%;font-family:'Tajawal',sans-serif;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;margin-top:2px}
+.mc-add:hover{border-color:var(--gold);color:var(--dark);background:var(--gold-p)}
+
+/* ── PANEL ── */
+.panel-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:flex-end;justify-content:center}
+.panel-bg.open{display:flex}
+.panel{background:var(--surf);border-radius:16px 16px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto}
+.panel-hdr{padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surf);z-index:10}
+.panel-ttl{font-size:16px;font-weight:900;color:var(--dark)}
+.panel-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+.panel-body{padding:16px 20px 24px}
+.p2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:380px){.p2col{grid-template-columns:1fr}}
+.psec{border-radius:10px;padding:12px;border:1px solid var(--border)}
+.psec-o{background:var(--gold-p);border-color:var(--gold-l)}
+.psec-d{background:#EFF6FF;border-color:#BFDBFE}
+.psec-ttl{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px}
+.psec-d .psec-ttl{color:#1E40AF}
+.pr{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05);gap:8px}
+.pr:last-child{border-bottom:none}
+.prk{font-size:11px;color:var(--muted);flex-shrink:0}
+.prv{font-size:13px;font-weight:700;color:var(--dark);text-align:left;word-break:break-word}
+.prv-total{font-size:16px;font-weight:900;color:var(--gold)}
+.panel-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.st-sel{border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;color:var(--dark);background:var(--surf);flex:1;min-width:150px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B7355' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;padding-left:30px}
+
+/* ── EDIT PANEL ── */
+.edit-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:450;display:none;align-items:flex-end;justify-content:center}
+.edit-bg.open{display:flex}
+.edit-panel{background:var(--surf);border-radius:16px 16px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:20px}
+.edit-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+
+/* ── PRINT MODAL ── */
+.pmodal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:flex-end;justify-content:center}
+.pmodal-bg.open{display:flex}
+.pmodal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:500px;padding:22px}
+.pmodal-ttl{font-size:17px;font-weight:900;color:#1A1410;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.popt{background:#F5F0E8;border:1.5px solid #EDE0CC;border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .2s}
+.popt:hover{border-color:#C9A96E;background:#FAF5EC}
+.popt-ico{font-size:24px;flex-shrink:0}
+.popt-name{font-size:15px;font-weight:800;color:#1A1410}
+.popt-desc{font-size:12px;color:#8B7355;margin-top:2px}
+.pday-sel{width:100%;background:#F5F0E8;border:1.5px solid #EDE0CC;border-radius:8px;padding:10px 14px;font-family:'Tajawal',sans-serif;font-size:15px;color:#2C2218;margin-bottom:12px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B7355' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;padding-left:32px;outline:none}
+.pday-sel:focus{border-color:#C9A96E}
+
+/* ── PRINT STYLES ── */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
+  body{background:#fff!important;margin:0;padding:0;font-family:'Tajawal',sans-serif;direction:rtl}
+  /* Hide everything except print view */
+  .hdr,.tabs,.main,.pmodal-bg,.panel-bg,.edit-bg,.toast{display:none!important}
+  /* Show only print container */
+  #print-container{display:block!important}
+
+  /* PAGE SETUP */
+  @page{size:A4;margin:8mm}
+
+  /* DAY SECTION */
+  .pc-day-hdr{
+    background:#1A1410!important;color:#C9A96E!important;
+    padding:6px 12px;border-radius:4px;margin-bottom:4mm;
+    display:flex!important;align-items:center;gap:10px;
+    font-size:13px;font-weight:900;page-break-after:avoid;
+  }
+  .pc-day-hdr .pc-dname{color:#fff!important;font-size:14px}
+  .pc-day-hdr .pc-ddate{color:#C9A96E!important;font-size:12px}
+  .pc-day-hdr .pc-dcnt{background:#C9A96E!important;color:#1A1410!important;border-radius:99px;padding:1px 9px;font-size:11px;font-weight:900}
+
+  /* CARDS GRID — 2 per row */
+  .pc-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:5mm!important;
+    margin-bottom:6mm;
+  }
+
+  /* SINGLE CARD */
+  .pc-card{
+    break-inside:avoid;
+    border:1.5px solid #CCC;
+    border-radius:6px;
+    overflow:hidden;
+    font-size:11px;
+  }
+
+  /* CARD HEADER */
+  .pc-card-hdr{
+    background:#1A1410!important;
+    padding:6px 10px;
+    display:flex!important;align-items:center;gap:8px;
+  }
+  .pc-card-hdr .pc-id{
+    background:#C9A96E!important;color:#1A1410!important;
+    border-radius:4px;padding:2px 7px;font-size:10px;font-weight:900;
+  }
+  .pc-card-hdr .pc-type{color:#E8D5B0!important;font-size:10px;font-weight:700}
+  .pc-card-hdr .pc-names{color:#fff!important;font-size:12px;font-weight:900;flex:1}
+  .pc-card-hdr .pc-price{color:#C9A96E!important;font-size:13px;font-weight:900;white-space:nowrap}
+
+  /* TWO SECTIONS */
+  .pc-secs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0}
+
+  .pc-sec{padding:7px 9px;border-top:1px solid #EEE}
+  .pc-sec-o{background:#FAF5EC!important;border-left:1px solid #EEE}
+  .pc-sec-d{background:#EFF6FF!important}
+
+  .pc-sec-ttl{
+    font-size:8px;font-weight:900;text-transform:uppercase;
+    letter-spacing:.3px;margin-bottom:5px;padding-bottom:3px;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+  .pc-sec-o .pc-sec-ttl{color:#8B7355!important}
+  .pc-sec-d .pc-sec-ttl{color:#1E40AF!important}
+
+  .pc-row{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;gap:4px;border-bottom:1px solid rgba(0,0,0,.04)}
+  .pc-row:last-child{border-bottom:none}
+  .pc-k{font-size:8px;color:#888!important;flex-shrink:0}
+  .pc-v{font-size:10px;font-weight:700;color:#1A1410!important;text-align:left;word-break:break-word}
+  .pc-v-total{font-size:13px;font-weight:900;color:#C9A96E!important}
+}
+
+/* ── FORM ── */
+.form-card{background:var(--surf);border-radius:var(--r2);border:1.5px solid var(--border);padding:16px;margin-bottom:14px}
+.form-ttl{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:16px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.fg label{font-size:13px;font-weight:700;color:var(--dark2)}
+.req{color:var(--gold)}.opt{color:var(--muted);font-size:12px;font-weight:400}
+.fg input,.fg select,.fg textarea{background:#F5F0E8;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;width:100%;appearance:none;-webkit-appearance:none}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B7355' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;padding-left:32px;background-color:#F5F0E8}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);background:var(--surf)}
+.fg textarea{resize:none;min-height:70px;line-height:1.6}
+.hint{font-size:12px;color:var(--gold);font-weight:700;margin-top:3px}
+.sec-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:440px){.form-grid{grid-template-columns:1fr}}
+.btn{border:none;border-radius:8px;padding:11px 16px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s,transform .1s;width:100%}
+.btn:active{transform:scale(.98)}
+.btn-dark{background:var(--dark);color:var(--gold)}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--dark)}
+.btn-sm{padding:7px 12px;font-size:12px;width:auto}
+.btn-row{display:flex;gap:8px;margin-top:14px}
+.btn-row .btn{flex:1}
+.btn-danger{background:#FFF0F0;color:#C0392B;border:1.5px solid #F5C6CB}
+
+/* LOADING / TOAST */
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--gold);padding:11px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">هدايا سلمى ✦</div>
+  <div class="hdr-status">
+    <div class="hdr-dot" id="conn-dot"></div>
+    <span id="conn-lbl">جاري التحميل...</span>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab on"  onclick="switchTab('cal')">📅 التقويم</button>
+  <button class="tab"     onclick="switchTab('add')">➕ أوردر جديد</button>
+  <button class="tab no-print" onclick="openPrintModal()">🖨️ طباعة</button>
+</div>
+
+<div class="main">
+
+<!-- ══ CALENDAR TAB ══ -->
+<div class="view on" id="view-cal">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="st-all">—</div><div class="stat-l">كل الأوردرات</div></div>
+    <div class="stat"><div class="stat-n" id="st-active">—</div><div class="stat-l">نشطة</div></div>
+    <div class="stat"><div class="stat-n" id="st-week">—</div><div class="stat-l">هذا الأسبوع</div></div>
+    <div class="stat"><div class="stat-n" id="st-rev">—</div><div class="stat-l">إجمالي د.أ</div></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <input class="search-inp" id="search-inp" type="text" placeholder="🔍 بحث بالاسم أو رقم الهاتف أو رقم الأوردر..." oninput="doSearch(this.value)">
+    <div class="search-results" id="search-results"></div>
+  </div>
+
+  <!-- WEEK NAV -->
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="shiftWeek(-1)">◀ الماضي</button>
+    <div class="cal-week-lbl" id="week-lbl">—</div>
+    <button class="cal-nav-btn today-btn" onclick="goToday()">اليوم</button>
+    <button class="cal-nav-btn" onclick="shiftWeek(1)">القادم ▶</button>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="chips">
+    <button class="chip on" onclick="setFilter(this,'all')">الكل</button>
+    <button class="chip c-recv" onclick="setFilter(this,'New')">تم الاستلام</button>
+    <button class="chip c-prep" onclick="setFilter(this,'Preparing')">جاري التجهيز</button>
+    <button class="chip c-ship" onclick="setFilter(this,'Shipped')">مع التوصيل</button>
+    <button class="chip c-done" onclick="setFilter(this,'Done')">تم التسليم</button>
+  </div>
+
+  <!-- BULK -->
+  <div class="bulk-bar" id="bulk-bar">
+    <div class="bulk-info"><span id="bulk-cnt">0</span> أوردر محدد</div>
+    <div class="bulk-acts">
+      <select class="bulk-sel" id="bulk-st">
+        <option value="">غيّر الحالة...</option>
+        <option value="New">تم الاستلام</option>
+        <option value="Preparing">جاري التجهيز</option>
+        <option value="Shipped">تم التسليم لشركة التوصيل</option>
+        <option value="Done">تم التسليم</option>
+        <option value="Other">أخرى</option>
+      </select>
+      <button class="bulk-apply" onclick="applyBulk()">تطبيق</button>
+      <button class="bulk-cancel" onclick="clearSel()">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="cal-wrap">
+    <table class="cal-table" id="cal-table">
+      <thead id="cal-head"></thead>
+      <tbody id="cal-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ ADD TAB ══ -->
+<div class="view" id="view-add">
+  <div class="form-card">
+    <div class="form-ttl">➕ أوردر جديد</div>
+
+    <div class="form-grid">
+      <div class="fg">
+        <label>نوع المنتج <span class="req">*</span></label>
+        <select id="f-type" onchange="toggleFields()">
+          <option value="">اختر...</option>
+          <option value="Tray">صينية</option>
+          <option value="Guest Book">كتاب</option>
+          <option value="Package">بكج</option>
+          <option value="Graduation">تخرج</option>
+          <option value="Bouquet">مسكة عروس</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>تاريخ التسليم <span class="req">*</span></label>
+        <input type="date" id="f-deldate">
+        <div class="hint" id="deldate-hint"></div>
+      </div>
+    </div>
+
+    <div id="eng-fields" style="display:none">
+      <div class="sec-lbl">بيانات العروسين</div>
+      <div class="form-grid">
+        <div class="fg"><label>اسم العريس <span class="req">*</span></label><input type="text" id="f-groom" placeholder="أحمد"></div>
+        <div class="fg"><label>اسم العروس <span class="req">*</span></label><input type="text" id="f-bride" placeholder="سلمى"></div>
+        <div class="fg"><label>تاريخ المناسبة</label><input type="date" id="f-date"></div>
+        <div class="fg bookdate-f" style="display:none"><label>تاريخ الكتاب <span class="opt">(إذا اختلف)</span></label><input type="date" id="f-bookdate"></div>
+      </div>
+    </div>
+
+    <div id="model-fields" style="display:none">
+      <div class="sec-lbl">الموديل</div>
+      <div class="form-grid">
+        <div class="fg">
+          <label>الموديل <span class="req">*</span></label>
+          <select id="f-model" onchange="toggleModelOther()">
+            <option value="">اختر...</option>
+            <option value="Turkish">التركي</option>
+            <option value="White">الأبيض</option>
+            <option value="Elegant">الأنيق</option>
+            <option value="Luxury">الفاخر</option>
+            <option value="Royal">الملكي</option>
+            <option value="Other">أخرى</option>
+          </select>
+        </div>
+        <div class="fg model-other-f" style="display:none"><label>اسم الموديل</label><input type="text" id="f-model-other"></div>
+        <div class="fg"><label>لون الستراس</label>
+          <select id="f-color"><option value="">—</option><option>فضي</option><option>ذهبي</option></select>
+        </div>
+        <div class="fg pkg-f" style="display:none"><label>نوع البكج</label>
+          <select id="f-pkg">
+            <option>البكج الأساسي</option>
+            <option>بكج القصاصات</option>
+            <option>البكج المميز</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="grad-fields" style="display:none">
+      <div class="sec-lbl">بيانات التخرج</div>
+      <div class="form-grid">
+        <div class="fg"><label>اسم الخريج/ة <span class="req">*</span></label><input type="text" id="f-gradname"></div>
+        <div class="fg"><label>التخصص <span class="opt">(اختياري)</span></label><input type="text" id="f-major"></div>
+      </div>
+    </div>
+
+    <div id="bouquet-fields" style="display:none">
+      <div class="sec-lbl">بيانات مسكة العروس</div>
+      <div class="fg"><label>ملاحظات <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-notes" placeholder="مثال: ورد أبيض، حجم كبير..."></div>
+      <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-add" placeholder="مثال: شريط، غلاف..."></div>
+    </div>
+
+    <div class="sec-lbl">العبارة والملاحظات</div>
+    <div class="fg"><label>عبارة خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-phrase"></div>
+    <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-notes" placeholder="مثال: علب الدبل فوق، بدون أحرف..."></textarea></div>
+    <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-additions" placeholder="مثال: ستاند، قصاصات..."></div>
+
+    <div class="sec-lbl">بيانات التوصيل</div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم المستلم <span class="req">*</span></label><input type="text" id="f-rname"></div>
+      <div class="fg"><label>رقم الهاتف <span class="req">*</span></label><input type="tel" id="f-phone" dir="ltr" style="text-align:right"></div>
+      <div class="fg">
+        <label>المحافظة</label>
+        <select id="f-prov">
+          <option value="">—</option>
+          <option>عمّان</option><option>الزرقاء</option><option>إربد</option>
+          <option>البلقاء</option><option>الكرك</option><option>مادبا</option>
+          <option>السلط</option><option>جرش</option><option>عجلون</option>
+          <option>المفرق</option><option>الطفيلة</option><option>معان</option><option>العقبة</option>
+        </select>
+      </div>
+      <div class="fg"><label>المنطقة</label><input type="text" id="f-area"></div>
+    </div>
+    <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="f-dnotes"></div>
+
+    <div class="sec-lbl">الحساب والرابط</div>
+    <div class="form-grid">
+      <div class="fg">
+        <label>الحساب الشامل (د.أ) <span class="req">*</span></label>
+        <input type="number" id="f-price" placeholder="15" min="0" step="0.5">
+        <div class="hint" id="price-hint"></div>
+      </div>
+      <div class="fg"><label>رابط المحادثة</label><input type="url" id="f-link" placeholder="https://..."></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="clearForm()">مسح</button>
+      <button class="btn btn-gold" onclick="saveOrder()" id="save-btn">💾 حفظ في الشيت</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ORDER DETAIL PANEL -->
+<div class="panel-bg" id="panel">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-ttl" id="panel-ttl">تفاصيل الأوردر</div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-body" id="panel-body"></div>
+  </div>
+</div>
+
+<!-- EDIT PANEL -->
+<div class="edit-bg" id="edit-panel">
+  <div class="edit-panel">
+    <div class="edit-hdr">
+      <div style="font-size:16px;font-weight:900;color:var(--dark)" id="edit-ttl">تعديل الأوردر</div>
+      <button style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)" onclick="closeEdit()">✕</button>
+    </div>
+    <div id="edit-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PRINT MODAL -->
+<div class="pmodal-bg" id="pmodal">
+  <div class="pmodal">
+    <div class="pmodal-ttl">
+      🖨️ طباعة الأوردرات
+      <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#8B7355" onclick="closePrintModal()">✕</button>
+    </div>
+
+    <select class="pday-sel" id="print-day-sel">
+      <option value="all">كل الأوردرات</option>
+      <option value="الأحد">الأحد فقط</option>
+      <option value="الاثنين">الاثنين فقط</option>
+      <option value="الثلاثاء">الثلاثاء فقط</option>
+      <option value="الخميس">الخميس فقط</option>
+      <option value="السبت">السبت فقط</option>
+    </select>
+
+    <select class="pday-sel" id="print-status-sel">
+      <option value="all">كل الحالات</option>
+      <option value="New">تم الاستلام فقط</option>
+      <option value="Preparing">جاري التجهيز فقط</option>
+      <option value="Shipped">مع التوصيل فقط</option>
+      <option value="Done">تم التسليم فقط</option>
+    </select>
+
+    <div class="popt" onclick="doPrint()">
+      <div class="popt-ico">📄</div>
+      <div>
+        <div class="popt-name">طباعة الكاردات</div>
+        <div class="popt-desc">كل أوردر كارد مستقل — قسم تجهيز + قسم توصيل</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT CONTAINER — only visible when printing -->
+<div id="print-container" style="display:none"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbx5NaV_8xCXiIZ1UE2XlNqMuV9IYDF0Qjb_XgLWLa3KDaDSDVJ3-zMoblCvZwOYnBm4/exec';
+const DELIVERY_FEE = 2;
+const DAYS = ['الأحد','الاثنين','الثلاثاء','الخميس','السبت'];
+const MODEL_AR = {Turkish:'التركي',White:'الأبيض',Elegant:'الأنيق',Luxury:'الفاخر',Royal:'الملكي'};
+const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Graduation:'تخرج',Bouquet:'مسكة عروس'};
+const STATUSES = {
+  New:      {lbl:'تم الاستلام',           cls:'s-New'},
+  Preparing:{lbl:'جاري التجهيز',          cls:'s-Preparing'},
+  Shipped:  {lbl:'مع التوصيل',            cls:'s-Shipped'},
+  Done:     {lbl:'تم التسليم',            cls:'s-Done'},
+  Other:    {lbl:'أخرى',                  cls:'s-Other'},
+};
+
+let allOrders = [];
+let weekOffset = 0;
+let filterStatus = 'all';
+let selectedIds = new Set();
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', loadOrders);
+
+async function loadOrders(){
+  try {
+    const data = await apiCall({action:'getOrders'});
+    allOrders = data.orders || [];
+    setConn(true);
+    renderCal();
+    updateStats();
+  } catch(e){ setConn(false); }
+}
+
+async function apiCall(params){
+  const url = API + '?' + new URLSearchParams(params);
+  const r = await fetch(url);
+  return r.json();
+}
+
+function setConn(ok){
+  document.getElementById('conn-dot').style.background = ok ? '#4CAF50' : '#FF5252';
+  document.getElementById('conn-lbl').textContent = ok ? 'متصل بالشيت' : 'غير متصل';
+}
+
+// ── DATE UTILS ──
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtShort(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1); }
+function fmtFull(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
+function parseDate(str){
+  if(!str) return null;
+  // dd/mm/yyyy
+  const p = str.split('/');
+  if(p.length===3) return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  // yyyy-mm-dd
+  const p2 = str.split('-');
+  if(p2.length===3) return new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
+  return null;
+}
+function isToday(d){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const dd=new Date(d); dd.setHours(0,0,0,0);
+  return t.getTime()===dd.getTime();
+}
+function isSameDay(a,b){
+  return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+}
+
+// Get week days for the given offset (week starting Sunday)
+function getWeekDays(offset){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - today.getDay() + offset*7);
+  // Return all 7 days of the week as Date objects keyed by name
+  const offsets = {الأحد:0,الاثنين:1,الثلاثاء:2,الخميس:4,السبت:6};
+  const result = {};
+  DAYS.forEach(d=>{ const dt=new Date(sunday); dt.setDate(sunday.getDate()+offsets[d]); result[d]=dt; });
+  return result;
+}
+
+// ── CALENDAR RENDER ──
+function renderCal(){
+  const days = getWeekDays(weekOffset);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Week label
+  const dates = Object.values(days);
+  const first = dates[0]; const last = dates[dates.length-1];
+  document.getElementById('week-lbl').textContent = fmtShort(first)+' — '+fmtShort(last)+' — '+last.getFullYear();
+
+  // Filter orders
+  let orders = allOrders.filter(o=>{
+    if(filterStatus!=='all' && o['Status']!==filterStatus) return false;
+    return true;
+  });
+
+  // Group orders by delivery date matching this week's days
+  const grouped = {};
+  DAYS.forEach(d=>grouped[d]=[]);
+
+  orders.forEach(o=>{
+    const delDate = parseDate(o['Delivery Date']);
+    if(delDate){
+      // Match by exact date
+      DAYS.forEach(d=>{
+        if(isSameDay(delDate, days[d])) grouped[d].push(o);
+      });
+    } else {
+      // Fallback: match by delivery day name
+      const dayName = String(o['Delivery Day']||'');
+      DAYS.forEach(d=>{ if(dayName.includes(d)) grouped[d].push(o); });
+    }
+  });
+
+  // Build header
+  let head = '<tr>';
+  head += '<th style="background:var(--dark);color:rgba(201,169,110,.4);font-size:11px;font-weight:800;padding:9px 6px;text-align:center;width:60px">الأسبوع</th>';
+  DAYS.forEach(d=>{
+    const dt = days[d];
+    const tod = isToday(dt);
+    const cnt = grouped[d].length;
+    head += `<th class="${tod?'today-th':''}" style="background:var(--dark);font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)">
+      <span class="th-day">${d}</span>
+      <span class="th-date">${fmtShort(dt)}</span>
+      ${cnt?`<span class="th-cnt">${cnt}</span>`:''}
+    </th>`;
+  });
+  head += '</tr>';
+  document.getElementById('cal-head').innerHTML = head;
+
+  // Week label for row
+  const isPast = weekOffset<0;
+  const isCur  = weekOffset===0;
+  const weekTag = isPast ? 'الماضي' : isCur ? 'الحالي' : 'القادم';
+
+  // Build body row
+  let body = `<tr class="week-row">`;
+  body += `<td><span class="week-lbl ${isCur?'cur':''}">${weekTag}</span></td>`;
+
+  DAYS.forEach(d=>{
+    const dt = days[d];
+    const tod = isToday(dt);
+    body += `<td class="${tod?'today-td':''}">`;
+    const list = grouped[d];
+    if(!list.length){
+      body += `<div class="mc-empty">—</div>`;
+    } else {
+      list.forEach(o=>{ body += miniCard(o); });
+    }
+    body += `<button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>`;
+    body += '</td>';
+  });
+
+  body += '</tr>';
+  document.getElementById('cal-body').innerHTML = body;
+}
+
+function miniCard(o){
+  const id = o['Order ID']||'';
+  const type = o['Product Type']||'';
+  const groom=o['Groom']||''; const bride=o['Bride']||'';
+  const names = type==='Graduation' ? bride : [bride,groom].filter(Boolean).join(' ❤️ ');
+  const status = o['Status']||'New';
+  const st = STATUSES[status]||STATUSES.New;
+  const total = parseFloat(o['Total']||0);
+  const grandTotal = o['Governorate'] ? total+DELIVERY_FEE : total;
+  const typeAr = TYPE_AR[type]||type;
+  const sel = selectedIds.has(id);
+  return `<div class="mc ${st.cls} ${sel?'selected':''}" id="mc-${id}" onclick="handleMC('${id}')">
+    <div class="mc-names">${names||id}</div>
+    <div class="mc-row">
+      <span class="mc-type">${typeAr}</span>
+      <span class="mc-st ${st.cls}">${st.lbl}</span>
+      <span class="mc-price">${grandTotal}د.أ</span>
+    </div>
+  </div>`;
+}
+
+// ── WEEK NAV ──
+function shiftWeek(d){ weekOffset+=d; renderCal(); }
+function goToday(){ weekOffset=0; renderCal(); }
+
+// ── FILTER ──
+function setFilter(el,val){
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  filterStatus = val;
+  renderCal();
+}
+
+// ── MINI CARD CLICK ──
+function handleMC(id){
+  if(selectedIds.size>0){ toggleSel(id); }
+  else { openPanel(id); }
+}
+
+// Long press to select
+let pressT = null;
+document.addEventListener('mousedown', e=>{
+  const mc = e.target.closest('.mc');
+  if(mc){
+    const id = mc.id.replace('mc-','');
+    pressT = setTimeout(()=>{ toggleSel(id); },500);
+  }
+});
+document.addEventListener('mouseup', ()=>clearTimeout(pressT));
+document.addEventListener('touchstart', e=>{
+  const mc = e.target.closest('.mc');
+  if(mc){
+    const id = mc.id.replace('mc-','');
+    pressT = setTimeout(()=>{ toggleSel(id); },500);
+  }
+},{passive:true});
+document.addEventListener('touchend', ()=>clearTimeout(pressT));
+
+function toggleSel(id){
+  if(selectedIds.has(id)){
+    selectedIds.delete(id);
+    const el=document.getElementById('mc-'+id);
+    if(el) el.classList.remove('selected');
+  } else {
+    selectedIds.add(id);
+    const el=document.getElementById('mc-'+id);
+    if(el) el.classList.add('selected');
+  }
+  updateBulkBar();
+}
+
+function updateBulkBar(){
+  const bar=document.getElementById('bulk-bar');
+  bar.classList.toggle('show', selectedIds.size>0);
+  document.getElementById('bulk-cnt').textContent=selectedIds.size;
+}
+
+function clearSel(){
+  selectedIds.clear();
+  document.querySelectorAll('.mc.selected').forEach(el=>el.classList.remove('selected'));
+  updateBulkBar();
+}
+
+async function applyBulk(){
+  const status=document.getElementById('bulk-st').value;
+  if(!status){toast('❌ اختاري الحالة');return;}
+  const ids=[...selectedIds];
+  const btn=document.querySelector('.bulk-apply');
+  btn.textContent='⏳...'; btn.disabled=true;
+  let ok=0;
+  for(const id of ids){
+    try{
+      await apiCall({action:'updateOrder',id,data:JSON.stringify({Status:status})});
+      const o=allOrders.find(o=>o['Order ID']===id);
+      if(o) o['Status']=status;
+      ok++;
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,150));
+  }
+  btn.textContent='تطبيق'; btn.disabled=false;
+  toast('✅ تم تحديث '+ok+' أوردر');
+  clearSel(); renderCal(); updateStats();
+}
+
+// ── STATS ──
+function updateStats(){
+  document.getElementById('st-all').textContent = allOrders.length;
+  const active = allOrders.filter(o=>o['Status']==='New'||o['Status']==='Preparing').length;
+  document.getElementById('st-active').textContent = active;
+  const days = getWeekDays(0);
+  const weekOrds = allOrders.filter(o=>{
+    const dd=parseDate(o['Delivery Date']);
+    if(!dd) return false;
+    return Object.values(days).some(d=>isSameDay(dd,d));
+  }).length;
+  document.getElementById('st-week').textContent = weekOrds;
+  const rev = allOrders.reduce((s,o)=>s+parseFloat(o['Total']||0)+(o['Governorate']?DELIVERY_FEE:0),0);
+  document.getElementById('st-rev').textContent = rev;
+}
+
+// ── SEARCH ──
+function doSearch(q){
+  const box = document.getElementById('search-results');
+  if(!q||q.length<2){ box.classList.remove('show'); return; }
+  q = q.toLowerCase();
+  const results = allOrders.filter(o=>{
+    const haystack = [o['Order ID'],o['Bride'],o['Groom'],o['Phone'],o['Recipient'],o['Delivery Date']].join(' ').toLowerCase();
+    return haystack.includes(q);
+  }).slice(0,8);
+
+  if(!results.length){ box.classList.remove('show'); return; }
+
+  box.innerHTML = results.map(o=>{
+    const id=o['Order ID']||'';
+    const type=o['Product Type']||'';
+    const groom=o['Groom']||''; const bride=o['Bride']||'';
+    const names=type==='Graduation'?bride:[bride,groom].filter(Boolean).join(' ❤️ ');
+    const status=o['Status']||'New';
+    const st=STATUSES[status]||STATUSES.New;
+    const dd=o['Delivery Date']||o['Delivery Day']||'—';
+    return `<div class="search-item" onclick="closeSearch();openPanel('${id}')">
+      <span class="si-id">${id}</span>
+      <span class="si-names">${names||'—'}</span>
+      <span class="si-date">${dd}</span>
+      <span class="si-status ${st.cls}" style="background:${status==='New'?'#EAF3DE':status==='Preparing'?'#FFF3CD':status==='Shipped'?'#DBEAFE':status==='Done'?'#F0F0F0':'#F3E8FF'};color:${status==='New'?'#3B6D11':status==='Preparing'?'#856404':status==='Shipped'?'#1E40AF':status==='Done'?'#666':'#6B21A8'}">${st.lbl}</span>
+    </div>`;
+  }).join('');
+  box.classList.add('show');
+}
+
+function closeSearch(){
+  document.getElementById('search-results').classList.remove('show');
+  document.getElementById('search-inp').value='';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-wrap')) closeSearch();
+});
+
+// ── PANEL ──
+function openPanel(id){
+  const o=allOrders.find(o=>o['Order ID']===id);
+  if(!o) return;
+  const type=o['Product Type']||'';
+  const groom=o['Groom']||''; const bride=o['Bride']||'';
+  const names=type==='Graduation'?bride:[bride,groom].filter(Boolean).join(' ❤️ ');
+  const total=parseFloat(o['Total']||0);
+  const prov=o['Governorate']||'';
+  const grandTotal=prov?total+DELIVERY_FEE:total;
+  const model=MODEL_AR[o['Model']]||o['Model']||'';
+  const status=o['Status']||'New';
+
+  document.getElementById('panel-ttl').textContent=(o['Order ID']||'')+' — '+names;
+
+  let oF='';
+  if(type==='Graduation'){
+    oF+=pr('الخريج',bride);
+    if(o['Model']) oF+=pr('التخصص',o['Model']);
+  } else {
+    if(groom) oF+=pr('العريس',groom);
+    if(bride) oF+=pr('العروس',bride);
+    if(o['Occasion Date']) oF+=pr('تاريخ المناسبة',o['Occasion Date']);
+    if(model) oF+=pr('الموديل',model);
+    if(o['Color']) oF+=pr('الستراس',o['Color']);
+    if(type==='Package'&&o['Additions']) oF+=pr('البكج',o['Additions']);
+  }
+  if(o['Phrase']) oF+=pr('العبارة',o['Phrase']);
+  oF+=pr('الآية','موجودة ✅');
+  if(o['Notes']) oF+=pr('ملاحظات',o['Notes']);
+  if(o['Additions']&&type!=='Package') oF+=pr('إضافات',o['Additions']);
+  oF+=pr('سعر المنتج',total+' د.أ');
+
+  let dF='';
+  dF+=pr('المستلم',o['Recipient']||'—');
+  dF+=pr('الهاتف',o['Phone']||'—');
+  if(prov) dF+=pr('المحافظة',prov);
+  if(o['Area']) dF+=pr('المنطقة',o['Area']);
+  dF+=pr('تاريخ التسليم',o['Delivery Date']||o['Delivery Day']||'—');
+  if(o['Delivery Notes']) dF+=pr('ملاحظات التوصيل',o['Delivery Notes']);
+  if(prov) dF+=pr('رسوم التوصيل',DELIVERY_FEE+' د.أ');
+  dF+=`<div class="pr"><span class="prk">الحساب الكامل</span><span class="prv prv-total">${grandTotal} د.أ</span></div>`;
+
+  const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${status===k?'selected':''}>${v.lbl}</option>`).join('');
+  const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
+
+  document.getElementById('panel-body').innerHTML=`
+    <div class="p2col">
+      <div class="psec psec-o"><div class="psec-ttl">📋 معلومات الطلب</div>${oF}</div>
+      <div class="psec psec-d"><div class="psec-ttl">🚚 شركة التوصيل</div>${dF}</div>
+    </div>
+    <div class="panel-acts">
+      <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
+      <button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>
+      <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>
+      ${linkHTML}
+    </div>`;
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function pr(k,v){ return `<div class="pr"><span class="prk">${k}</span><span class="prv">${v}</span></div>`; }
+function closePanel(){ document.getElementById('panel').classList.remove('open'); }
+document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
+
+async function changeStatus(id,status){
+  try{
+    await apiCall({action:'updateOrder',id,data:JSON.stringify({Status:status})});
+    const o=allOrders.find(o=>o['Order ID']===id);
+    if(o) o['Status']=status;
+    toast('✅ تم تحديث الحالة');
+    renderCal(); updateStats();
+  }catch(e){toast('❌ خطأ');}
+}
+
+// ── EDIT PANEL ──
+function openEdit(id){
+  const o=allOrders.find(o=>o['Order ID']===id);
+  if(!o) return;
+  document.getElementById('edit-ttl').textContent='تعديل — '+id;
+  const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${o['Status']===k?'selected':''}>${v.lbl}</option>`).join('');
+  document.getElementById('edit-body').innerHTML=`
+    <div class="fg"><label>الحالة</label><select id="e-status" class="st-sel" style="width:100%">${stOpts}</select></div>
+    <div class="form-grid">
+      <div class="fg"><label>تاريخ التسليم</label><input type="date" id="e-deldate" value="${toInputDate(o['Delivery Date'])}"></div>
+      <div class="fg"><label>الحساب (د.أ)</label><input type="number" id="e-price" value="${o['Total']||0}" min="0" step="0.5"></div>
+      <div class="fg"><label>الموديل</label><input type="text" id="e-model" value="${MODEL_AR[o['Model']]||o['Model']||''}"></div>
+      <div class="fg"><label>الستراس</label><select id="e-color" class="st-sel" style="width:100%"><option value="">—</option><option ${o['Color']==='فضي'?'selected':''}>فضي</option><option ${o['Color']==='ذهبي'?'selected':''}>ذهبي</option></select></div>
+    </div>
+    <div class="fg"><label>العبارة</label><input type="text" id="e-phrase" value="${o['Phrase']||''}"></div>
+    <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:60px">${o['Notes']||''}</textarea></div>
+    <div class="fg"><label>إضافات</label><input type="text" id="e-add" value="${o['Additions']||''}"></div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم المستلم</label><input type="text" id="e-rname" value="${o['Recipient']||''}"></div>
+      <div class="fg"><label>الهاتف</label><input type="tel" id="e-phone" value="${o['Phone']||''}" dir="ltr" style="text-align:right"></div>
+    </div>
+    <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="e-dnotes" value="${o['Delivery Notes']||''}"></div>
+    <div class="fg"><label>رابط المحادثة</label><input type="url" id="e-link" value="${o['Link']||''}"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
+      <button class="btn btn-gold" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
+    </div>`;
+  document.getElementById('edit-panel').classList.add('open');
+}
+
+function toInputDate(str){
+  if(!str) return '';
+  const p=str.split('/');
+  if(p.length===3) return p[2]+'-'+pad(p[1])+'-'+pad(p[0]);
+  return str;
+}
+
+async function applyEdit(id){
+  const deldateRaw=document.getElementById('e-deldate').value;
+  const data={
+    Status:    document.getElementById('e-status').value,
+    'Delivery Date': deldateRaw ? fmtFull(new Date(deldateRaw+'T00:00:00')) : '',
+    Total:     parseFloat(document.getElementById('e-price').value)||0,
+    Model:     document.getElementById('e-model').value.trim(),
+    Color:     document.getElementById('e-color').value,
+    Phrase:    document.getElementById('e-phrase').value.trim(),
+    Notes:     document.getElementById('e-notes').value.trim(),
+    Additions: document.getElementById('e-add').value.trim(),
+    Recipient: document.getElementById('e-rname').value.trim(),
+    Phone:     document.getElementById('e-phone').value.trim(),
+    'Delivery Notes': document.getElementById('e-dnotes').value.trim(),
+    Link:      document.getElementById('e-link').value.trim(),
+  };
+  try{
+    await apiCall({action:'updateOrder',id,data:JSON.stringify(data)});
+    const o=allOrders.find(o=>o['Order ID']===id);
+    if(o) Object.assign(o,data);
+    toast('✅ تم حفظ التعديل');
+    closeEdit(); renderCal(); updateStats();
+  }catch(e){toast('❌ خطأ في الحفظ');}
+}
+
+function openReschedule(id){
+  const o=allOrders.find(o=>o['Order ID']===id);
+  if(!o) return;
+  const names = o['Product Type']==='Graduation' ? o['Bride'] : [o['Bride'],o['Groom']].filter(Boolean).join(' ❤️ ');
+  document.getElementById('edit-ttl').textContent='📅 تغيير موعد — '+id;
+  document.getElementById('edit-body').innerHTML=`
+    <div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;color:#8B7355;margin-bottom:4px">الأوردر</div>
+      <div style="font-size:16px;font-weight:800;color:#1A1410">${names||id}</div>
+      <div style="font-size:13px;color:#8B7355;margin-top:4px">الموعد الحالي: <strong style="color:#C9A96E">${o['Delivery Date']||o['Delivery Day']||'غير محدد'}</strong></div>
+    </div>
+    <div class="fg">
+      <label>تاريخ التسليم الجديد <span class="req">*</span></label>
+      <input type="date" id="r-deldate" value="${toInputDate(o['Delivery Date'])}">
+      <div class="hint" id="r-date-hint"></div>
+    </div>
+    <div class="fg">
+      <label>سبب التغيير <span class="opt">(اختياري)</span></label>
+      <input type="text" id="r-reason" placeholder="مثال: بطلب الزبون، تأجيل المناسبة...">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
+      <button class="btn btn-gold" onclick="applyReschedule('${id}')">💾 حفظ الموعد الجديد</button>
+    </div>`;
+  // Date hint
+  document.getElementById('r-deldate').addEventListener('change',function(){
+    const d=new Date(this.value+'T00:00:00');
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    document.getElementById('r-date-hint').textContent=this.value?'📅 '+days[d.getDay()]+' '+fmtFull(d):'';
+  });
+  document.getElementById('edit-panel').classList.add('open');
+}
+
+async function applyReschedule(id){
+  const deldateRaw=document.getElementById('r-deldate').value;
+  if(!deldateRaw){toast('❌ اختاري التاريخ الجديد');return;}
+  const deldateObj=new Date(deldateRaw+'T00:00:00');
+  const dayNames=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const data={
+    'Delivery Date': fmtFull(deldateObj),
+    'Delivery Day': dayNames[deldateObj.getDay()],
+  };
+  try{
+    await apiCall({action:'updateOrder',id,data:JSON.stringify(data)});
+    const o=allOrders.find(o=>o['Order ID']===id);
+    if(o){ o['Delivery Date']=data['Delivery Date']; o['Delivery Day']=data['Delivery Day']; }
+    toast('✅ تم تغيير الموعد إلى '+data['Delivery Date']);
+    closeEdit(); renderCal(); updateStats();
+  }catch(e){toast('❌ خطأ في الحفظ');}
+}
+
+function closeEdit(){ document.getElementById('edit-panel').classList.remove('open'); }
+document.getElementById('edit-panel').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+
+// ── FORM ──
+function toggleFields(){
+  const t=document.getElementById('f-type').value;
+  const isEng=['Tray','Guest Book','Package'].includes(t);
+  const hasTray=['Tray','Package'].includes(t);
+  const isBouquet=t==='Bouquet';
+  document.getElementById('eng-fields').style.display=isEng?'block':'none';
+  document.getElementById('grad-fields').style.display=t==='Graduation'?'block':'none';
+  document.getElementById('model-fields').style.display=hasTray?'block':'none';
+  document.getElementById('bouquet-fields').style.display=isBouquet?'block':'none';
+  document.querySelectorAll('.bookdate-f').forEach(el=>el.style.display=['Guest Book','Package'].includes(t)?'block':'none');
+  document.querySelectorAll('.pkg-f').forEach(el=>el.style.display=t==='Package'?'block':'none');
+  const prices={Tray:15,'Guest Book':9,Package:22,Graduation:13,Bouquet:18};
+  if(prices[t]) document.getElementById('f-price').value=prices[t];
+  updatePriceHint();
+}
+function toggleModelOther(){
+  const isO=document.getElementById('f-model').value==='Other';
+  document.querySelectorAll('.model-other-f').forEach(el=>el.style.display=isO?'block':'none');
+}
+function updatePriceHint(){
+  const prov=document.getElementById('f-prov').value;
+  const price=parseFloat(document.getElementById('f-price').value)||0;
+  document.getElementById('price-hint').textContent=prov&&price?'+ 2 د.أ توصيل = الإجمالي: '+(price+DELIVERY_FEE)+' د.أ':'';
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('f-prov').addEventListener('change',updatePriceHint);
+  document.getElementById('f-price').addEventListener('input',updatePriceHint);
+  document.getElementById('f-deldate').addEventListener('change',function(){
+    const d=new Date(this.value+'T00:00:00');
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    document.getElementById('deldate-hint').textContent=this.value?'📅 '+days[d.getDay()]+' '+fmtFull(d):'';
+  });
+});
+
+function openAddForDate(dateStr){
+  switchTab('add');
+  setTimeout(()=>{
+    // Convert dd/mm/yyyy to yyyy-mm-dd for input
+    const p=dateStr.split('/');
+    if(p.length===3){
+      const inputVal=p[2]+'-'+p[1]+'-'+p[0];
+      const el=document.getElementById('f-deldate');
+      if(el){ el.value=inputVal; el.dispatchEvent(new Event('change')); }
+    }
+  },100);
+}
+
+async function saveOrder(){
+  const type=document.getElementById('f-type').value;
+  if(!type){toast('❌ اختاري نوع المنتج');return;}
+  const deldate=document.getElementById('f-deldate').value;
+  if(!deldate){toast('❌ أدخلي تاريخ التسليم');return;}
+  const rname=document.getElementById('f-rname').value.trim();
+  if(!rname){toast('❌ أدخلي اسم المستلم');return;}
+  const phone=document.getElementById('f-phone').value.trim();
+  if(!phone){toast('❌ أدخلي رقم الهاتف');return;}
+  const price=parseFloat(document.getElementById('f-price').value);
+  if(!price){toast('❌ أدخلي الحساب');return;}
+  const isEng=['Tray','Guest Book','Package'].includes(type);
+  const hasTray=['Tray','Package'].includes(type);
+  const isBouquet=type==='Bouquet';
+  if(isEng){
+    if(!document.getElementById('f-groom').value.trim()){toast('❌ أدخلي اسم العريس');return;}
+    if(!document.getElementById('f-bride').value.trim()){toast('❌ أدخلي اسم العروس');return;}
+    if(hasTray&&!document.getElementById('f-model').value){toast('❌ اختاري الموديل');return;}
+  }
+  if(type==='Graduation'&&!document.getElementById('f-gradname').value.trim()){toast('❌ أدخلي اسم الخريج');return;}
+
+  const modelVal=document.getElementById('f-model').value;
+  const model=modelVal==='Other'?document.getElementById('f-model-other').value.trim():modelVal;
+  const dateRaw=document.getElementById('f-date').value;
+  const deldateObj=new Date(deldate+'T00:00:00');
+  const dayNames=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+  const data={
+    productType:type, model,
+    groom:document.getElementById('f-groom').value.trim(),
+    bride:type==='Graduation'?document.getElementById('f-gradname').value.trim():document.getElementById('f-bride').value.trim(),
+    occasionDate:dateRaw?fmtFull(new Date(dateRaw+'T00:00:00')):'',
+    phrase:document.getElementById('f-phrase').value.trim(),
+    verse:true,
+    notes:isBouquet?document.getElementById('f-bouquet-notes').value.trim():document.getElementById('f-notes').value.trim(),
+    additions:isBouquet?document.getElementById('f-bouquet-add').value.trim():document.getElementById('f-additions').value.trim(),
+    deliveryDay:dayNames[deldateObj.getDay()],
+    deliveryDate:fmtFull(deldateObj),
+    recipient:rname, phone,
+    governorate:document.getElementById('f-prov').value,
+    area:document.getElementById('f-area').value.trim(),
+    deliveryNotes:document.getElementById('f-dnotes').value.trim(),
+    total:price,
+    link:document.getElementById('f-link').value.trim(),
+    status:'New'
+  };
+
+  const btn=document.getElementById('save-btn');
+  btn.textContent='⏳ جاري الحفظ...'; btn.disabled=true;
+  try{
+    const res=await apiCall({action:'addOrder',data:JSON.stringify(data)});
+    if(res.success){
+      toast('✅ تم حفظ الأوردر '+res.id);
+      clearForm();
+      await loadOrders();
+      switchTab('cal');
+    }else toast('❌ '+(res.error||'خطأ'));
+  }catch(e){toast('❌ تعذّر الاتصال');}
+  btn.textContent='💾 حفظ في الشيت'; btn.disabled=false;
+}
+
+function clearForm(){
+  ['f-type','f-deldate','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
+   'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
+   'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link'
+  ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('deldate-hint').textContent='';
+  document.getElementById('price-hint').textContent='';
+  ['eng-fields','grad-fields','model-fields','bouquet-fields'].forEach(id=>document.getElementById(id).style.display='none');
+  ['f-bouquet-notes','f-bouquet-add'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+}
+
+// ── PRINT ──
+function printOrders(){
+  // Expand all and print
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
+  document.getElementById('view-cal').classList.add('on');
+  setTimeout(()=>window.print(),150);
+}
+
+// ── TABS ──
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add'][i]===t));
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
+  document.getElementById('view-'+t).classList.add('on');
+}
+
+// ── PRINT ──
+function openPrintModal(){
+  document.getElementById('pmodal').classList.add('open');
+}
+function closePrintModal(){
+  document.getElementById('pmodal').classList.remove('open');
+}
+document.getElementById('pmodal').addEventListener('click',function(e){if(e.target===this)closePrintModal();});
+
+function doPrint(){
+  const dayF = document.getElementById('print-day-sel').value;
+  const stF  = document.getElementById('print-status-sel').value;
+
+  // Filter orders
+  let orders = allOrders.filter(o=>{
+    if(dayF!=='all'){
+      const dd = o['Delivery Date']||'';
+      const dday = o['Delivery Day']||'';
+      if(!dd.includes('') && !dday.includes(dayF)) return false;
+      // match by delivery day name
+      if(!String(dday).includes(dayF)) return false;
+    }
+    if(stF!=='all' && o['Status']!==stF) return false;
+    return true;
+  });
+
+  if(!orders.length){ toast('❌ ما في أوردرات للطباعة'); return; }
+
+  // Group by delivery day
+  const DAYS_PRINT = ['الأحد','الاثنين','الثلاثاء','الخميس','السبت','أخرى'];
+  const grouped = {}; DAYS_PRINT.forEach(d=>grouped[d]=[]);
+  orders.forEach(o=>{
+    const day = String(o['Delivery Day']||'');
+    let matched = false;
+    ['الأحد','الاثنين','الثلاثاء','الخميس','السبت'].forEach(d=>{
+      if(day.includes(d)){ grouped[d].push(o); matched=true; }
+    });
+    if(!matched) grouped['أخرى'].push(o);
+  });
+
+  let html = '';
+  DAYS_PRINT.forEach(day=>{
+    const list = grouped[day];
+    if(!list||!list.length) return;
+    const cnt = list.length;
+    const dd = day!=='أخرى' ? nextDateStr(day) : '';
+    html += `<div class="pc-day-section">
+      <div class="pc-day-hdr">
+        <span class="pc-dname">${day}</span>
+        ${dd?`<span class="pc-ddate">${dd}</span>`:''}
+        <span class="pc-dcnt">${cnt} أوردر</span>
+      </div>
+      <div class="pc-grid">`;
+    list.forEach(o=>{ html += printCard(o); });
+    html += '</div></div>';
+  });
+
+  document.getElementById('print-container').innerHTML = html;
+  closePrintModal();
+  setTimeout(()=>window.print(), 200);
+}
+
+function nextDateStr(dayName){
+  const DAY_JS2 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الخميس':4,'السبت':6};
+  const target = DAY_JS2[dayName];
+  if(target===undefined) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  let diff = (target-today.getDay()+7)%7; if(diff===0) diff=7;
+  const d = new Date(today); d.setDate(d.getDate()+diff);
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+}
+
+function printCard(o){
+  const id=o['Order ID']||'';
+  const type=o['Product Type']||'';
+  const typeAr=TYPE_AR[type]||type;
+  const groom=o['Groom']||''; const bride=o['Bride']||'';
+  const names=type==='Graduation'?bride:[bride,groom].filter(Boolean).join(' ❤️ ');
+  const total=parseFloat(o['Total']||0);
+  const prov=o['Governorate']||'';
+  const grandTotal=prov?total+DELIVERY_FEE:total;
+  const model=MODEL_AR[o['Model']]||o['Model']||'';
+
+  // ORDER SECTION
+  let oRows='';
+  if(type==='Graduation'){
+    oRows+=prow('الخريج',bride);
+    if(o['Model']) oRows+=prow('التخصص',o['Model']);
+  } else {
+    if(groom) oRows+=prow('العريس',groom);
+    if(bride) oRows+=prow('العروس',bride);
+    if(o['Occasion Date']) oRows+=prow('تاريخ المناسبة',o['Occasion Date']);
+    if(model) oRows+=prow('الموديل',model);
+    if(o['Color']) oRows+=prow('الستراس',o['Color']);
+    if(type==='Package'&&o['Additions']) oRows+=prow('البكج',o['Additions']);
+  }
+  oRows+=prow('الآية','موجودة ✅');
+  if(o['Phrase']) oRows+=prow('العبارة',o['Phrase']);
+  if(o['Notes']) oRows+=prow('ملاحظات',o['Notes']);
+  if(o['Additions']&&type!=='Package') oRows+=prow('إضافات',o['Additions']);
+
+  // DELIVERY SECTION
+  let dRows='';
+  dRows+=prow('المستلم',o['Recipient']||'—');
+  dRows+=prow('الهاتف',o['Phone']||'—');
+  if(prov) dRows+=prow('المحافظة',prov);
+  if(o['Area']) dRows+=prow('المنطقة',o['Area']);
+  dRows+=prow('تاريخ التسليم',o['Delivery Date']||o['Delivery Day']||'—');
+  if(o['Delivery Notes']) dRows+=prow('ملاحظات',o['Delivery Notes']);
+  if(prov) dRows+=prow('رسوم التوصيل',DELIVERY_FEE+' د.أ');
+  dRows+=`<div class="pc-row"><span class="pc-k">الحساب الكامل</span><span class="pc-v pc-v-total">${grandTotal} د.أ</span></div>`;
+
+  return `<div class="pc-card">
+    <div class="pc-card-hdr">
+      <span class="pc-id">${id}</span>
+      <span class="pc-type">${typeAr}</span>
+      <span class="pc-names">${names||'—'}</span>
+      <span class="pc-price">${grandTotal} د.أ</span>
+    </div>
+    <div class="pc-secs">
+      <div class="pc-sec pc-sec-o">
+        <div class="pc-sec-ttl">📋 التجهيز</div>
+        ${oRows}
+      </div>
+      <div class="pc-sec pc-sec-d">
+        <div class="pc-sec-ttl">🚚 التوصيل</div>
+        ${dRows}
+      </div>
+    </div>
+  </div>`;
+}
+
+function prow(k,v){
+  return `<div class="pc-row"><span class="pc-k">${k}</span><span class="pc-v">${v}</span></div>`;
+}
+
+// ── TOAST ──
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
