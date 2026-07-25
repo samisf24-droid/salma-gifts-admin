@@ -314,7 +314,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction
 
   <!-- FILTERS -->
   <div class="chips">
-    <button class="chip on" onclick="setFilter(this,'all')">الكل</button>
+    <button class="chip on" onclick="setFilter(this,'all')">النشطة</button>
     <button class="chip c-recv" onclick="setFilter(this,'New')">تم الاستلام</button>
     <button class="chip c-prep" onclick="setFilter(this,'Preparing')">جاري التجهيز</button>
     <button class="chip c-ship" onclick="setFilter(this,'Shipped')">مع التوصيل</button>
@@ -366,7 +366,10 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction
       </div>
       <div class="fg">
         <label>تاريخ التسليم <span class="req">*</span></label>
-        <input type="date" id="f-deldate">
+        <select id="f-deldate-sel" onchange="onDelDateSel(this.value)">
+          <option value="">اختر يوم التسليم...</option>
+        </select>
+        <input type="date" id="f-deldate" style="display:none">
         <div class="hint" id="deldate-hint"></div>
       </div>
     </div>
@@ -501,11 +504,6 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction
 
     <select class="pday-sel" id="print-day-sel">
       <option value="all">كل الأوردرات</option>
-      <option value="الأحد">الأحد فقط</option>
-      <option value="الاثنين">الاثنين فقط</option>
-      <option value="الثلاثاء">الثلاثاء فقط</option>
-      <option value="الخميس">الخميس فقط</option>
-      <option value="السبت">السبت فقط</option>
     </select>
 
     <select class="pday-sel" id="print-status-sel">
@@ -532,7 +530,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#2C2218;direction
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbx5NaV_8xCXiIZ1UE2XlNqMuV9IYDF0Qjb_XgLWLa3KDaDSDVJ3-zMoblCvZwOYnBm4/exec';
 const DELIVERY_FEE = 2;
-const DAYS = ['الأحد','الاثنين','الثلاثاء','الخميس','السبت'];
+const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const MODEL_AR = {Turkish:'التركي',White:'الأبيض',Elegant:'الأنيق',Luxury:'الفاخر',Royal:'الملكي'};
 const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Graduation:'تخرج',Bouquet:'مسكة عروس'};
 const STATUSES = {
@@ -601,7 +599,7 @@ function getWeekDays(offset){
   const sunday = new Date(today);
   sunday.setDate(today.getDate() - today.getDay() + offset*7);
   // Return all 7 days of the week as Date objects keyed by name
-  const offsets = {الأحد:0,الاثنين:1,الثلاثاء:2,الخميس:4,السبت:6};
+  const offsets = {الأحد:0,الاثنين:1,الثلاثاء:2,الأربعاء:3,الخميس:4,الجمعة:5,السبت:6};
   const result = {};
   DAYS.forEach(d=>{ const dt=new Date(sunday); dt.setDate(sunday.getDate()+offsets[d]); result[d]=dt; });
   return result;
@@ -619,26 +617,31 @@ function renderCal(){
 
   // Filter orders
   let orders = allOrders.filter(o=>{
-    if(filterStatus!=='all' && o['Status']!==filterStatus) return false;
+    if(filterStatus==='all'){
+      // الوضع الافتراضي: أخفي "تم التسليم" — تظهر فقط لما يضغط عليها
+      if(o['Status']==='Done'||o['Status']==='Pending') return false;
+    } else {
+      if(o['Status']!==filterStatus) return false;
+    }
     return true;
   });
 
-  // Group orders by delivery date matching this week's days
+  // لما فلتر Done: اعرض كل الأسابيع مش بس الحالي
+  // نستخدم تواريخ الأسبوع المحدد عادي بس بدون حذف Done
+
+  // Group orders by delivery date — exact match only, no fallback
   const grouped = {};
   DAYS.forEach(d=>grouped[d]=[]);
 
   orders.forEach(o=>{
     const delDate = parseDate(o['Delivery Date']);
     if(delDate){
-      // Match by exact date
+      // Match by exact date only
       DAYS.forEach(d=>{
         if(isSameDay(delDate, days[d])) grouped[d].push(o);
       });
-    } else {
-      // Fallback: match by delivery day name
-      const dayName = String(o['Delivery Day']||'');
-      DAYS.forEach(d=>{ if(dayName.includes(d)) grouped[d].push(o); });
     }
+    // No fallback — if no Delivery Date, don't show in calendar
   });
 
   // Build header
@@ -714,6 +717,10 @@ function setFilter(el,val){
   document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
   filterStatus = val;
+  // إذا اختار "تم التسليم" — يعرض الأسابيع الماضية أيضاً
+  if(val==='Done' && weekOffset===0){
+    // ابق في الأسبوع الحالي بس خلي المستخدم يتنقل
+  }
   renderCal();
 }
 
@@ -1034,6 +1041,57 @@ function closeEdit(){ document.getElementById('edit-panel').classList.remove('op
 document.getElementById('edit-panel').addEventListener('click',function(e){if(e.target===this)closeEdit();});
 
 // ── FORM ──
+function buildDelDateOptions(){
+  const sel = document.getElementById('f-deldate-sel');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const dayNamesAr = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+  // Clear existing options except first
+  while(sel.options.length > 1) sel.remove(1);
+
+  // Add next 14 days
+  for(let i=1; i<=14; i++){
+    const d = new Date(today);
+    d.setDate(today.getDate()+i);
+    const dayAr = dayNamesAr[d.getDay()];
+    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+    const val = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = dayAr + ' — ' + dateStr;
+    sel.appendChild(opt);
+  }
+
+  // Add custom option
+  const customOpt = document.createElement('option');
+  customOpt.value = 'custom';
+  customOpt.textContent = '📅 تاريخ محدد آخر...';
+  sel.appendChild(customOpt);
+}
+
+function onDelDateSel(val){
+  const dateInput = document.getElementById('f-deldate');
+  const hint = document.getElementById('deldate-hint');
+  if(val === 'custom'){
+    dateInput.style.display = 'block';
+    dateInput.value = '';
+    hint.textContent = '';
+    dateInput.focus();
+    dateInput.click();
+  } else if(val){
+    dateInput.style.display = 'none';
+    dateInput.value = val;
+    const d = new Date(val+'T00:00:00');
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    hint.textContent = '📅 '+days[d.getDay()]+' '+fmtFull(d);
+  } else {
+    dateInput.style.display = 'none';
+    dateInput.value = '';
+    hint.textContent = '';
+  }
+}
+
 function toggleFields(){
   const t=document.getElementById('f-type').value;
   const isEng=['Tray','Guest Book','Package'].includes(t);
@@ -1061,10 +1119,14 @@ function updatePriceHint(){
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('f-prov').addEventListener('change',updatePriceHint);
   document.getElementById('f-price').addEventListener('input',updatePriceHint);
+  buildDelDateOptions();
+
+  // hidden date input change (for custom date option)
   document.getElementById('f-deldate').addEventListener('change',function(){
+    if(!this.value) return;
     const d=new Date(this.value+'T00:00:00');
     const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    document.getElementById('deldate-hint').textContent=this.value?'📅 '+days[d.getDay()]+' '+fmtFull(d):'';
+    document.getElementById('deldate-hint').textContent='📅 '+days[d.getDay()]+' '+fmtFull(d);
   });
 });
 
@@ -1075,8 +1137,22 @@ function openAddForDate(dateStr){
     const p=dateStr.split('/');
     if(p.length===3){
       const inputVal=p[2]+'-'+p[1]+'-'+p[0];
+      const sel=document.getElementById('f-deldate-sel');
       const el=document.getElementById('f-deldate');
-      if(el){ el.value=inputVal; el.dispatchEvent(new Event('change')); }
+      // Try to find in select options
+      let found=false;
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].value===inputVal){
+          sel.value=inputVal;
+          onDelDateSel(inputVal);
+          found=true; break;
+        }
+      }
+      if(!found){
+        sel.value='custom';
+        onDelDateSel('custom');
+        if(el){ el.value=inputVal; el.dispatchEvent(new Event('change')); }
+      }
     }
   },100);
 }
@@ -1143,6 +1219,8 @@ async function saveOrder(){
 }
 
 function clearForm(){
+  document.getElementById('f-deldate-sel').value='';
+  document.getElementById('f-deldate').style.display='none';
   ['f-type','f-deldate','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link'
@@ -1170,7 +1248,34 @@ function switchTab(t){
 
 // ── PRINT ──
 function openPrintModal(){
+  buildPrintDayOptions();
   document.getElementById('pmodal').classList.add('open');
+}
+
+function buildPrintDayOptions(){
+  const sel = document.getElementById('print-day-sel');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const DAY_JS3 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
+
+  // Keep only first option "كل الأوردرات"
+  while(sel.options.length > 1) sel.remove(1);
+
+  // Get unique delivery days from orders + their next date
+  const seenDays = new Set();
+  // Always show all 7 days with their next occurrence
+  dayNames.forEach(day=>{
+    const target = DAY_JS3[day];
+    let diff = (target - today.getDay() + 7) % 7;
+    if(diff === 0) diff = 7;
+    const d = new Date(today);
+    d.setDate(today.getDate() + diff);
+    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1);
+    const opt = document.createElement('option');
+    opt.value = day;
+    opt.textContent = day + ' — ' + dateStr;
+    sel.appendChild(opt);
+  });
 }
 function closePrintModal(){
   document.getElementById('pmodal').classList.remove('open');
@@ -1197,12 +1302,12 @@ function doPrint(){
   if(!orders.length){ toast('❌ ما في أوردرات للطباعة'); return; }
 
   // Group by delivery day
-  const DAYS_PRINT = ['الأحد','الاثنين','الثلاثاء','الخميس','السبت','أخرى'];
+  const DAYS_PRINT = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','أخرى'];
   const grouped = {}; DAYS_PRINT.forEach(d=>grouped[d]=[]);
   orders.forEach(o=>{
     const day = String(o['Delivery Day']||'');
     let matched = false;
-    ['الأحد','الاثنين','الثلاثاء','الخميس','السبت'].forEach(d=>{
+    ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].forEach(d=>{
       if(day.includes(d)){ grouped[d].push(o); matched=true; }
     });
     if(!matched) grouped['أخرى'].push(o);
@@ -1231,7 +1336,7 @@ function doPrint(){
 }
 
 function nextDateStr(dayName){
-  const DAY_JS2 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الخميس':4,'السبت':6};
+  const DAY_JS2 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
   const target = DAY_JS2[dayName];
   if(target===undefined) return '';
   const today = new Date(); today.setHours(0,0,0,0);
