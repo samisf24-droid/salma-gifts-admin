@@ -279,63 +279,80 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   .pc-ddate{color:#C9A96E!important;font-size:10px;font-weight:700}
   .pc-dcnt{background:#C9A96E!important;color:#1A1410!important;border-radius:99px;padding:1px 7px;font-size:9px;font-weight:900}
 
-  /* ── GRID: 1 card per row (full width) ── */
+  /* ── GRID ── */
   .pc-grid{display:block!important;margin-bottom:3mm}
 
-  /* ── CARD: horizontal row layout ── */
+  /* ── CARD: FIXED HEIGHT ── */
   .pc-card{
     break-inside:avoid;
-    border:1px solid #CCC;
+    border:1.5px solid #1A1410;
     border-radius:4px;
     overflow:hidden;
-    margin-bottom:2mm;
+    margin-bottom:3mm;
     display:block;
+    height:36mm; /* ثابت دائماً */
   }
 
-  /* CARD HEADER — single thin row */
+  /* CARD HEADER */
   .pc-card-hdr{
     background:#1A1410!important;
-    padding:3px 8px;
+    padding:3px 10px;
     display:flex!important;align-items:center;gap:6px;
+    height:7mm;
   }
-  .pc-id{background:#C9A96E!important;color:#1A1410!important;border-radius:3px;padding:1px 5px;font-size:8px;font-weight:900;flex-shrink:0}
-  .pc-type{color:#E8D5B0!important;font-size:8px;font-weight:700;flex-shrink:0}
-  .pc-names{color:#fff!important;font-size:10px;font-weight:900;flex:1}
-  .pc-date-hdr{color:#C9A96E!important;font-size:8px;flex-shrink:0}
-  .pc-price{color:#C9A96E!important;font-size:10px;font-weight:900;white-space:nowrap;flex-shrink:0}
+  .pc-id{background:#C9A96E!important;color:#1A1410!important;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:900;flex-shrink:0}
+  .pc-type{color:#E8D5B0!important;font-size:8px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.15);padding:1px 5px;border-radius:3px}
+  .pc-names{color:#fff!important;font-size:11px;font-weight:900;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pc-date-hdr{color:#C9A96E!important;font-size:9px;font-weight:700;flex-shrink:0}
+  .pc-price{color:#C9A96E!important;font-size:11px;font-weight:900;white-space:nowrap;flex-shrink:0}
 
-  /* TWO SECTIONS SIDE BY SIDE — full width */
+  /* TWO SECTIONS — right: prep (smaller), left: delivery (full) */
   .pc-secs{
     display:grid!important;
-    grid-template-columns:1fr 1fr!important;
+    grid-template-columns:1fr 1.2fr!important;
     gap:0;
+    height:29mm; /* بقية الكارد بعد الهيدر */
   }
 
-  .pc-sec{padding:4px 8px;border-top:1px solid #EEE}
-  .pc-sec-o{background:#FAF5EC!important;border-left:1px solid #DDD}
-  .pc-sec-d{background:#EFF6FF!important}
+  .pc-sec{
+    padding:4px 8px;
+    border-top:1px solid #DDD;
+    overflow:hidden; /* الحجم الثابت يقطع الزيادة */
+    position:relative;
+  }
+  .pc-sec-o{background:#FFFBF4!important;border-left:1.5px solid #CCC}
+  .pc-sec-d{background:#F0F7FF!important}
 
   .pc-sec-ttl{
-    font-size:7px;font-weight:900;text-transform:uppercase;
-    color:#888!important;margin-bottom:3px;padding-bottom:2px;
-    border-bottom:1px solid rgba(0,0,0,.08);
+    font-size:8px;font-weight:900;text-transform:uppercase;
+    margin-bottom:3px;padding-bottom:2px;
+    border-bottom:1px solid rgba(0,0,0,.1);
   }
-  .pc-sec-d .pc-sec-ttl{color:#1E40AF!important}
+  .pc-sec-o .pc-sec-ttl{color:#6B5240!important}
+  .pc-sec-d .pc-sec-ttl{color:#1A3F8A!important}
 
-  /* FIELDS: inline pairs */
-  .pc-fields{display:flex;flex-wrap:wrap;gap:0 8px}
-  .pc-row{
-    display:inline-flex;align-items:baseline;gap:3px;
-    margin-bottom:1px;white-space:nowrap;
+  /* DELIVERY — each field on its own line for clarity */
+  .pc-del-row{
+    display:flex;gap:4px;align-items:baseline;
+    margin-bottom:2px;
   }
+  .pc-del-k{font-size:8px;color:#666!important;flex-shrink:0;min-width:18mm}
+  .pc-del-v{font-size:9px;font-weight:700;color:#1A1410!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pc-del-total{
+    position:absolute;bottom:4px;left:8px;right:8px;
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid #BFDBFE;padding-top:3px;
+  }
+  .pc-del-total-k{font-size:8px;color:#1A3F8A!important;font-weight:700}
+  .pc-del-total-v{font-size:13px;font-weight:900;color:#C9A96E!important}
+
+  /* PREP — compact inline */
+  .pc-fields{display:flex;flex-wrap:wrap;gap:0 6px;overflow:hidden;max-height:24mm}
+  .pc-row{display:inline-flex;align-items:baseline;gap:2px;margin-bottom:1px;white-space:nowrap}
   .pc-k{font-size:7px;color:#888!important}
-  .pc-v{font-size:9px;font-weight:700;color:#1A1410!important}
+  .pc-v{font-size:8.5px;font-weight:700;color:#1A1410!important}
   .pc-v-total{font-size:11px;font-weight:900;color:#C9A96E!important}
-  .pc-v-total-row{
-    display:flex!important;justify-content:space-between;
-    padding-top:2px;margin-top:2px;
-    border-top:1px solid rgba(0,0,0,.1);width:100%;
-  }
+  .pc-v-total-row{display:flex!important;justify-content:space-between;padding-top:2px;margin-top:2px;border-top:1px solid rgba(0,0,0,.1);width:100%}
 }
 
 /* ── CONTRAST RULES — نص دائماً مقروء على خلفيته ── */
@@ -350,6 +367,16 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .panel .st-sel,.edit-panel .st-sel{color:#2C2218 !important;background:#FFF8EE !important}
 .panel .btn-ghost,.edit-panel .btn-ghost{color:#8B7355 !important}
 .panel .btn-gold,.edit-panel .btn-gold{color:#1A1410 !important}
+
+/* ── PRINT CHECKBOXES ── */
+.pday-cb{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #E5D9C7;border-radius:8px;cursor:pointer;background:#FFFFFF;transition:border-color 150ms ease}
+.pday-cb.has-orders{border-color:#C9A96E;background:#FAF5EC}
+.pday-cb input[type=checkbox]{width:18px;height:18px;accent-color:#C9A96E;cursor:pointer;flex-shrink:0}
+.pday-cb-info{flex:1}
+.pday-cb-name{font-size:14px;font-weight:700;color:#1A1410}
+.pday-cb-date{font-size:12px;color:#8B7355}
+.pday-cb-cnt{font-size:12px;font-weight:800;color:#C9A96E;background:#FAF5EC;border:1px solid #E8D5B0;border-radius:99px;padding:1px 8px;flex-shrink:0}
+.pday-cb-cnt.zero{color:#B8A898;background:#F5F5F5;border-color:#E0E0E0}
 
 /* ── FORM ── */
 .form-card{background:#FFFFFF;border-radius:14px;border:1px solid #E5D9C7;padding:20px;margin-bottom:14px;box-shadow:0 4px 12px rgba(60,30,10,.08)}
@@ -608,6 +635,20 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 
+/* ── DRAFTS ── */
+.draft-card{background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;padding:14px 16px;margin-bottom:10px;position:relative;border-right:4px solid #C9A96E}
+.draft-card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.draft-type{font-size:11px;font-weight:700;color:#8B7355;background:#F5F0E8;border-radius:5px;padding:2px 7px}
+.draft-names{font-size:15px;font-weight:800;color:#1A1410;flex:1}
+.draft-time{font-size:11px;color:#B8A898}
+.draft-fields{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:12px}
+.draft-field{font-size:12px;color:#4A3728}<span class="draft-field-k" style="color:#8B7355"></span>
+.draft-acts{display:flex;gap:8px}
+.draft-empty{text-align:center;padding:40px 20px;color:#B8A898}
+.draft-empty-ico{font-size:40px;margin-bottom:8px}
+.draft-empty-txt{font-size:14px;font-weight:600}
+.draft-empty-sub{font-size:12px;margin-top:4px}
+
 /* ── DASH VIEW ── */
 .view-dash{display:none}.view-dash.on{display:block}
 </style>
@@ -625,6 +666,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <button class="tab on"  onclick="switchTab('cal')">📅 التقويم</button>
   <button class="tab"     onclick="switchTab('add')">➕ أوردر جديد</button>
   <button class="tab no-print" onclick="openPrintModal()">🖨️ طباعة</button>
+  <button class="tab no-print" onclick="switchTab('drafts')" id="tab-drafts">📝 المسودات</button>
   <button class="tab no-print" onclick="openDashboard()">📊 الداشبورد</button>
 </div>
 
@@ -824,8 +866,20 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearForm()">مسح</button>
+      <button class="btn btn-ghost" onclick="saveDraft()" style="border-color:#C9A96E;color:#8A6030">📝 حفظ كمسودة</button>
       <button class="btn btn-gold" onclick="saveOrder()" id="save-btn">💾 حفظ في الشيت</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ DRAFTS TAB ══ -->
+<div class="view" id="view-drafts">
+  <div class="form-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="form-ttl" style="margin-bottom:0">📝 المسودات المحفوظة</div>
+      <button onclick="clearAllDrafts()" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:8px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;cursor:pointer">حذف الكل</button>
+    </div>
+    <div id="drafts-list"></div>
   </div>
 </div>
 
@@ -864,17 +918,36 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#8B7355" onclick="closePrintModal()">✕</button>
     </div>
 
-    <select class="pday-sel" id="print-day-sel">
-      <option value="all">كل الأوردرات</option>
-    </select>
+    <!-- Days checkboxes -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#8B7355;text-transform:uppercase;letter-spacing:.5px">اختر الأيام</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="selectAllDays(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
+          <button onclick="selectAllDays(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+        </div>
+      </div>
+      <div id="print-days-checkboxes" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
 
-    <select class="pday-sel" id="print-status-sel">
-      <option value="all">كل الحالات</option>
-      <option value="New">تم الاستلام فقط</option>
-      <option value="Preparing">جاري التجهيز فقط</option>
-      <option value="Shipped">مع التوصيل فقط</option>
-      <option value="Done">تم التسليم فقط</option>
-    </select>
+    <!-- Status filter — checkboxes -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#8B7355;text-transform:uppercase;letter-spacing:.5px">الحالة</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="selectAllStatus(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
+          <button onclick="selectAllStatus(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="print-status-checkboxes">
+        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="New" checked><div class="pday-cb-info"><div class="pday-cb-name">تم الاستلام</div></div></label>
+        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Preparing" checked><div class="pday-cb-info"><div class="pday-cb-name">جاري التجهيز</div></div></label>
+        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Shipped" checked><div class="pday-cb-info"><div class="pday-cb-name">مع التوصيل</div></div></label>
+        <label class="pday-cb"><input type="checkbox" name="print-status" value="Done"><div class="pday-cb-info"><div class="pday-cb-name">تم التسليم</div></div></label>
+        <label class="pday-cb"><input type="checkbox" name="print-status" value="Waiting" checked><div class="pday-cb-info"><div class="pday-cb-name">بانتظار تأكيد</div></div></label>
+        <label class="pday-cb"><input type="checkbox" name="print-status" value="Cancelled"><div class="pday-cb-info"><div class="pday-cb-name">ملغي</div></div></label>
+      </div>
+    </div>
 
     <button class="popt" onclick="doPrint()">
       <span class="popt-ico">🖨️</span>
@@ -1430,29 +1503,63 @@ async function changeStatus(id,status){
 function openEdit(id){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
-  document.getElementById('edit-ttl').textContent='تعديل — '+id;
+  const type=o['Product Type']||'';
+  const isEng=['Tray','Guest Book','Package'].includes(type);
+  const isGrad=type==='Graduation';
+  const isBouquet=type==='Bouquet';
+  const hasTray=['Tray','Package'].includes(type);
+
+  document.getElementById('edit-ttl').textContent='✏️ تعديل — '+id;
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${o['Status']===k?'selected':''}>${v.lbl}</option>`).join('');
+  const typeOpts=['Tray','Guest Book','Package','Graduation','Bouquet'].map(t=>`<option value="${t}" ${type===t?'selected':''}>${TYPE_AR[t]||t}</option>`).join('');
+  const modelOpts=['Turkish','White','Elegant','Luxury','Royal','Other'].map(m=>`<option value="${m}" ${o['Model']===m?'selected':''}>${MODEL_AR[m]||m}</option>`).join('');
+  const provOpts=['','عمّان','الزرقاء','إربد','البلقاء','الكرك','مادبا','السلط','جرش','عجلون','المفرق','الطفيلة','معان','العقبة'].map(p=>`<option value="${p}" ${o['Governorate']===p?'selected':''}>${p||'—'}</option>`).join('');
+
   document.getElementById('edit-body').innerHTML=`
-    <div class="fg"><label>الحالة</label><select id="e-status" class="st-sel" style="width:100%">${stOpts}</select></div>
+    <div class="sec-lbl">الحالة والنوع</div>
     <div class="form-grid">
-      <div class="fg"><label>تاريخ التسليم</label><input type="date" id="e-deldate" value="${toInputDate(o['Delivery Date'])}"></div>
-      <div class="fg"><label>الحساب (د.أ)</label><input type="number" id="e-price" value="${o['Total']||0}" min="0" step="0.5"></div>
-      <div class="fg"><label>الموديل</label><input type="text" id="e-model" value="${MODEL_AR[o['Model']]||o['Model']||''}"></div>
-      <div class="fg"><label>الستراس</label><select id="e-color" class="st-sel" style="width:100%"><option value="">—</option><option ${o['Color']==='فضي'?'selected':''}>فضي</option><option ${o['Color']==='ذهبي'?'selected':''}>ذهبي</option></select></div>
+      <div class="fg"><label>الحالة</label><select id="e-status" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${stOpts}</select></div>
+      <div class="fg"><label>نوع المنتج</label><select id="e-type" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${typeOpts}</select></div>
     </div>
-    <div class="fg"><label>العبارة</label><input type="text" id="e-phrase" value="${o['Phrase']||''}"></div>
-    <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:60px">${o['Notes']||''}</textarea></div>
-    <div class="fg"><label>إضافات</label><input type="text" id="e-add" value="${o['Additions']||''}"></div>
+
+    ${isEng?`
+    <div class="sec-lbl">بيانات العروسين</div>
     <div class="form-grid">
-      <div class="fg"><label>اسم المستلم</label><input type="text" id="e-rname" value="${o['Recipient']||''}"></div>
+      <div class="fg"><label>اسم العريس</label><input type="text" id="e-groom" value="${o['Groom']||''}"></div>
+      <div class="fg"><label>اسم العروس</label><input type="text" id="e-bride" value="${o['Bride']||''}"></div>
+      <div class="fg"><label>تاريخ المناسبة</label><input type="date" id="e-occdate" value="${toInputDate(o['Occasion Date'])}"></div>
+      ${hasTray?`<div class="fg"><label>الموديل</label><select id="e-model" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${modelOpts}</select></div>`:''}
+    </div>`:''}
+
+    ${isGrad?`
+    <div class="sec-lbl">بيانات التخرج</div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم الخريج/ة</label><input type="text" id="e-bride" value="${o['Bride']||''}"></div>
+      <div class="fg"><label>التخصص</label><input type="text" id="e-model" value="${o['Model']||''}"></div>
+    </div>`:''}
+
+    <div class="sec-lbl">العبارة والملاحظات</div>
+    <div class="fg"><label>العبارة</label><input type="text" id="e-phrase" value="${(o['Phrase']||'').replace(/"/g,'&quot;')}"></div>
+    <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:70px;width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;resize:none">${o['Notes']||''}</textarea></div>
+    <div class="fg"><label>إضافات</label><input type="text" id="e-add" value="${(o['Additions']||'').replace(/"/g,'&quot;')}"></div>
+
+    <div class="sec-lbl">بيانات التوصيل</div>
+    <div class="form-grid">
+      <div class="fg"><label>تاريخ التسليم <span style="color:#C0392B">*</span></label><input type="date" id="e-deldate" value="${toInputDate(o['Delivery Date'])}"></div>
+      <div class="fg"><label>الحساب (د.أ) <span style="color:#C0392B">*</span></label><input type="number" id="e-price" value="${o['Total']||0}" min="0" step="0.5"></div>
+      <div class="fg"><label>اسم المستلم</label><input type="text" id="e-rname" value="${(o['Recipient']||'').replace(/"/g,'&quot;')}"></div>
       <div class="fg"><label>الهاتف</label><input type="tel" id="e-phone" value="${o['Phone']||''}" dir="ltr" style="text-align:right"></div>
+      <div class="fg"><label>المحافظة</label><select id="e-prov" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${provOpts}</select></div>
+      <div class="fg"><label>المنطقة</label><input type="text" id="e-area" value="${(o['Area']||'').replace(/"/g,'&quot;')}"></div>
     </div>
-    <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="e-dnotes" value="${o['Delivery Notes']||''}"></div>
+    <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="e-dnotes" value="${(o['Delivery Notes']||'').replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>رابط المحادثة</label><input type="url" id="e-link" value="${o['Link']||''}"></div>
+
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
       <button class="btn btn-gold" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
     </div>`;
+
   document.getElementById('edit-panel').classList.add('open');
 }
 
@@ -1470,20 +1577,26 @@ async function applyEdit(id){
   const deldateObj = new Date(deldateRaw+'T00:00:00');
   const newDeliveryDay = dayNamesEdit[deldateObj.getDay()];
   const newDeliveryDate = fmtFull(deldateObj);
+  const getVal = (id) => { const el=document.getElementById(id); return el ? el.value.trim() : ''; };
   const data={
-    Status:    document.getElementById('e-status').value,
+    Status:         getVal('e-status'),
+    'Product Type': getVal('e-type'),
     'Delivery Date': newDeliveryDate,
     'Delivery Day':  newDeliveryDay,
-    Total:     parseFloat(document.getElementById('e-price').value)||0,
-    Model:     document.getElementById('e-model').value.trim(),
-    Color:     document.getElementById('e-color').value,
-    Phrase:    document.getElementById('e-phrase').value.trim(),
-    Notes:     document.getElementById('e-notes').value.trim(),
-    Additions: document.getElementById('e-add').value.trim(),
-    Recipient: document.getElementById('e-rname').value.trim(),
-    Phone:     document.getElementById('e-phone').value.trim(),
-    'Delivery Notes': document.getElementById('e-dnotes').value.trim(),
-    Link:      document.getElementById('e-link').value.trim(),
+    Total:          parseFloat(document.getElementById('e-price').value)||0,
+    Groom:          getVal('e-groom'),
+    Bride:          getVal('e-bride'),
+    'Occasion Date': (() => { const el=document.getElementById('e-occdate'); if(!el||!el.value) return ''; const d=new Date(el.value+'T00:00:00'); return fmtFull(d); })(),
+    Model:          getVal('e-model'),
+    Phrase:         getVal('e-phrase'),
+    Notes:          document.getElementById('e-notes') ? document.getElementById('e-notes').value.trim() : '',
+    Additions:      getVal('e-add'),
+    Recipient:      getVal('e-rname'),
+    Phone:          getVal('e-phone'),
+    Governorate:    getVal('e-prov'),
+    Area:           getVal('e-area'),
+    'Delivery Notes': getVal('e-dnotes'),
+    Link:           getVal('e-link'),
   };
   try{
     await apiCall({action:'updateOrder',id,data:JSON.stringify(data)});
@@ -1810,11 +1923,12 @@ function printOrders(){
 
 // ── TABS ──
 function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print','drafts'][i]===t));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   const viewEl = document.getElementById('view-'+t);
   if(viewEl) viewEl.classList.add('on');
-  else document.getElementById('view-cal').classList.add('on'); // fallback
+  else document.getElementById('view-cal').classList.add('on');
+  if(t==='drafts') renderDraftsList();
 }
 
 // ── PRINT ──
@@ -1824,40 +1938,44 @@ function openPrintModal(){
 }
 
 function buildPrintDayOptions(){
-  const sel = document.getElementById('print-day-sel');
+  const container = document.getElementById('print-days-checkboxes');
+  if(!container) return;
   const today = new Date(); today.setHours(0,0,0,0);
-  const DAY_JS3 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
   const dayNamesAll = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
-  // Keep only first option "كل الأوردرات"
-  while(sel.options.length > 1) sel.remove(1);
+  // Build next 7 days
+  const days = [];
+  for(let i=0; i<=7; i++){
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+    const dayName = dayNamesAll[d.getDay()];
+    // Count orders on this date
+    const cnt = allOrders.filter(o=>{
+      const dd = String(o['Delivery Date']||'').trim();
+      return dd === dateStr && o['Status'] !== 'Cancelled';
+    }).length;
+    days.push({dateStr, dayName, cnt, isToday: i===0});
+  }
 
-  // Get unique DATES from actual orders
-  const dateSeen = new Set();
-  const dateOptions = [];
+  container.innerHTML = days.map(d=>`
+    <label class="pday-cb ${d.cnt>0?'has-orders':''}">
+      <input type="checkbox" name="print-day" value="${d.dateStr}" ${d.cnt>0?'checked':''}>
+      <div class="pday-cb-info">
+        <div class="pday-cb-name">${d.dayName}${d.isToday?' — اليوم':''}</div>
+        <div class="pday-cb-date">${d.dateStr}</div>
+      </div>
+      <span class="pday-cb-cnt ${d.cnt===0?'zero':''}">${d.cnt} أوردر</span>
+    </label>
+  `).join('');
+}
 
-  allOrders.forEach(o=>{
-    const dd = o['Delivery Date'];
-    if(dd && !dateSeen.has(dd)){
-      dateSeen.add(dd);
-      const d = parseDate(dd);
-      if(d){
-        const dayName = dayNamesAll[d.getDay()];
-        const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
-        dateOptions.push({val:dd, label:dayName+' — '+dateStr, ts:d.getTime()});
-      }
-    }
-  });
+function selectAllStatus(checked){
+  document.querySelectorAll('input[name="print-status"]').forEach(cb=>cb.checked=checked);
+}
 
-  // Sort by date
-  dateOptions.sort((a,b)=>a.ts-b.ts);
-
-  dateOptions.forEach(item=>{
-    const opt = document.createElement('option');
-    opt.value = item.val;       // القيمة = التاريخ الفعلي dd/mm/yyyy
-    opt.textContent = item.label;
-    sel.appendChild(opt);
-  });
+function selectAllDays(checked){
+  document.querySelectorAll('input[name="print-day"]').forEach(cb=>cb.checked=checked);
 }
 function closePrintModal(){
   document.getElementById('pmodal').classList.remove('open');
@@ -1865,21 +1983,22 @@ function closePrintModal(){
 document.getElementById('pmodal').addEventListener('click',function(e){if(e.target===this)closePrintModal();});
 
 function doPrint(){
-  const dayF = document.getElementById('print-day-sel').value;
-  const stF  = document.getElementById('print-status-sel').value;
+  // Get selected dates
+  const selectedDates = new Set(
+    [...document.querySelectorAll('input[name="print-day"]:checked')].map(cb=>cb.value)
+  );
+  // Get selected statuses
+  const selectedStatuses = new Set(
+    [...document.querySelectorAll('input[name="print-status"]:checked')].map(cb=>cb.value)
+  );
 
-  // Filter orders by EXACT Delivery Date — exclude Cancelled by default
+  if(selectedStatuses.size === 0){ toast('❌ اختاري حالة واحدة على الأقل'); return; }
+
+  // Filter orders
   let orders = allOrders.filter(o=>{
-    if(dayF!=='all'){
-      const dd = String(o['Delivery Date']||'').trim();
-      if(dd !== dayF) return false;
-    }
-    if(stF==='all'){
-      // بالافتراضي: لا تطبع الملغية
-      if(o['Status']==='Cancelled') return false;
-    } else {
-      if(o['Status']!==stF) return false;
-    }
+    const dd = String(o['Delivery Date']||'').trim();
+    if(selectedDates.size > 0 && !selectedDates.has(dd)) return false;
+    if(!selectedStatuses.has(o['Status']||'New')) return false;
     return true;
   });
 
@@ -1942,39 +2061,39 @@ function printCard(o){
   const model=MODEL_AR[o['Model']]||o['Model']||'';
   const delDate=o['Delivery Date']||o['Delivery Day']||'—';
 
-  // ORDER FIELDS — inline
+  // ── قسم التجهيز — compact inline (يُقطع إذا طال)
   const oItems=[];
   if(type==='Graduation'){
     oItems.push(['الخريج',bride]);
     if(o['Model']) oItems.push(['التخصص',o['Model']]);
   } else if(type==='Bouquet'){
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
-    if(o['Additions']) oItems.push(['إضافات',o['Additions']]);
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes'].slice(0,60)]);
+    if(o['Additions']) oItems.push(['إضافات',o['Additions'].slice(0,40)]);
   } else {
     if(groom) oItems.push(['العريس',groom]);
     if(bride) oItems.push(['العروس',bride]);
-    if(o['Occasion Date']) oItems.push(['تاريخ المناسبة',o['Occasion Date']]);
+    if(o['Occasion Date']) oItems.push(['التاريخ',o['Occasion Date']]);
     if(model) oItems.push(['الموديل',model]);
-    if(o['Color']) oItems.push(['الستراس',o['Color']]);
-    if(type==='Package'&&o['Additions']) oItems.push(['البكج',o['Additions']]);
     if(['Tray','Guest Book','Package'].includes(type)) oItems.push(['الآية','✅']);
-    if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
-    if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions']]);
+    if(o['Phrase']) oItems.push(['العبارة',o['Phrase'].slice(0,40)]);
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes'].slice(0,50)]);
+    if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions'].slice(0,30)]);
   }
-  const oRows = '<div class="pc-fields">'+oItems.map(([k,v])=>prowInline(k,v)).join('')+'</div>';
+  const oRows='<div class="pc-fields">'+oItems.map(([k,v])=>prowInline(k,v)).join('')+'</div>';
 
-  // DELIVERY FIELDS — inline
-  const dItems=[];
-  dItems.push(['المستلم',o['Recipient']||'—']);
-  dItems.push(['الهاتف',o['Phone']||'—']);
-  if(prov) dItems.push(['المحافظة',prov]);
-  if(o['Area']) dItems.push(['المنطقة',o['Area']]);
-  dItems.push(['التسليم',delDate]);
-  if(o['Delivery Notes']) dItems.push(['ملاحظات',o['Delivery Notes']]);
-  const dRows='<div class="pc-fields">'+dItems.map(([k,v])=>prowInline(k,v)).join('')
-    +'<div class="pc-v-total-row"><span class="pc-k">الحساب الكامل</span><span class="pc-v pc-v-total">'+grandTotal+' د.أ</span></div>'
-    +'</div>';
+  // ── قسم التوصيل — صفوف واضحة ثابتة (المعلومات الإجبارية فقط)
+  const dRow = (k,v) => v?`<div class="pc-del-row"><span class="pc-del-k">${k}</span><span class="pc-del-v">${v}</span></div>`:'';
+  const location = [prov, o['Area']].filter(Boolean).join(' — ');
+  const dRows=
+    dRow('المستلم', o['Recipient']||'—') +
+    dRow('الهاتف',  o['Phone']||'—') +
+    dRow('العنوان', location||'—') +
+    dRow('التسليم', delDate) +
+    (o['Delivery Notes']?dRow('ملاحظات', o['Delivery Notes'].slice(0,40)):'') +
+    `<div class="pc-del-total">
+      <span class="pc-del-total-k">الحساب الكامل</span>
+      <span class="pc-del-total-v">${grandTotal} د.أ</span>
+    </div>`;
 
   return `<div class="pc-card">
     <div class="pc-card-hdr">
@@ -1982,7 +2101,7 @@ function printCard(o){
       <span class="pc-type">${typeAr}</span>
       <span class="pc-names">${names||'—'}</span>
       <span class="pc-date-hdr">${delDate}</span>
-      <span class="pc-price">${grandTotal}د.أ</span>
+      <span class="pc-price">${grandTotal} د.أ</span>
     </div>
     <div class="pc-secs">
       <div class="pc-sec pc-sec-o">
@@ -2253,6 +2372,201 @@ function renderDashGovs(){
   const max=sorted[0]?.[1]||1;
   document.getElementById('dash-govs').innerHTML='<div class="status-list">'+sorted.map(([g,cnt])=>`<div class="status-item"><div class="status-name">📍 ${g}</div><div class="status-bar-bg"><div class="status-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:#C9A96E"></div></div><div class="status-cnt">${cnt}</div></div>`).join('')+'</div>';
 }
+
+// ── DRAFTS ──
+const DRAFTS_KEY = 'salma_drafts';
+
+function getDrafts(){
+  try{ return JSON.parse(localStorage.getItem(DRAFTS_KEY)||'[]'); }
+  catch(e){ return []; }
+}
+function saveDrafts(drafts){
+  localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+  updateDraftTabBadge();
+}
+
+function updateDraftTabBadge(){
+  const drafts = getDrafts();
+  const tab = document.getElementById('tab-drafts');
+  if(tab) tab.textContent = drafts.length > 0 ? `📝 المسودات (${drafts.length})` : '📝 المسودات';
+}
+
+function getFormData(){
+  const type = document.getElementById('f-type').value;
+  const delSel = document.getElementById('f-deldate-sel').value;
+  const deldate = document.getElementById('f-deldate').value;
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const deldateObj = deldate ? new Date(deldate+'T00:00:00') : null;
+  return {
+    type,
+    groom:     document.getElementById('f-groom').value.trim(),
+    bride:     document.getElementById('f-bride').value.trim(),
+    gradname:  document.getElementById('f-gradname').value.trim(),
+    major:     document.getElementById('f-major').value.trim(),
+    date:      document.getElementById('f-date').value,
+    model:     document.getElementById('f-model').value,
+    modelOther:document.getElementById('f-model-other').value.trim(),
+    phrase:    document.getElementById('f-phrase').value.trim(),
+    notes:     document.getElementById('f-notes').value.trim(),
+    additions: document.getElementById('f-additions').value.trim(),
+    rname:     document.getElementById('f-rname').value.trim(),
+    phone:     document.getElementById('f-phone').value.trim(),
+    prov:      document.getElementById('f-prov').value,
+    area:      document.getElementById('f-area').value.trim(),
+    dnotes:    document.getElementById('f-dnotes').value.trim(),
+    price:     document.getElementById('f-price').value,
+    link:      document.getElementById('f-link').value.trim(),
+    delSel, deldate,
+    deliveryDay:  deldateObj ? dayNames[deldateObj.getDay()] : '',
+    deliveryDate: deldateObj ? fmtFull(deldateObj) : '',
+  };
+}
+
+function saveDraft(){
+  const data = getFormData();
+  if(!data.type && !data.groom && !data.bride && !data.rname && !data.phone){
+    toast('❌ أدخلي بيانات أولاً');
+    return;
+  }
+  const drafts = getDrafts();
+  const draft = {
+    id: 'draft_' + Date.now(),
+    savedAt: new Date().toISOString(),
+    data
+  };
+  drafts.unshift(draft);
+  saveDrafts(drafts);
+  toast('✅ تم حفظ المسودة');
+  renderDraftsList();
+  updateDraftTabBadge();
+}
+
+function loadDraft(draftId){
+  const drafts = getDrafts();
+  const draft = drafts.find(d=>d.id===draftId);
+  if(!draft) return;
+  const d = draft.data;
+
+  switchTab('add');
+  setTimeout(()=>{
+    // Set type and trigger fields
+    document.getElementById('f-type').value = d.type||'';
+    toggleFields();
+
+    // Fill all fields
+    const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+    set('f-groom', d.groom);
+    set('f-bride', d.bride);
+    set('f-gradname', d.gradname);
+    set('f-major', d.major);
+    set('f-date', d.date);
+    set('f-model', d.model);
+    set('f-model-other', d.modelOther);
+    set('f-phrase', d.phrase);
+    set('f-notes', d.notes);
+    set('f-additions', d.additions);
+    set('f-rname', d.rname);
+    set('f-phone', d.phone);
+    set('f-prov', d.prov);
+    set('f-area', d.area);
+    set('f-dnotes', d.dnotes);
+    set('f-price', d.price);
+    set('f-link', d.link);
+
+    // Set delivery date
+    if(d.deldate){
+      const selEl = document.getElementById('f-deldate-sel');
+      // Try to find in options
+      let found = false;
+      if(selEl){
+        for(const opt of selEl.options){
+          if(opt.value === d.delSel){ opt.selected=true; found=true; break; }
+        }
+      }
+      // Always set hidden input
+      document.getElementById('f-deldate').value = d.deldate;
+      if(!found){
+        // Set to custom
+        if(selEl){
+          for(const opt of selEl.options){
+            if(opt.value==='custom'){ opt.selected=true; break; }
+          }
+        }
+        document.getElementById('f-deldate').style.display='block';
+      }
+      // Trigger hint
+      const dObj = new Date(d.deldate+'T00:00:00');
+      const dayNames2=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      document.getElementById('deldate-hint').textContent='📅 '+dayNames2[dObj.getDay()]+' '+fmtFull(dObj);
+    }
+    toggleModelOther();
+    updatePriceHint();
+    toast('✅ تم تحميل المسودة — يمكنك إكمال البيانات');
+  }, 100);
+}
+
+function deleteDraft(draftId){
+  const drafts = getDrafts().filter(d=>d.id!==draftId);
+  saveDrafts(drafts);
+  renderDraftsList();
+  toast('✅ تم حذف المسودة');
+}
+
+function clearAllDrafts(){
+  if(!confirm('حذف كل المسودات؟')) return;
+  saveDrafts([]);
+  renderDraftsList();
+  toast('✅ تم حذف كل المسودات');
+}
+
+function renderDraftsList(){
+  const el = document.getElementById('drafts-list');
+  if(!el) return;
+  const drafts = getDrafts();
+  if(!drafts.length){
+    el.innerHTML=`<div class="draft-empty">
+      <div class="draft-empty-ico">📝</div>
+      <div class="draft-empty-txt">لا يوجد مسودات</div>
+      <div class="draft-empty-sub">لما تحفظ أوردر كمسودة بيظهر هنا</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = drafts.map(draft=>{
+    const d = draft.data;
+    const typeAr = TYPE_AR[d.type]||d.type||'—';
+    const names = d.type==='Graduation'?(d.gradname||'—'):
+                  d.type==='Bouquet'?'مسكة عروس':
+                  [d.bride, d.groom].filter(Boolean).join(' ❤️ ')||'—';
+    const dt = new Date(draft.savedAt);
+    const timeStr = pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
+    const fields = [
+      d.deliveryDate && ['التسليم', d.deliveryDate],
+      d.rname && ['المستلم', d.rname],
+      d.phone && ['الهاتف', d.phone],
+      d.prov && ['المحافظة', d.prov],
+      d.price && ['الحساب', d.price+' د.أ'],
+    ].filter(Boolean);
+    return `<div class="draft-card">
+      <div class="draft-card-hdr">
+        <span class="draft-type">${typeAr}</span>
+        <span class="draft-names">${names}</span>
+        <span class="draft-time">${timeStr}</span>
+      </div>
+      <div class="draft-fields">
+        ${fields.map(([k,v])=>`<span class="draft-field"><span style="color:#8B7355;font-size:11px">${k}: </span><strong>${v}</strong></span>`).join('')}
+      </div>
+      <div class="draft-acts">
+        <button onclick="loadDraft('${draft.id}')" class="btn btn-gold btn-sm">📂 استكمال الأوردر</button>
+        <button onclick="deleteDraft('${draft.id}')" class="btn btn-ghost btn-sm" style="color:#C0392B;border-color:#FFCDD2">🗑️ حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Init drafts on load
+window.addEventListener('DOMContentLoaded', ()=>{
+  updateDraftTabBadge();
+});
 
 // ── TOAST ──
 function toast(msg){
