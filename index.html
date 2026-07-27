@@ -128,7 +128,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 
 /* FILTER CHIPS */
 .chips{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
-.chip{flex-shrink:0;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:9999px;padding:6px 14px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:600;color:#8B7355;cursor:pointer;white-space:nowrap;transition:border-color 150ms ease,background 150ms ease,color 150ms ease;box-shadow:0 1px 3px rgba(60,30,10,.06)}
+.chip{flex-shrink:0;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:9999px;padding:8px 16px;min-height:36px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:600;color:#8B7355;cursor:pointer;white-space:nowrap;transition:border-color 150ms ease,background 150ms ease,color 150ms ease;box-shadow:0 1px 3px rgba(60,30,10,.06)}
 .chip:focus-visible{outline:2px solid #C9A96E;outline-offset:2px}
 .chip.on{background:#FAF5EC;color:#1A1410;border-color:#C9A96E;font-weight:700}
 .chip.c-recv.on{background:#EAF5EA;border-color:#2D6A2D;color:#1A4D1A}
@@ -147,6 +147,22 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 
 /* CALENDAR TABLE */
 .cal-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:4px}
+@media(max-width:600px){
+  .cal-wrap{overflow-x:visible}
+  .cal-table{display:none}
+  .cal-mobile{display:block!important}
+}
+@media(min-width:601px){
+  .cal-mobile{display:none!important}
+}
+.cal-mobile{display:none}
+.cal-day-block{background:#FFFFFF;border-radius:10px;border:1px solid #E5D9C7;margin-bottom:10px;overflow:hidden}
+.cal-day-block-hdr{background:#2C1F12;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.cal-day-block-hdr.today{background:#3D2510}
+.cal-day-block-name{font-size:14px;font-weight:900;color:#C9A96E}
+.cal-day-block-date{font-size:12px;color:#E8D5B0;opacity:.8}
+.cal-day-block-cnt{background:#C9A96E;color:#1A1410;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900}
+.cal-day-block-body{padding:8px}
 .cal-table{width:100%;border-collapse:separate;border-spacing:0;min-width:560px}
 .cal-head th{background:#2C1F12;color:#E8D5B0;font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)}
 .cal-head th:first-child{border-left:none;width:72px}
@@ -164,7 +180,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .today-td{background:#FFF8EC!important}
 
 /* MINI CARD */
-.mc{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:8px;padding:7px 9px 7px 12px;margin-bottom:5px;cursor:pointer;transition:border-color 150ms ease;position:relative;overflow:hidden;user-select:none;box-shadow:0 1px 3px rgba(60,30,10,.06)}
+.mc{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:8px;padding:9px 10px 9px 13px;margin-bottom:6px;cursor:pointer;transition:border-color 150ms ease;position:relative;overflow:hidden;user-select:none;box-shadow:0 1px 3px rgba(60,30,10,.06)}
 .mc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 8px 8px 0}
 .mc.s-New::before{background:#4CAF50}
 .mc.s-Preparing::before{background:#FF9800}
@@ -247,10 +263,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .edit-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 
 /* ── PRINT MODAL ── */
-.pmodal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:flex-end;justify-content:center}
-.pmodal-bg.open{display:flex}
-.pmodal{background:#FFFFFF;border-radius:16px 16px 0 0;width:100%;max-width:500px;padding:22px;border-top:2px solid #C9A96E}
-.pmodal-ttl{font-size:17px;font-weight:800;color:#1A1410;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+
 .popt{background:var(--gold);border:none;border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
 .popt:hover{opacity:.88}
 .popt:active{transform:scale(.97)}
@@ -657,15 +670,18 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
-  <div class="hdr-status">
-    <div class="hdr-dot" id="conn-dot"></div>
-    <span id="conn-lbl">جاري التحميل...</span>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:13px;font-weight:800;padding:7px 14px;font-family:Tajawal,sans-serif;display:flex;align-items:center;gap:5px">↻ تحديث</button>
+    <div class="hdr-status">
+      <div class="hdr-dot" id="conn-dot"></div>
+      <span id="conn-lbl">جاري التحميل...</span>
+    </div>
   </div>
 </div>
 <div class="tabs">
   <button class="tab on"  onclick="switchTab('cal')">📅 التقويم</button>
   <button class="tab"     onclick="switchTab('add')">➕ أوردر جديد</button>
-  <button class="tab no-print" onclick="openPrintModal()">🖨️ طباعة</button>
+  <button class="tab no-print" onclick="switchTab('print')">🖨️ طباعة</button>
   <button class="tab no-print" onclick="switchTab('drafts')" id="tab-drafts">📝 المسودات</button>
   <button class="tab no-print" onclick="openDashboard()">📊 الداشبورد</button>
 </div>
@@ -883,6 +899,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   </div>
 </div>
 
+
 </div><!-- /main -->
 
 <!-- ORDER DETAIL PANEL -->
@@ -911,18 +928,16 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div class="toast" id="toast"></div>
 
 <!-- PRINT MODAL -->
-<div class="pmodal-bg" id="pmodal">
-  <div class="pmodal">
-    <div class="pmodal-ttl">
-      🖨️ طباعة الأوردرات
-      <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#8B7355" onclick="closePrintModal()">✕</button>
-    </div>
+<!-- ══ PRINT TAB ══ -->
+<div class="view" id="view-print">
+  <div class="form-card">
+    <div class="form-ttl">🖨️ طباعة الأوردرات</div>
 
     <!-- Days checkboxes -->
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;color:#8B7355;text-transform:uppercase;letter-spacing:.5px">اختر الأيام</div>
-        <div style="display:flex;gap:8px">
+        <div class="sec-lbl" style="margin:0;border:none;padding:0">اختر الأيام</div>
+        <div style="display:flex;gap:10px">
           <button onclick="selectAllDays(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
           <button onclick="selectAllDays(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
         </div>
@@ -930,11 +945,11 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div id="print-days-checkboxes" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
-    <!-- Status filter — checkboxes -->
-    <div style="margin-bottom:14px">
+    <!-- Status filter -->
+    <div style="margin-bottom:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;color:#8B7355;text-transform:uppercase;letter-spacing:.5px">الحالة</div>
-        <div style="display:flex;gap:8px">
+        <div class="sec-lbl" style="margin:0;border:none;padding:0">الحالة</div>
+        <div style="display:flex;gap:10px">
           <button onclick="selectAllStatus(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
           <button onclick="selectAllStatus(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
         </div>
@@ -944,12 +959,12 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Preparing" checked><div class="pday-cb-info"><div class="pday-cb-name">جاري التجهيز</div></div></label>
         <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Shipped" checked><div class="pday-cb-info"><div class="pday-cb-name">مع التوصيل</div></div></label>
         <label class="pday-cb"><input type="checkbox" name="print-status" value="Done"><div class="pday-cb-info"><div class="pday-cb-name">تم التسليم</div></div></label>
-        <label class="pday-cb"><input type="checkbox" name="print-status" value="Waiting" checked><div class="pday-cb-info"><div class="pday-cb-name">بانتظار تأكيد</div></div></label>
+        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Waiting" checked><div class="pday-cb-info"><div class="pday-cb-name">بانتظار تأكيد</div></div></label>
         <label class="pday-cb"><input type="checkbox" name="print-status" value="Cancelled"><div class="pday-cb-info"><div class="pday-cb-name">ملغي</div></div></label>
       </div>
     </div>
 
-    <button class="popt" onclick="doPrint()">
+    <button class="popt" onclick="doPrint()" style="width:100%">
       <span class="popt-ico">🖨️</span>
       <span class="popt-name">طباعة الكاردات الآن</span>
     </button>
@@ -1056,7 +1071,7 @@ function renderCal(){
   let orders = allOrders.filter(o=>{
     if(filterStatus==='all'){
       // الوضع الافتراضي: أخفي "تم التسليم" — تظهر فقط لما يضغط عليها
-      if(['Done','Cancelled'].includes(o['Status'])) return false;
+      if(['done','cancelled'].includes((o['Status']||'').toLowerCase())) return false;
     } else {
       if(o['Status']!==filterStatus) return false;
     }
@@ -1127,6 +1142,35 @@ function renderCal(){
 
   body += '</tr>';
   document.getElementById('cal-body').innerHTML = body;
+  renderCalMobile(days, grouped);
+}
+
+function renderCalMobile(days, grouped){
+  let html = '';
+  DAYS.forEach(d=>{
+    const dt = days[d];
+    const list = grouped[d];
+    const tod = isToday(dt);
+    html += `<div class="cal-day-block">
+      <div class="cal-day-block-hdr ${tod?'today':''}">
+        <span class="cal-day-block-name">${d}</span>
+        <span class="cal-day-block-date">${fmtShort(dt)}</span>
+        ${list&&list.length?`<span class="cal-day-block-cnt">${list.length}</span>`:''}
+      </div>
+      <div class="cal-day-block-body">
+        ${list&&list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
+        <button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>
+      </div>
+    </div>`;
+  });
+  let mobileEl = document.getElementById('cal-mobile');
+  if(!mobileEl){
+    mobileEl = document.createElement('div');
+    mobileEl.id = 'cal-mobile';
+    mobileEl.className = 'cal-mobile';
+    document.getElementById('cal-table').parentNode.appendChild(mobileEl);
+  }
+  mobileEl.innerHTML = html;
 }
 
 function miniCard(o){
@@ -1243,7 +1287,7 @@ async function applyBulk(){
 // ── STATS ──
 function updateStats(){
   document.getElementById('st-all').textContent = allOrders.length;
-  const active = allOrders.filter(o=>o['Status']==='New'||o['Status']==='Preparing'||o['Status']==='Shipped').length;
+  const active = allOrders.filter(o=>['new','preparing','shipped'].includes((o['Status']||'').toLowerCase())).length;
   document.getElementById('st-active').textContent = active;
   const days = getWeekDays(0);
   const weekOrds = allOrders.filter(o=>{
@@ -1252,7 +1296,7 @@ function updateStats(){
     return Object.values(days).some(d=>isSameDay(dd,d));
   }).length;
   document.getElementById('st-week').textContent = weekOrds;
-  const done = allOrders.filter(o=>o['Status']==='Done').length;
+  const done = allOrders.filter(o=>(o['Status']||'').toLowerCase()==='done').length;
   document.getElementById('st-done').textContent = done;
 }
 
@@ -1573,6 +1617,18 @@ function toInputDate(str){
 async function applyEdit(id){
   const deldateRaw=document.getElementById('e-deldate').value;
   if(!deldateRaw){toast('❌ تاريخ التسليم إجباري');return;}
+  // Check duplicate phone (exclude current order)
+  const newPhone = document.getElementById('e-phone').value.trim();
+  if(newPhone){
+    function normPh(ph){return String(ph||'').replace(/[\s\-]/g,'').replace(/^0+/,'');}
+    const norm = normPh(newPhone);
+    const dup = allOrders.find(o=>o['Order ID']!==id && normPh(o['Phone']||'')===norm && norm.length>=7);
+    if(dup){
+      const dupName = [dup['Bride'],dup['Groom']].filter(Boolean).join(' ❤️ ')||dup['Recipient']||'—';
+      if(!confirm(`⚠️ رقم الهاتف موجود في ${dup['Order ID']} — ${dupName}
+تبي تكمل الحفظ؟`)) return;
+    }
+  }
   const dayNamesEdit=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const deldateObj = new Date(deldateRaw+'T00:00:00');
   const newDeliveryDay = dayNamesEdit[deldateObj.getDay()];
@@ -1788,6 +1844,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function openAddForDate(dateStr){
+  // تحذير لو في بيانات موجودة في الفورم
+  const hasData = ['f-groom','f-bride','f-rname','f-phone','f-gradname'].some(id=>{
+    const el=document.getElementById(id); return el&&el.value.trim();
+  });
+  if(hasData && !confirm('في بيانات غير محفوظة في الفورم. تبي تكمل؟')){
+    switchTab('add'); return;
+  }
   switchTab('add');
   setTimeout(()=>{
     // Convert dd/mm/yyyy to yyyy-mm-dd for input
@@ -1892,7 +1955,8 @@ async function saveOrder(){
 
 function clearForm(){
   // Reset date selector
-  document.getElementById('f-deldate-sel').value='';
+  const fDelSel=document.getElementById('f-deldate-sel');
+  if(fDelSel) fDelSel.selectedIndex=0;
   document.getElementById('f-deldate').value='';
   document.getElementById('f-deldate').style.display='none';
   document.getElementById('deldate-hint').textContent='';
@@ -1929,12 +1993,13 @@ function switchTab(t){
   if(viewEl) viewEl.classList.add('on');
   else document.getElementById('view-cal').classList.add('on');
   if(t==='drafts') renderDraftsList();
+  if(t==='print') buildPrintDayOptions();
+  if(t==='add') buildDelDateOptions();
 }
 
 // ── PRINT ──
 function openPrintModal(){
-  buildPrintDayOptions();
-  document.getElementById('pmodal').classList.add('open');
+  switchTab('print');
 }
 
 function buildPrintDayOptions(){
@@ -1978,9 +2043,9 @@ function selectAllDays(checked){
   document.querySelectorAll('input[name="print-day"]').forEach(cb=>cb.checked=checked);
 }
 function closePrintModal(){
-  document.getElementById('pmodal').classList.remove('open');
+  
 }
-document.getElementById('pmodal').addEventListener('click',function(e){if(e.target===this)closePrintModal();});
+
 
 function doPrint(){
   // Get selected dates
@@ -2032,9 +2097,9 @@ function doPrint(){
     html+='</div></div>';
   });
 
+  document.getElementById('print-container').innerHTML='';
   if(!html){toast('❌ ما في أوردرات للطباعة');return;}
   document.getElementById('print-container').innerHTML=html;
-  closePrintModal();
   setTimeout(()=>window.print(),200);
 }
 
@@ -2439,6 +2504,8 @@ function saveDraft(){
   toast('✅ تم حفظ المسودة');
   renderDraftsList();
   updateDraftTabBadge();
+  clearForm();
+  switchTab('cal');
 }
 
 function loadDraft(draftId){
@@ -2501,7 +2568,9 @@ function loadDraft(draftId){
     }
     toggleModelOther();
     updatePriceHint();
-    toast('✅ تم تحميل المسودة — يمكنك إكمال البيانات');
+    // حذف المسودة بعد تحميلها
+    deleteDraft(draftId);
+    toast('✅ تم تحميل المسودة — أكمل البيانات واحفظ');
   }, 100);
 }
 
