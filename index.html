@@ -201,26 +201,40 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 /* MINI CARD */
 .mc{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:8px;padding:9px 10px 9px 13px;margin-bottom:6px;cursor:pointer;transition:border-color 150ms ease;position:relative;overflow:hidden;user-select:none;box-shadow:0 1px 3px rgba(60,30,10,.06)}
 .mc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 8px 8px 0}
-/* شريط جانبي + شارة النوع حسب المنتج */
-.mc.t-tray::before{background:#2563EB}
+/* ── لون الكارد كامل حسب نوع المنتج ── */
+.mc.t-tray    {background:#EFF5FF; border-color:#BFD4F5}
+.mc.t-package {background:#F7F1FF; border-color:#DDC7F7}
+.mc.t-book    {background:#EDF8F7; border-color:#B2DFDB}
+.mc.t-grad    {background:#FFF5EE; border-color:#FFD4B8}
+.mc.t-bouquet {background:#FEF1F7; border-color:#FBCFE8}
+.mc.t-other   {background:#F7F8FA; border-color:#E5E7EB}
+.mc.t-tray::before   {background:#2563EB}
 .mc.t-package::before{background:#7C3AED}
-.mc.t-book::before{background:#0D9488}
-.mc.t-grad::before{background:#EA580C}
+.mc.t-book::before   {background:#0D9488}
+.mc.t-grad::before   {background:#EA580C}
 .mc.t-bouquet::before{background:#DB2777}
-.mc.t-other::before{background:#9CA3AF}
-.mc-type.t-tray{background:#E8F0FE;color:#1A3F8A;border:1px solid #BFD4F5}
-.mc-type.t-package{background:#F3E8FF;color:#5B21B6;border:1px solid #DDC7F7}
-.mc-type.t-book{background:#E0F2F1;color:#0F766E;border:1px solid #B2DFDB}
-.mc-type.t-grad{background:#FFF0E6;color:#9A3412;border:1px solid #FFD4B8}
-.mc-type.t-bouquet{background:#FCE7F3;color:#9D174D;border:1px solid #FBCFE8}
-.mc-type.t-other{background:#F3F4F6;color:#374151;border:1px solid #E5E7EB}
-.mc-legacy.s-New::before{background:#4CAF50}
-.mc-legacy.s-Preparing::before{background:#FF9800}
-.mc-legacy.s-Shipped::before{background:#2196F3}
-.mc-legacy.s-Done::before{background:#9E9E9E}
-.mc-legacy.s-Cancel::before{background:#F44336}
-.mc-legacy.s-Wait::before{background:#9C27B0}
-.mc-legacy.s-Other::before{background:#9C27B0}
+.mc.t-other::before  {background:#9CA3AF}
+.mc.t-tray    .mc-names{color:#12306B}
+.mc.t-package .mc-names{color:#3F1470}
+.mc.t-book    .mc-names{color:#0B4F4A}
+.mc.t-grad    .mc-names{color:#7A2A0A}
+.mc.t-bouquet .mc-names{color:#7A1140}
+.mc-type.t-tray   {background:#DBE7FB;color:#12306B;border:1px solid #BFD4F5}
+.mc-type.t-package{background:#EBDCFA;color:#3F1470;border:1px solid #DDC7F7}
+.mc-type.t-book   {background:#D6EFED;color:#0B4F4A;border:1px solid #B2DFDB}
+.mc-type.t-grad   {background:#FFE6D5;color:#7A2A0A;border:1px solid #FFD4B8}
+.mc-type.t-bouquet{background:#FBDCEA;color:#7A1140;border:1px solid #FBCFE8}
+.mc-type.t-other  {background:#EEF0F3;color:#374151;border:1px solid #E5E7EB}
+/* عناوين الأسابيع */
+.wk-total{display:block;margin-top:4px;background:#C9A96E;color:#1A1410;border-radius:9999px;padding:1px 8px;font-size:10px;font-weight:900}
+.td-date-lbl{font-size:10px;font-weight:800;color:#8B7355;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #EFE7DA;text-align:center}
+.td-date-lbl.is-today{color:#8A6030;background:#FAF5EC;border-radius:5px;padding:2px 4px}
+.wk-sec{margin-bottom:16px}
+.wk-sec-hdr{display:flex;align-items:center;gap:8px;background:#EFE7DA;border:1px solid #E5D9C7;border-radius:9px;padding:9px 13px;margin-bottom:8px}
+.wk-sec-hdr.cur{background:#FAF5EC;border-color:#C9A96E}
+.wk-sec-name{font-size:13px;font-weight:900;color:#1A1410;flex:1}
+.wk-sec-range{font-size:11px;color:#8B7355}
+.wk-sec-cnt{background:#C9A96E;color:#1A1410;border-radius:9999px;padding:2px 9px;font-size:11px;font-weight:900}
 .mc.selected{border-color:var(--gold);background:var(--gold-p)}
 .mc:active{box-shadow:none;opacity:.85}
 .mc-names{font-size:12px;font-weight:800;color:#1A1410;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
@@ -793,7 +807,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <span class="lg"><i class="dot t-package"></i>بكج</span>
       <span class="lg"><i class="dot t-book"></i>كتاب</span>
       <span class="lg"><i class="dot t-grad"></i>تخرج</span>
-      <span class="lg"><i class="dot t-bouquet"></i>مسكة</span>
+      <span class="lg"><i class="dot t-bouquet"></i>مسكة عروس</span>
     </div>
     <div class="exp-btns">
       <button onclick="expandAllDays(true)">توسيع الكل</button>
@@ -1108,16 +1122,24 @@ function nowStamp(){
   const d = new Date();
   return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
+// يقبل: dd/mm/yyyy — yyyy-mm-dd — ISO — نص كائن Date من الشيت
 function parseDate(str){
   if(!str) return null;
-  // dd/mm/yyyy
-  const p = str.split('/');
-  if(p.length===3) return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
-  // yyyy-mm-dd
-  const p2 = str.split('-');
-  if(p2.length===3) return new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
-  return null;
+  if(str instanceof Date) return isNaN(str)?null:new Date(str.getFullYear(),str.getMonth(),str.getDate());
+  const s=String(str).trim();
+  if(!s) return null;
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  // نص كائن Date: "Mon Aug 03 2026 ..." — نقرأ المكونات مباشرة لتفادي انزياح المنطقة الزمنية
+  const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  m=s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+  if(m && MON[m[1]]!==undefined) return new Date(+m[3],MON[m[1]],+m[2]);
+  const d=new Date(s);
+  return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
 }
+
 function isToday(d){
   const t=new Date(); t.setHours(0,0,0,0);
   const dd=new Date(d); dd.setHours(0,0,0,0);
@@ -1128,129 +1150,132 @@ function isSameDay(a,b){
 }
 
 // Get week days for the given offset (week starting Sunday)
-// نافذة متدحرجة: 7 أيام تبدأ من اليوم (وليس أسبوع تقويمي ثابت)
+// الأسبوع يبدأ من السبت وينتهي الجمعة
+const WEEKS_SHOWN = 3;
 function getWeekDays(offset){
   const today = new Date(); today.setHours(0,0,0,0);
-  const start = new Date(today);
-  start.setDate(today.getDate() + offset*7);
-  const result = [];
-  for(let i=0;i<7;i++){
-    const dt = new Date(start);
-    dt.setDate(start.getDate()+i);
-    result.push(dt);
-  }
-  return result;  // مصفوفة من 7 تواريخ
+  const back = (today.getDay() + 1) % 7;
+  const sat = new Date(today);
+  sat.setDate(today.getDate() - back + offset*7);
+  return Array.from({length:7},(_,i)=>{ const d=new Date(sat); d.setDate(sat.getDate()+i); return d; });
 }
+function weekLabel(off){
+  if(off===0) return 'هذا الأسبوع';
+  if(off===1) return 'الأسبوع القادم';
+  if(off===-1) return 'الأسبوع الماضي';
+  return off>0 ? ('بعد '+off+' أسابيع') : ('قبل '+Math.abs(off)+' أسابيع');
+}
+function groupWeek(days, orders){
+  const g = days.map(()=>[]);
+  orders.forEach(o=>{
+    const d = parseDate(o['Delivery Date']);
+    if(!d) return;
+    days.forEach((dt,i)=>{ if(isSameDay(d,dt)) g[i].push(o); });
+  });
+  return g;
+}
+
 
 // ── CALENDAR RENDER ──
 function renderCal(){
-  const days = getWeekDays(weekOffset);   // مصفوفة 7 تواريخ
   const today = new Date(); today.setHours(0,0,0,0);
 
-  // Week label
-  const first = days[0]; const last = days[6];
-  document.getElementById('week-lbl').textContent = fmtShort(first)+' — '+fmtShort(last)+' — '+last.getFullYear();
+  // تسمية الفترة المعروضة
+  const firstWeek = getWeekDays(weekOffset);
+  const lastWeek  = getWeekDays(weekOffset + WEEKS_SHOWN - 1);
+  document.getElementById('week-lbl').textContent =
+    fmtShort(firstWeek[0])+' — '+fmtShort(lastWeek[6])+' — '+lastWeek[6].getFullYear();
 
-  // Filter orders (مقارنة الحالة غير حساسة لحالة الأحرف)
+  // فلترة الحالات (غير حساسة لحالة الأحرف)
   const fs = String(filterStatus||'all').toLowerCase();
-  let orders = allOrders.filter(o=>{
+  const orders = allOrders.filter(o=>{
     const st = (o['Status']||'').toLowerCase();
-    if(fs==='all'){
-      if(['done','cancelled'].includes(st)) return false;
-    } else {
-      if(st !== fs) return false;
-    }
-    return true;
+    if(fs==='all') return !['done','cancelled'].includes(st);
+    return st === fs;
   });
 
-  // تجميع حسب موقع اليوم في النافذة (0..6)
-  const grouped = days.map(()=>[]);
-  orders.forEach(o=>{
-    const delDate = parseDate(o['Delivery Date']);
-    if(!delDate) return;   // بدون تاريخ تسليم = لا يظهر في التقويم
-    days.forEach((dt,i)=>{ if(isSameDay(delDate, dt)) grouped[i].push(o); });
-  });
-
-  // Build header
+  // ── رأس الجدول: أيام السبت→الجمعة ──
+  const headDays = getWeekDays(weekOffset);
   let head = '<tr>';
-  head += '<th style="background:var(--dark);color:rgba(201,169,110,.4);font-size:11px;font-weight:800;padding:9px 6px;text-align:center;width:60px">الأسبوع</th>';
-  days.forEach((dt,i)=>{
-    const tod = isToday(dt);
-    const cnt = grouped[i].length;
-    head += `<th class="${tod?'today-th':''}" style="background:var(--dark);font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)">
+  head += '<th style="background:var(--dark);color:rgba(201,169,110,.4);font-size:11px;font-weight:800;padding:9px 6px;text-align:center;width:70px">الأسبوع</th>';
+  headDays.forEach(dt=>{
+    head += `<th style="background:var(--dark);font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)">
       <span class="th-day">${DAYS[dt.getDay()]}</span>
-      <span class="th-date">${fmtShort(dt)}</span>
-      ${cnt?`<span class="th-cnt">${cnt}</span>`:''}
     </th>`;
   });
   head += '</tr>';
   document.getElementById('cal-head').innerHTML = head;
 
-  // Week label for row
-  const isCur = weekOffset===0;
-  let weekTag;
-  if(isCur) weekTag='من اليوم';
-  else if(weekOffset===-1) weekTag='الأسبوع الماضي';
-  else if(weekOffset===1) weekTag='بعد أسبوع';
-  else if(weekOffset<0) weekTag='قبل '+Math.abs(weekOffset)+' أسابيع';
-  else weekTag='بعد '+weekOffset+' أسابيع';
+  // ── جسم الجدول: صف لكل أسبوع ──
+  let body = '';
+  const weeksData = [];
+  for(let w=0; w<WEEKS_SHOWN; w++){
+    const off  = weekOffset + w;
+    const days = getWeekDays(off);
+    const grouped = groupWeek(days, orders);
+    weeksData.push({off, days, grouped});
 
-  // Build body row
-  let body = `<tr class="week-row">`;
-  body += `<td><span class="week-lbl ${isCur?'cur':''}">${weekTag}</span></td>`;
-
-  days.forEach((dt,i)=>{
-    const tod = isToday(dt);
-    body += `<td class="${tod?'today-td':''}">`;
-    const list = grouped[i];
-    if(!list.length){
-      body += `<div class="mc-empty">—</div>`;
-    } else {
-      list.forEach(o=>{ body += miniCard(o); });
-    }
-    body += `<button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>`;
-    body += '</td>';
-  });
-
-  body += '</tr>';
-  document.getElementById('cal-body').innerHTML = body;
-  renderCalMobile(days, grouped);
-}
-
-function renderCalMobile(days, grouped){
-  let html = '';
-  days.forEach((dt,i)=>{
-    const list = grouped[i] || [];
-    const tod  = isToday(dt);
-    const key  = fmtFull(dt);
-    // حالة الطي: محفوظة، وإلا مفتوح إذا فيه أوردرات أو هو اليوم
-    const open = calOpenDays.has(key) ? true
-               : calClosedDays.has(key) ? false
-               : (list.length > 0 || tod);
-    html += `<div class="cal-day-block ${open?'open':''}" data-key="${key}">
-      <div class="cal-day-block-hdr ${tod?'today':''}" onclick="toggleCalDay('${key}')">
-        <span class="cal-arrow">›</span>
-        <span class="cal-day-block-name">${DAYS[dt.getDay()]}${tod?' — اليوم':''}</span>
-        <span class="cal-day-block-date">${fmtShort(dt)}</span>
-        <span class="cal-day-block-cnt ${list.length?'':'zero'}">${list.length}</span>
-      </div>
-      <div class="cal-day-block-body">
-        ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
-        <button class="mc-add no-print" onclick="event.stopPropagation();openAddForDate('${key}')">+ إضافة</button>
-      </div>
-    </div>`;
-  });
-  let mobileEl = document.getElementById('cal-mobile');
-  if(!mobileEl){
-    mobileEl = document.createElement('div');
-    mobileEl.id = 'cal-mobile';
-    mobileEl.className = 'cal-mobile';
-    document.getElementById('cal-table').parentNode.appendChild(mobileEl);
+    const isCur = off===0;
+    const total = grouped.reduce((s,g)=>s+g.length,0);
+    body += `<tr class="week-row">
+      <td><span class="week-lbl ${isCur?'cur':''}">${weekLabel(off)}</span>
+          ${total?`<span class="wk-total">${total}</span>`:''}</td>`;
+    days.forEach((dt,i)=>{
+      const tod  = isToday(dt);
+      const list = grouped[i];
+      body += `<td class="${tod?'today-td':''}">
+        <div class="td-date-lbl ${tod?'is-today':''}">${fmtShort(dt)}${list.length?` · ${list.length}`:''}</div>
+        ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">—</div>'}
+        <button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>
+      </td>`;
+    });
+    body += '</tr>';
   }
-  mobileEl.innerHTML = html;
+  document.getElementById('cal-body').innerHTML = body;
+  renderCalMobile(weeksData);
 }
 
-// تتبّع الأيام المفتوحة/المغلقة يدوياً حتى لا تُفقد عند إعادة الرسم
+function renderCalMobile(weeksData){
+  let html = '';
+  weeksData.forEach(({off, days, grouped})=>{
+    const total = grouped.reduce((s,g)=>s+g.length,0);
+    html += `<div class="wk-sec">
+      <div class="wk-sec-hdr ${off===0?'cur':''}">
+        <span class="wk-sec-name">${weekLabel(off)}</span>
+        <span class="wk-sec-range">${fmtShort(days[0])} — ${fmtShort(days[6])}</span>
+        <span class="wk-sec-cnt">${total}</span>
+      </div>`;
+    days.forEach((dt,i)=>{
+      const list = grouped[i];
+      const tod  = isToday(dt);
+      const key  = fmtFull(dt);
+      const open = calOpenDays.has(key) ? true
+                 : calClosedDays.has(key) ? false
+                 : (list.length > 0 || tod);
+      html += `<div class="cal-day-block ${open?'open':''}" data-key="${key}">
+        <div class="cal-day-block-hdr ${tod?'today':''}" onclick="toggleCalDay('${key}')">
+          <span class="cal-arrow">›</span>
+          <span class="cal-day-block-name">${DAYS[dt.getDay()]}${tod?' — اليوم':''}</span>
+          <span class="cal-day-block-date">${fmtShort(dt)}</span>
+          <span class="cal-day-block-cnt ${list.length?'':'zero'}">${list.length}</span>
+        </div>
+        <div class="cal-day-block-body">
+          ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
+          <button class="mc-add no-print" onclick="event.stopPropagation();openAddForDate('${key}')">+ إضافة</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  let el = document.getElementById('cal-mobile');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'cal-mobile'; el.className = 'cal-mobile';
+    document.getElementById('cal-table').parentNode.appendChild(el);
+  }
+  el.innerHTML = html;
+}
+
 const calOpenDays   = new Set();
 const calClosedDays = new Set();
 
@@ -1259,8 +1284,8 @@ function toggleCalDay(key){
   if(!el) return;
   const willOpen = !el.classList.contains('open');
   el.classList.toggle('open', willOpen);
-  if(willOpen){ calOpenDays.add(key);   calClosedDays.delete(key); }
-  else        { calClosedDays.add(key); calOpenDays.delete(key);   }
+  if(willOpen){ calOpenDays.add(key); calClosedDays.delete(key); }
+  else        { calClosedDays.add(key); calOpenDays.delete(key); }
 }
 
 function expandAllDays(open){
