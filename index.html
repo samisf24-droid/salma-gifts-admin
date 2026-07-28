@@ -800,6 +800,9 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     </div>
   </div>
 
+  <!-- شريط تنبيه: أوردرات بتاريخ غير مقروء -->
+  <div id="date-warn" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7A4A00"></div>
+
   <!-- MOBILE TOOLBAR + LEGEND -->
   <div class="cal-mobile-bar">
     <div class="legend">
@@ -1082,6 +1085,7 @@ async function loadOrders(silent){
     setConn(true);
     renderCal();
     updateStats();
+    checkUnparsedDates();
     const dashApp = document.getElementById('dash-app');
     if(dashApp && dashApp.style.display === 'block') applyDashFilters();
     if(!silent) toast('✅ تم التحديث — '+allOrders.length+' أوردر');
@@ -1177,6 +1181,26 @@ function groupWeek(days, orders){
 
 
 // ── CALENDAR RENDER ──
+// تكشف الأوردرات التي لا يُقرأ تاريخها فلا تظهر في التقويم
+function checkUnparsedDates(){
+  const box=document.getElementById('date-warn');
+  if(!box) return;
+  const bad=allOrders.filter(o=>{
+    const st=(o['Status']||'').toLowerCase();
+    if(['done','cancelled'].includes(st)) return false;
+    const raw=o['Delivery Date'];
+    if(!raw) return false;
+    return !parseDate(raw);
+  });
+  if(!bad.length){ box.style.display='none'; return; }
+  box.style.display='block';
+  box.innerHTML='⚠️ <strong>'+bad.length+' أوردر لا يظهر في التقويم</strong> — تاريخ التسليم بصيغة غير مقروءة:<br><br>'
+    + bad.slice(0,8).map(o=>'<code style="background:#fff;padding:1px 5px;border-radius:4px">'
+        +o['Order ID']+'</code> → <span style="direction:ltr;display:inline-block">'
+        +String(o['Delivery Date']).slice(0,60)+'</span>').join('<br>')
+    + (bad.length>8?'<br>… و'+(bad.length-8)+' غيرها':'');
+}
+
 function renderCal(){
   const today = new Date(); today.setHours(0,0,0,0);
 
