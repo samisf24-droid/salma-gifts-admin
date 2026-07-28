@@ -156,13 +156,32 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   .cal-mobile{display:none!important}
 }
 .cal-mobile{display:none}
+.cal-mobile-bar{display:none}
+@media(max-width:600px){
+  .cal-mobile-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+}
+.legend{display:flex;gap:10px;flex-wrap:wrap}
+.legend .lg{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#4A3728}
+.legend .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+.legend .dot.t-tray{background:#2563EB}
+.legend .dot.t-package{background:#7C3AED}
+.legend .dot.t-book{background:#0D9488}
+.legend .dot.t-grad{background:#EA580C}
+.legend .dot.t-bouquet{background:#DB2777}
+.exp-btns{display:flex;gap:6px}
+.exp-btns button{background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:6px 12px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:#4A3728;cursor:pointer;min-height:34px}
+.exp-btns button:active{background:#FAF5EC}
 .cal-day-block{background:#FFFFFF;border-radius:10px;border:1px solid #E5D9C7;margin-bottom:10px;overflow:hidden}
-.cal-day-block-hdr{background:#2C1F12;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.cal-day-block-hdr{background:#2C1F12;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;min-height:48px}
 .cal-day-block-hdr.today{background:#3D2510}
-.cal-day-block-name{font-size:14px;font-weight:900;color:#C9A96E}
-.cal-day-block-date{font-size:12px;color:#E8D5B0;opacity:.8}
-.cal-day-block-cnt{background:#C9A96E;color:#1A1410;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900}
-.cal-day-block-body{padding:8px}
+.cal-day-block-name{font-size:14px;font-weight:900;color:#C9A96E;flex:1}
+.cal-day-block-date{font-size:12px;color:#E8D5B0;opacity:.85}
+.cal-day-block-cnt{background:#C9A96E;color:#1A1410;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;flex-shrink:0}
+.cal-day-block-cnt.zero{background:rgba(232,213,176,.2);color:#E8D5B0}
+.cal-arrow{color:#C9A96E;font-size:15px;flex-shrink:0;transition:transform 180ms ease;display:inline-block;width:14px;text-align:center}
+.cal-day-block.open .cal-arrow{transform:rotate(90deg)}
+.cal-day-block-body{padding:8px;display:none}
+.cal-day-block.open .cal-day-block-body{display:block}
 .cal-table{width:100%;border-collapse:separate;border-spacing:0;min-width:560px}
 .cal-head th{background:#2C1F12;color:#E8D5B0;font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)}
 .cal-head th:first-child{border-left:none;width:72px}
@@ -182,13 +201,26 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 /* MINI CARD */
 .mc{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:8px;padding:9px 10px 9px 13px;margin-bottom:6px;cursor:pointer;transition:border-color 150ms ease;position:relative;overflow:hidden;user-select:none;box-shadow:0 1px 3px rgba(60,30,10,.06)}
 .mc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 8px 8px 0}
-.mc.s-New::before{background:#4CAF50}
-.mc.s-Preparing::before{background:#FF9800}
-.mc.s-Shipped::before{background:#2196F3}
-.mc.s-Done::before{background:#9E9E9E}
-.mc.s-Cancel::before{background:#F44336}
-.mc.s-Wait::before{background:#9C27B0}
-.mc.s-Other::before{background:#9C27B0}
+/* شريط جانبي + شارة النوع حسب المنتج */
+.mc.t-tray::before{background:#2563EB}
+.mc.t-package::before{background:#7C3AED}
+.mc.t-book::before{background:#0D9488}
+.mc.t-grad::before{background:#EA580C}
+.mc.t-bouquet::before{background:#DB2777}
+.mc.t-other::before{background:#9CA3AF}
+.mc-type.t-tray{background:#E8F0FE;color:#1A3F8A;border:1px solid #BFD4F5}
+.mc-type.t-package{background:#F3E8FF;color:#5B21B6;border:1px solid #DDC7F7}
+.mc-type.t-book{background:#E0F2F1;color:#0F766E;border:1px solid #B2DFDB}
+.mc-type.t-grad{background:#FFF0E6;color:#9A3412;border:1px solid #FFD4B8}
+.mc-type.t-bouquet{background:#FCE7F3;color:#9D174D;border:1px solid #FBCFE8}
+.mc-type.t-other{background:#F3F4F6;color:#374151;border:1px solid #E5E7EB}
+.mc-legacy.s-New::before{background:#4CAF50}
+.mc-legacy.s-Preparing::before{background:#FF9800}
+.mc-legacy.s-Shipped::before{background:#2196F3}
+.mc-legacy.s-Done::before{background:#9E9E9E}
+.mc-legacy.s-Cancel::before{background:#F44336}
+.mc-legacy.s-Wait::before{background:#9C27B0}
+.mc-legacy.s-Other::before{background:#9C27B0}
 .mc.selected{border-color:var(--gold);background:var(--gold-p)}
 .mc:active{box-shadow:none;opacity:.85}
 .mc-names{font-size:12px;font-weight:800;color:#1A1410;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
@@ -671,7 +703,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
   <div style="display:flex;align-items:center;gap:10px">
-    <button onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:13px;font-weight:800;padding:7px 14px;font-family:Tajawal,sans-serif;display:flex;align-items:center;gap:5px">↻ تحديث</button>
+    <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:13px;font-weight:800;padding:7px 14px;font-family:Tajawal,sans-serif;display:flex;align-items:center;gap:5px">↻ تحديث</button>
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
@@ -727,7 +759,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <!-- FILTERS -->
   <div class="chips">
     <button class="chip on" onclick="setFilter(this,'all')">النشطة</button>
-    <button class="chip c-recv" onclick="setFilter(this,'New')">تم الاستلام</button>
+    <button class="chip c-recv" onclick="setFilter(this,'New')">طلب جديد</button>
     <button class="chip c-prep" onclick="setFilter(this,'Preparing')">جاري التجهيز</button>
     <button class="chip c-ship" onclick="setFilter(this,'Shipped')">مع التوصيل</button>
     <button class="chip c-done" onclick="setFilter(this,'Done')">تم التسليم</button>
@@ -741,7 +773,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="bulk-acts">
       <select class="bulk-sel" id="bulk-st">
         <option value="">غيّر الحالة...</option>
-        <option value="New">تم الاستلام</option>
+        <option value="New">طلب جديد</option>
         <option value="Preparing">جاري التجهيز</option>
         <option value="Shipped">تم التسليم لشركة التوصيل</option>
         <option value="Done">تم التسليم</option>
@@ -751,6 +783,21 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       </select>
       <button class="bulk-apply" onclick="applyBulk()">تطبيق</button>
       <button class="bulk-cancel" onclick="clearSel()">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- MOBILE TOOLBAR + LEGEND -->
+  <div class="cal-mobile-bar">
+    <div class="legend">
+      <span class="lg"><i class="dot t-tray"></i>صينية</span>
+      <span class="lg"><i class="dot t-package"></i>بكج</span>
+      <span class="lg"><i class="dot t-book"></i>كتاب</span>
+      <span class="lg"><i class="dot t-grad"></i>تخرج</span>
+      <span class="lg"><i class="dot t-bouquet"></i>مسكة</span>
+    </div>
+    <div class="exp-btns">
+      <button onclick="expandAllDays(true)">توسيع الكل</button>
+      <button onclick="expandAllDays(false)">طي الكل</button>
     </div>
   </div>
 
@@ -955,7 +1002,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="print-status-checkboxes">
-        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="New" checked><div class="pday-cb-info"><div class="pday-cb-name">تم الاستلام</div></div></label>
+        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="New" checked><div class="pday-cb-info"><div class="pday-cb-name">طلب جديد</div></div></label>
         <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Preparing" checked><div class="pday-cb-info"><div class="pday-cb-name">جاري التجهيز</div></div></label>
         <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Shipped" checked><div class="pday-cb-info"><div class="pday-cb-name">مع التوصيل</div></div></label>
         <label class="pday-cb"><input type="checkbox" name="print-status" value="Done"><div class="pday-cb-info"><div class="pday-cb-name">تم التسليم</div></div></label>
@@ -975,13 +1022,19 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div id="print-container" style="display:none"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbx5NaV_8xCXiIZ1UE2XlNqMuV9IYDF0Qjb_XgLWLa3KDaDSDVJ3-zMoblCvZwOYnBm4/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwQd7oBe5-UZsRmidW5L-IKYDFce85IelauWzhhERWBm_Va1mjncJzo-ELswJ4Zh4ow/exec';
 const DELIVERY_FEE = 2;
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+// تطبيع الحالة: الشيت فيه قيم قديمة بأحرف صغيرة (done) وجديدة بكبيرة (Done)
+const STATUS_CANON = {new:'New',preparing:'Preparing',shipped:'Shipped',done:'Done',cancelled:'Cancelled',waiting:'Waiting',other:'Other'};
+function normStatus(o){
+  const raw = (typeof o === 'object' && o) ? (o['Status']||'') : (o||'');
+  return STATUS_CANON[String(raw).toLowerCase()] || 'New';
+}
 const MODEL_AR = {Turkish:'التركي',White:'الأبيض',Elegant:'الأنيق',Luxury:'الفاخر',Royal:'الملكي'};
 const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Graduation:'تخرج',Bouquet:'مسكة عروس'};
 const STATUSES = {
-  New:      {lbl:'تم الاستلام',           cls:'s-New'},
+  New:      {lbl:'طلب جديد',           cls:'s-New'},
   Preparing:{lbl:'جاري التجهيز',          cls:'s-Preparing'},
   Shipped:  {lbl:'مع التوصيل',            cls:'s-Shipped'},
   Done:     {lbl:'تم التسليم',            cls:'s-Done'},
@@ -996,25 +1049,49 @@ let filterStatus = 'all';
 let selectedIds = new Set();
 
 // ── INIT ──
-window.addEventListener('DOMContentLoaded', loadOrders);
+window.addEventListener('DOMContentLoaded', ()=>loadOrders(true));
 
-async function loadOrders(){
+// كل كتابة تمر من هنا: تتحقق من نجاح الشيت فعلياً وترمي خطأ واضح إن فشلت
+async function writeToSheet(params){
+  const res = await apiCall(params);
+  if(!res || res.success !== true) throw new Error((res && res.error) || 'الشيت لم يؤكد العملية');
+  return res;
+}
+
+// silent=true عند إعادة القراءة الداخلية بعد عملية كتابة (لتفادي ازدواج الإشعارات)
+async function loadOrders(silent){
+  const btn = document.getElementById('refresh-btn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; }
   try {
     const data = await apiCall({action:'getOrders'});
     allOrders = data.orders || [];
     setConn(true);
     renderCal();
     updateStats();
-  } catch(e){ setConn(false); }
+    const dashApp = document.getElementById('dash-app');
+    if(dashApp && dashApp.style.display === 'block') applyDashFilters();
+    if(!silent) toast('✅ تم التحديث — '+allOrders.length+' أوردر');
+  } catch(e){
+    setConn(false);
+    toast('❌ تعذّر الاتصال بالشيت — البيانات المعروضة قد تكون قديمة');
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '↻ تحديث'; }
+  }
 }
 
 async function apiCall(params){
-  const url = API + '?' + new URLSearchParams(params);
-  const r = await fetch(url);
+  // منع الكاش — كل طلب فريد
+  const p = Object.assign({}, params, {_t: Date.now()});
+  const url = API + '?' + new URLSearchParams(p);
+  const r = await fetch(url, {cache:'no-store'});
   if(!r.ok) throw new Error('HTTP '+r.status);
   const text = await r.text();
-  try{ return JSON.parse(text); }
-  catch(e){ throw new Error('Bad JSON: '+text.slice(0,100)); }
+  let json;
+  try{ json = JSON.parse(text); }
+  catch(e){ throw new Error('رد غير صالح من السيرفر'); }
+  // Apps Script يرجع {error:...} مع HTTP 200 — لازم نكشفها
+  if(json && json.error) throw new Error(json.error);
+  return json;
 }
 
 function setConn(ok){
@@ -1026,6 +1103,11 @@ function setConn(ok){
 function pad(n){ return String(n).padStart(2,'0'); }
 function fmtShort(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1); }
 function fmtFull(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
+// ختم وقت الإضافة من ساعة الجهاز: dd/mm/yyyy HH:MM
+function nowStamp(){
+  const d = new Date();
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
 function parseDate(str){
   if(!str) return null;
   // dd/mm/yyyy
@@ -1046,65 +1128,57 @@ function isSameDay(a,b){
 }
 
 // Get week days for the given offset (week starting Sunday)
+// نافذة متدحرجة: 7 أيام تبدأ من اليوم (وليس أسبوع تقويمي ثابت)
 function getWeekDays(offset){
   const today = new Date(); today.setHours(0,0,0,0);
-  const sunday = new Date(today);
-  sunday.setDate(today.getDate() - today.getDay() + offset*7);
-  // Return all 7 days of the week as Date objects keyed by name
-  const offsets = {الأحد:0,الاثنين:1,الثلاثاء:2,الأربعاء:3,الخميس:4,الجمعة:5,السبت:6};
-  const result = {};
-  DAYS.forEach(d=>{ const dt=new Date(sunday); dt.setDate(sunday.getDate()+offsets[d]); result[d]=dt; });
-  return result;
+  const start = new Date(today);
+  start.setDate(today.getDate() + offset*7);
+  const result = [];
+  for(let i=0;i<7;i++){
+    const dt = new Date(start);
+    dt.setDate(start.getDate()+i);
+    result.push(dt);
+  }
+  return result;  // مصفوفة من 7 تواريخ
 }
 
 // ── CALENDAR RENDER ──
 function renderCal(){
-  const days = getWeekDays(weekOffset);
+  const days = getWeekDays(weekOffset);   // مصفوفة 7 تواريخ
   const today = new Date(); today.setHours(0,0,0,0);
 
   // Week label
-  const dates = Object.values(days);
-  const first = dates[0]; const last = dates[dates.length-1];
+  const first = days[0]; const last = days[6];
   document.getElementById('week-lbl').textContent = fmtShort(first)+' — '+fmtShort(last)+' — '+last.getFullYear();
 
-  // Filter orders
+  // Filter orders (مقارنة الحالة غير حساسة لحالة الأحرف)
+  const fs = String(filterStatus||'all').toLowerCase();
   let orders = allOrders.filter(o=>{
-    if(filterStatus==='all'){
-      // الوضع الافتراضي: أخفي "تم التسليم" — تظهر فقط لما يضغط عليها
-      if(['done','cancelled'].includes((o['Status']||'').toLowerCase())) return false;
+    const st = (o['Status']||'').toLowerCase();
+    if(fs==='all'){
+      if(['done','cancelled'].includes(st)) return false;
     } else {
-      if(o['Status']!==filterStatus) return false;
+      if(st !== fs) return false;
     }
     return true;
   });
 
-  // لما فلتر Done: اعرض كل الأسابيع مش بس الحالي
-  // نستخدم تواريخ الأسبوع المحدد عادي بس بدون حذف Done
-
-  // Group orders by delivery date — exact match only, no fallback
-  const grouped = {};
-  DAYS.forEach(d=>grouped[d]=[]);
-
+  // تجميع حسب موقع اليوم في النافذة (0..6)
+  const grouped = days.map(()=>[]);
   orders.forEach(o=>{
     const delDate = parseDate(o['Delivery Date']);
-    if(delDate){
-      // Match by exact date only
-      DAYS.forEach(d=>{
-        if(isSameDay(delDate, days[d])) grouped[d].push(o);
-      });
-    }
-    // No fallback — if no Delivery Date, don't show in calendar
+    if(!delDate) return;   // بدون تاريخ تسليم = لا يظهر في التقويم
+    days.forEach((dt,i)=>{ if(isSameDay(delDate, dt)) grouped[i].push(o); });
   });
 
   // Build header
   let head = '<tr>';
   head += '<th style="background:var(--dark);color:rgba(201,169,110,.4);font-size:11px;font-weight:800;padding:9px 6px;text-align:center;width:60px">الأسبوع</th>';
-  DAYS.forEach(d=>{
-    const dt = days[d];
+  days.forEach((dt,i)=>{
     const tod = isToday(dt);
-    const cnt = grouped[d].length;
+    const cnt = grouped[i].length;
     head += `<th class="${tod?'today-th':''}" style="background:var(--dark);font-size:12px;font-weight:800;padding:9px 6px;text-align:center;border-left:1px solid rgba(255,255,255,.08)">
-      <span class="th-day">${d}</span>
+      <span class="th-day">${DAYS[dt.getDay()]}</span>
       <span class="th-date">${fmtShort(dt)}</span>
       ${cnt?`<span class="th-cnt">${cnt}</span>`:''}
     </th>`;
@@ -1113,12 +1187,11 @@ function renderCal(){
   document.getElementById('cal-head').innerHTML = head;
 
   // Week label for row
-  const isPast = weekOffset<0;
-  const isCur  = weekOffset===0;
+  const isCur = weekOffset===0;
   let weekTag;
-  if(isCur) weekTag='الحالي';
-  else if(weekOffset===-1) weekTag='الماضي';
-  else if(weekOffset===1) weekTag='القادم';
+  if(isCur) weekTag='من اليوم';
+  else if(weekOffset===-1) weekTag='الأسبوع الماضي';
+  else if(weekOffset===1) weekTag='بعد أسبوع';
   else if(weekOffset<0) weekTag='قبل '+Math.abs(weekOffset)+' أسابيع';
   else weekTag='بعد '+weekOffset+' أسابيع';
 
@@ -1126,11 +1199,10 @@ function renderCal(){
   let body = `<tr class="week-row">`;
   body += `<td><span class="week-lbl ${isCur?'cur':''}">${weekTag}</span></td>`;
 
-  DAYS.forEach(d=>{
-    const dt = days[d];
+  days.forEach((dt,i)=>{
     const tod = isToday(dt);
     body += `<td class="${tod?'today-td':''}">`;
-    const list = grouped[d];
+    const list = grouped[i];
     if(!list.length){
       body += `<div class="mc-empty">—</div>`;
     } else {
@@ -1147,19 +1219,24 @@ function renderCal(){
 
 function renderCalMobile(days, grouped){
   let html = '';
-  DAYS.forEach(d=>{
-    const dt = days[d];
-    const list = grouped[d];
-    const tod = isToday(dt);
-    html += `<div class="cal-day-block">
-      <div class="cal-day-block-hdr ${tod?'today':''}">
-        <span class="cal-day-block-name">${d}</span>
+  days.forEach((dt,i)=>{
+    const list = grouped[i] || [];
+    const tod  = isToday(dt);
+    const key  = fmtFull(dt);
+    // حالة الطي: محفوظة، وإلا مفتوح إذا فيه أوردرات أو هو اليوم
+    const open = calOpenDays.has(key) ? true
+               : calClosedDays.has(key) ? false
+               : (list.length > 0 || tod);
+    html += `<div class="cal-day-block ${open?'open':''}" data-key="${key}">
+      <div class="cal-day-block-hdr ${tod?'today':''}" onclick="toggleCalDay('${key}')">
+        <span class="cal-arrow">›</span>
+        <span class="cal-day-block-name">${DAYS[dt.getDay()]}${tod?' — اليوم':''}</span>
         <span class="cal-day-block-date">${fmtShort(dt)}</span>
-        ${list&&list.length?`<span class="cal-day-block-cnt">${list.length}</span>`:''}
+        <span class="cal-day-block-cnt ${list.length?'':'zero'}">${list.length}</span>
       </div>
       <div class="cal-day-block-body">
-        ${list&&list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
-        <button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>
+        ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
+        <button class="mc-add no-print" onclick="event.stopPropagation();openAddForDate('${key}')">+ إضافة</button>
       </div>
     </div>`;
   });
@@ -1173,6 +1250,33 @@ function renderCalMobile(days, grouped){
   mobileEl.innerHTML = html;
 }
 
+// تتبّع الأيام المفتوحة/المغلقة يدوياً حتى لا تُفقد عند إعادة الرسم
+const calOpenDays   = new Set();
+const calClosedDays = new Set();
+
+function toggleCalDay(key){
+  const el = document.querySelector(`.cal-day-block[data-key="${key}"]`);
+  if(!el) return;
+  const willOpen = !el.classList.contains('open');
+  el.classList.toggle('open', willOpen);
+  if(willOpen){ calOpenDays.add(key);   calClosedDays.delete(key); }
+  else        { calClosedDays.add(key); calOpenDays.delete(key);   }
+}
+
+function expandAllDays(open){
+  document.querySelectorAll('#cal-mobile .cal-day-block').forEach(el=>{
+    const key = el.dataset.key;
+    el.classList.toggle('open', open);
+    if(open){ calOpenDays.add(key); calClosedDays.delete(key); }
+    else    { calClosedDays.add(key); calOpenDays.delete(key); }
+  });
+}
+
+function typeClass(t){
+  return ({Tray:'t-tray',Package:'t-package','Guest Book':'t-book',
+           Graduation:'t-grad',Bouquet:'t-bouquet'})[t] || 't-other';
+}
+
 function miniCard(o){
   const id = o['Order ID']||'';
   const type = o['Product Type']||'';
@@ -1180,16 +1284,17 @@ function miniCard(o){
   const isBouquet2 = type==='Bouquet';
   const bqNote = o['Notes']?(o['Notes'].length>15?o['Notes'].slice(0,15)+'...':o['Notes']):''; 
   const names = type==='Graduation' ? bride : isBouquet2 ? ('مسكة عروس'+(bqNote?' — '+bqNote:'')).trim() : [bride,groom].filter(Boolean).join(' ❤️ ');
-  const status = o['Status']||'New';
+  const status = normStatus(o);
   const st = STATUSES[status]||STATUSES.New;
   const total = parseFloat(o['Total']||0);
   const grandTotal = o['Governorate'] ? total+DELIVERY_FEE : total;
   const typeAr = TYPE_AR[type]||type;
+  const tc = typeClass(type);
   const sel = selectedIds.has(id);
-  return `<div class="mc ${st.cls} ${sel?'selected':''}" id="mc-${id}" onclick="handleMC('${id}')">
+  return `<div class="mc ${st.cls} ${tc} ${sel?'selected':''}" id="mc-${id}" onclick="handleMC('${id}')">
     <div class="mc-names">${names||id}</div>
     <div class="mc-row">
-      <span class="mc-type">${typeAr}</span>
+      <span class="mc-type ${tc}">${typeAr}</span>
       <span class="mc-st ${st.cls}">${st.lbl}</span>
       <span class="mc-price">${grandTotal}د.أ</span>
     </div>
@@ -1270,18 +1375,19 @@ async function applyBulk(){
   const btn=document.querySelector('.bulk-apply');
   btn.textContent='⏳...'; btn.disabled=true;
   let ok=0;
+  let failed=[];
   for(const id of ids){
     try{
-      await apiCall({action:'updateOrder',id,data:JSON.stringify({Status:status})});
-      const o=allOrders.find(o=>o['Order ID']===id);
-      if(o) o['Status']=status;
+      await writeToSheet({action:'updateOrder',id,data:JSON.stringify({Status:status})});
       ok++;
-    }catch(e){}
+    }catch(e){ failed.push(id); }
     await new Promise(r=>setTimeout(r,150));
   }
   btn.textContent='تطبيق'; btn.disabled=false;
-  toast('✅ تم تحديث '+ok+' أوردر');
-  clearSel(); renderCal(); updateStats();
+  clearSel();
+  await loadOrders(true);
+  if(failed.length) toast('⚠️ نجح '+ok+' — فشل: '+failed.join(', '));
+  else toast('✅ تم تحديث '+ok+' أوردر');
 }
 
 // ── STATS ──
@@ -1289,11 +1395,11 @@ function updateStats(){
   document.getElementById('st-all').textContent = allOrders.length;
   const active = allOrders.filter(o=>['new','preparing','shipped'].includes((o['Status']||'').toLowerCase())).length;
   document.getElementById('st-active').textContent = active;
-  const days = getWeekDays(0);
+  const days = getWeekDays(0);   // مصفوفة
   const weekOrds = allOrders.filter(o=>{
     const dd=parseDate(o['Delivery Date']);
     if(!dd) return false;
-    return Object.values(days).some(d=>isSameDay(dd,d));
+    return days.some(d=>isSameDay(dd,d));
   }).length;
   document.getElementById('st-week').textContent = weekOrds;
   const done = allOrders.filter(o=>(o['Status']||'').toLowerCase()==='done').length;
@@ -1349,7 +1455,7 @@ function searchItemHTML(o, q){
   const type=o['Product Type']||'';
   const groom=o['Groom']||''; const bride=o['Bride']||'';
   const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
-  const status=o['Status']||'New';
+  const status=normStatus(o);
   const st=STATUSES[status]||STATUSES.New;
   const dd=o['Delivery Date']||o['Delivery Day']||'—';
   const total=parseFloat(o['Total']||0);
@@ -1383,7 +1489,7 @@ function showSearchPanel(results, q){
     const type=o['Product Type']||'';
     const groom=o['Groom']||''; const bride=o['Bride']||'';
     const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
-    const status=o['Status']||'New';
+    const status=normStatus(o);
     const st=STATUSES[status]||STATUSES.New;
     const typeAr=TYPE_AR[type]||type;
     const dd=o['Delivery Date']||o['Delivery Day']||'—';
@@ -1439,7 +1545,7 @@ function openPanel(id){
   const prov=o['Governorate']||'';
   const grandTotal=prov?total+DELIVERY_FEE:total;
   const model=MODEL_AR[o['Model']]||o['Model']||'';
-  const status=o['Status']||'New';
+  const status=normStatus(o);
 
   document.getElementById('panel-ttl').textContent=(o['Order ID']||'')+' — '+names;
 
@@ -1473,6 +1579,15 @@ function openPanel(id){
   if(o['Delivery Notes']) dF+=pr('ملاحظات التوصيل',o['Delivery Notes']);
   if(prov) dF+=pr('رسوم التوصيل',DELIVERY_FEE+' د.أ');
   dF+=`<div class="pr"><span class="prk">الحساب الكامل</span><span class="prv prv-total">${grandTotal} د.أ</span></div>`;
+  // سطر التوثيق: متى أُضيف الأوردر
+  const created = o['Created At']||'';
+  const createdRow = created
+    ? `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E5D9C7;font-size:11px;color:#8B7355">
+         🕐 أُضيف بتاريخ <strong style="color:#4A3728">${created}</strong>
+       </div>`
+    : `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E5D9C7;font-size:11px;color:#B8A898">
+         🕐 وقت الإضافة غير مسجّل (أوردر قديم)
+       </div>`;
 
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${status===k?'selected':''}>${v.lbl}</option>`).join('');
   const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
@@ -1482,6 +1597,7 @@ function openPanel(id){
       <div class="psec psec-o"><div class="psec-ttl">📋 معلومات الطلب</div>${oF}</div>
       <div class="psec psec-d"><div class="psec-ttl">🚚 شركة التوصيل</div>${dF}</div>
     </div>
+    ${createdRow}
     <div class="panel-acts">
       <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
       <button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>
@@ -1514,33 +1630,27 @@ async function deleteOrder(id){
   );
   try{
     if(choice){
-      await apiCall({action:'deleteOrder', id});
-      allOrders = allOrders.filter(o=>o['Order ID']!==id);
+      await writeToSheet({action:'deleteOrder', id});
       toast('✅ تم حذف الأوردر '+id+' نهائياً');
     } else {
-      await apiCall({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
-      if(o) o['Status']='Cancelled';
+      await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
       toast('✅ تم وضع الأوردر '+id+' كملغي');
     }
     closePanel();
-    renderCal();
-    updateStats();
-  }catch(e){ toast('❌ خطأ في الحذف'); }
+    await loadOrders(true);
+  }catch(e){ toast('❌ فشل الحذف: '+e.message); }
 }
 function closePanel(){ document.getElementById('panel').classList.remove('open'); }
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
 
 async function changeStatus(id,status){
   try{
-    await apiCall({action:'updateOrder',id,data:JSON.stringify({Status:status})});
-    const o=allOrders.find(o=>o['Order ID']===id);
-    if(o) o['Status']=status;
+    await writeToSheet({action:'updateOrder',id,data:JSON.stringify({Status:status})});
+    await loadOrders(true);
     toast('✅ تم تحديث الحالة');
-    renderCal(); updateStats();
-    // Refresh panel if still open
     const panel=document.getElementById('panel');
     if(panel.classList.contains('open')) openPanel(id);
-  }catch(e){toast('❌ خطأ');}
+  }catch(e){ toast('❌ لم يتم التحديث: '+e.message); await loadOrders(true); }
 }
 
 // ── EDIT PANEL ──
@@ -1554,7 +1664,8 @@ function openEdit(id){
   const hasTray=['Tray','Package'].includes(type);
 
   document.getElementById('edit-ttl').textContent='✏️ تعديل — '+id;
-  const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${o['Status']===k?'selected':''}>${v.lbl}</option>`).join('');
+  const _cur=normStatus(o);
+  const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${_cur===k?'selected':''}>${v.lbl}</option>`).join('');
   const typeOpts=['Tray','Guest Book','Package','Graduation','Bouquet'].map(t=>`<option value="${t}" ${type===t?'selected':''}>${TYPE_AR[t]||t}</option>`).join('');
   const modelOpts=['Turkish','White','Elegant','Luxury','Royal','Other'].map(m=>`<option value="${m}" ${o['Model']===m?'selected':''}>${MODEL_AR[m]||m}</option>`).join('');
   const provOpts=['','عمّان','الزرقاء','إربد','البلقاء','الكرك','مادبا','السلط','جرش','عجلون','المفرق','الطفيلة','معان','العقبة'].map(p=>`<option value="${p}" ${o['Governorate']===p?'selected':''}>${p||'—'}</option>`).join('');
@@ -1655,12 +1766,11 @@ async function applyEdit(id){
     Link:           getVal('e-link'),
   };
   try{
-    await apiCall({action:'updateOrder',id,data:JSON.stringify(data)});
-    const o=allOrders.find(o=>o['Order ID']===id);
-    if(o) Object.assign(o,data);
+    await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
+    closeEdit();
+    await loadOrders(true);
     toast('✅ تم حفظ التعديل');
-    closeEdit(); renderCal(); updateStats();
-  }catch(e){toast('❌ خطأ في الحفظ');}
+  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
 }
 
 function openReschedule(id){
@@ -1706,12 +1816,11 @@ async function applyReschedule(id){
     'Delivery Day': dayNames[deldateObj.getDay()],
   };
   try{
-    await apiCall({action:'updateOrder',id,data:JSON.stringify(data)});
-    const o=allOrders.find(o=>o['Order ID']===id);
-    if(o){ o['Delivery Date']=data['Delivery Date']; o['Delivery Day']=data['Delivery Day']; }
+    await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
+    closeEdit();
+    await loadOrders(true);
     toast('✅ تم تغيير الموعد إلى '+data['Delivery Date']);
-    closeEdit(); renderCal(); updateStats();
-  }catch(e){toast('❌ خطأ في الحفظ');}
+  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
 }
 
 function closeEdit(){ document.getElementById('edit-panel').classList.remove('open'); }
@@ -1788,7 +1897,7 @@ function checkDuplicatePhone(phone){
       const type = o['Product Type']||'';
       const groom = o['Groom']||''; const bride = o['Bride']||'';
       const name = type==='Graduation'? o['Bride'] : [bride,groom].filter(Boolean).join(' ❤️ ');
-      const status = STATUSES[o['Status']]?.lbl || o['Status'];
+      const status = STATUSES[normStatus(o)]?.lbl || o['Status'];
       return `<strong>${o['Order ID']}</strong> — ${name||'—'} — ${status} — ${o['Delivery Date']||o['Delivery Day']||'—'}`;
     }).join('<br>');
 
@@ -1936,20 +2045,19 @@ async function saveOrder(){
     deliveryNotes:document.getElementById('f-dnotes').value.trim(),
     total:price,
     link:document.getElementById('f-link').value.trim(),
-    status:'New'
+    status:'New',
+    createdAt:nowStamp()          // وقت الإضافة من جهاز المُدخِل
   };
 
   const btn=document.getElementById('save-btn');
   btn.textContent='⏳ جاري الحفظ...'; btn.disabled=true;
   try{
-    const res=await apiCall({action:'addOrder',data:JSON.stringify(data)});
-    if(res.success){
-      toast('✅ تم حفظ الأوردر '+res.id);
-      clearForm();
-      await loadOrders();
-      switchTab('cal');
-    }else toast('❌ '+(res.error||'خطأ'));
-  }catch(e){toast('❌ تعذّر الاتصال');}
+    const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data)});
+    clearForm();
+    await loadOrders(true);
+    switchTab('cal');
+    toast('✅ تم حفظ الأوردر '+(res.id||''));
+  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
   btn.textContent='💾 حفظ في الشيت'; btn.disabled=false;
 }
 
@@ -2279,12 +2387,12 @@ function applyDashCustomDate(){
 async function loadDashData(){
   document.getElementById('dash-conn-lbl').textContent='جاري التحميل...';
   try{
-    const res=await fetch(API+'?'+new URLSearchParams({action:'getOrders'}));
-    const data=await res.json();
+    const data=await apiCall({action:'getOrders'});
     allOrders=data.orders||[];
     document.getElementById('dash-conn-dot').style.background='#4CAF50';
     document.getElementById('dash-conn-lbl').textContent='متصل';
     applyDashFilters();
+    renderCal(); updateStats();   // مزامنة التقويم مع نفس البيانات
   }catch(e){
     document.getElementById('dash-conn-dot').style.background='#FF5252';
     document.getElementById('dash-conn-lbl').textContent='خطأ في الاتصال';
@@ -2292,6 +2400,10 @@ async function loadDashData(){
 }
 
 function orderTotalD(o){return parseFloat(o['Total']||0)+(o['Governorate']?DELIVERY_FEE:0)}
+function stOf(o){ return String(o['Status']||'').toLowerCase(); }
+function isCancelled(o){ return stOf(o)==='cancelled'; }
+// الأوردرات المحتسبة مالياً = كل شي عدا الملغي
+function billable(list){ return list.filter(o=>!isCancelled(o)); }
 
 function applyDashFilters(){
   dashFiltered=allOrders.filter(o=>{
@@ -2318,11 +2430,11 @@ function renderDashAll(){
 
 function renderDashAlerts(){
   const alerts=[];
-  const waiting=allOrders.filter(o=>o['Status']==='Waiting').length;
+  const waiting=allOrders.filter(o=>stOf(o)==='waiting').length;
   if(waiting>0) alerts.push({cls:'alert-warn',msg:`⚠️ ${waiting} أوردر بانتظار تأكيد العميل`});
   const today=new Date();today.setHours(0,0,0,0);
   const tmr=new Date(today);tmr.setDate(tmr.getDate()+1);
-  const tmrOrds=allOrders.filter(o=>{const d=parseDateD(o['Delivery Date']);return d&&d.getTime()===tmr.getTime()&&['New','Preparing'].includes(o['Status']);}).length;
+  const tmrOrds=allOrders.filter(o=>{const d=parseDateD(o['Delivery Date']);return d&&d.getTime()===tmr.getTime()&&['new','preparing'].includes(stOf(o));}).length;
   if(tmrOrds>0) alerts.push({cls:'alert-info',msg:`📅 ${tmrOrds} أوردر للتسليم غداً لم تكتمل تجهيزها`});
   if(!alerts.length) alerts.push({cls:'alert-ok',msg:'✅ كل شي تمام — لا تنبيهات'});
   document.getElementById('dash-alerts').innerHTML=alerts.map(a=>`<div class="alert ${a.cls}">${a.msg}</div>`).join('');
@@ -2331,25 +2443,28 @@ function renderDashAlerts(){
 function renderDashKPIs(){
   const t=dashFiltered;
   const total=t.length;
-  const rev=t.filter(o=>o['Status']!=='Cancelled').reduce((s,o)=>s+orderTotalD(o),0);
-  const avg=total?Math.round(rev/total*10)/10:0;
-  const active=t.filter(o=>['New','Preparing','Shipped'].includes(o['Status'])).length;
-  const done=t.filter(o=>o['Status']==='Done').length;
-  const cancelled=t.filter(o=>o['Status']==='Cancelled').length;
-  const waiting=t.filter(o=>o['Status']==='Waiting').length;
-  const delivRev=t.filter(o=>o['Governorate']).length*DELIVERY_FEE;
-  const prodRev=rev-delivRev;
-  const doneRate=total?Math.round(done/total*100):0;
+  const bill=billable(t);                       // المحتسب مالياً (بدون الملغي)
+  const billCount=bill.length;
+  const prodRev=bill.reduce((s,o)=>s+parseFloat(o['Total']||0),0);      // سعر المنتجات
+  const delivCount=bill.filter(o=>o['Governorate']).length;
+  const delivRev=delivCount*DELIVERY_FEE;                                // رسوم التوصيل
+  const rev=prodRev+delivRev;                                            // الإجمالي
+  const avg=billCount?Math.round(rev/billCount*10)/10:0;                 // المتوسط على المحتسب فقط
+  const active=t.filter(o=>['new','preparing','shipped'].includes(stOf(o))).length;
+  const done=t.filter(o=>stOf(o)==='done').length;
+  const cancelled=t.filter(o=>isCancelled(o)).length;
+  const waiting=t.filter(o=>stOf(o)==='waiting').length;
+  const doneRate=billCount?Math.round(done/billCount*100):0;
   const kpis=[
-    {ico:'📦',val:total,lbl:'إجمالي الأوردرات',sub:'في الفترة المحددة',cls:'gold'},
-    {ico:'💰',val:rev+' د.أ',lbl:'إجمالي الإيرادات',sub:'شامل التوصيل',cls:'green'},
+    {ico:'📦',val:total,lbl:'إجمالي الأوردرات',sub:cancelled?('منها '+cancelled+' ملغي'):'في الفترة المحددة',cls:'gold'},
+    {ico:'💰',val:rev+' د.أ',lbl:'إجمالي الإيرادات',sub:'شامل التوصيل — بدون الملغي',cls:'green'},
     {ico:'🛍️',val:prodRev+' د.أ',lbl:'إيرادات المنتجات',sub:'بدون التوصيل',cls:'gold'},
-    {ico:'🚚',val:delivRev+' د.أ',lbl:'إيرادات التوصيل',sub:t.filter(o=>o['Governorate']).length+' أوردر',cls:'blue'},
+    {ico:'🚚',val:delivRev+' د.أ',lbl:'رسوم التوصيل',sub:delivCount+' أوردر خارج عمّان',cls:'blue'},
     {ico:'⚡',val:active,lbl:'قيد التنفيذ',sub:'استلام + تجهيز + توصيل',cls:'orange'},
-    {ico:'✅',val:done,lbl:'تم التسليم',sub:doneRate+'% من الإجمالي',cls:'green'},
+    {ico:'✅',val:done,lbl:'تم التسليم',sub:doneRate+'% من المحتسب',cls:'green'},
     {ico:'⏳',val:waiting,lbl:'بانتظار تأكيد',sub:'يحتاج متابعة',cls:'purple'},
     {ico:'❌',val:cancelled,lbl:'ملغي',sub:'',cls:'red'},
-    {ico:'📊',val:avg+' د.أ',lbl:'متوسط قيمة الأوردر',sub:'',cls:'gold'},
+    {ico:'📊',val:avg+' د.أ',lbl:'متوسط قيمة الأوردر',sub:'على '+billCount+' أوردر',cls:'gold'},
     {ico:'📅',val:[...new Set(t.map(o=>o['Delivery Date']).filter(Boolean))].length,lbl:'أيام تسليم',sub:'',cls:'blue'},
     {ico:'🏙️',val:[...new Set(t.map(o=>o['Governorate']).filter(Boolean))].length,lbl:'محافظات',sub:'',cls:'purple'},
     {ico:'📱',val:[...new Set(t.map(o=>o['Phone']).filter(Boolean))].length,lbl:'عملاء مختلفون',sub:'',cls:'gold'},
@@ -2359,7 +2474,7 @@ function renderDashKPIs(){
 
 function renderDashCharts(){
   const revByDate={};
-  dashFiltered.forEach(o=>{const d=o['Delivery Date']||'غير محدد';revByDate[d]=(revByDate[d]||0)+orderTotalD(o);});
+  billable(dashFiltered).forEach(o=>{const d=o['Delivery Date']||'غير محدد';revByDate[d]=(revByDate[d]||0)+orderTotalD(o);});
   const sortedDates=Object.keys(revByDate).sort((a,b)=>{const da=parseDateD(a),db=parseDateD(b);if(!da)return 1;if(!db)return -1;return da-db;});
   if(dashRevChart) dashRevChart.destroy();
   dashRevChart=new Chart(document.getElementById('dash-chart-rev'),{
@@ -2377,7 +2492,8 @@ function renderDashCharts(){
 
 function renderDashStatus(){
   const counts={};
-  dashFiltered.forEach(o=>{const s=o['Status']||'Other';counts[s]=(counts[s]||0)+1;});
+  const stMap={new:'New',preparing:'Preparing',shipped:'Shipped',done:'Done',cancelled:'Cancelled',waiting:'Waiting'};
+  dashFiltered.forEach(o=>{const s=stMap[stOf(o)]||'Other';counts[s]=(counts[s]||0)+1;});
   const max=Math.max(...Object.values(counts),1);
   const order=['New','Preparing','Shipped','Done','Waiting','Cancelled','Other'];
   document.getElementById('dash-status').innerHTML='<div class="status-list">'+order.map(s=>{
@@ -2389,7 +2505,7 @@ function renderDashStatus(){
 
 function renderDashProds(){
   const prods={};
-  dashFiltered.forEach(o=>{const t=o['Product Type']||'Other';if(!prods[t])prods[t]={count:0,rev:0};prods[t].count++;prods[t].rev+=orderTotalD(o);});
+  billable(dashFiltered).forEach(o=>{const t=o['Product Type']||'Other';if(!prods[t])prods[t]={count:0,rev:0};prods[t].count++;prods[t].rev+=orderTotalD(o);});
   const sorted=Object.entries(prods).sort((a,b)=>b[1].count-a[1].count);
   const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
   document.getElementById('dash-prods').innerHTML=sorted.slice(0,5).map(([type,d],i)=>`<div class="prod-item"><div class="prod-rank">${medals[i]||i+1}</div><div class="prod-name">${TYPE_AR[type]||type}</div><div class="prod-cnt">${d.count} أوردر</div><div class="prod-rev">${d.rev} د.أ</div></div>`).join('');
@@ -2401,22 +2517,26 @@ function renderDashTable(){
   const srch=(document.getElementById('dash-search').value||'').toLowerCase();
   const sort=document.getElementById('dash-tbl-sort').value;
   let orders=[...dashFiltered];
-  if(stF!=='all') orders=orders.filter(o=>o['Status']===stF);
+  if(stF!=='all') orders=orders.filter(o=>stOf(o)===stF.toLowerCase());
   if(tyF!=='all') orders=orders.filter(o=>o['Product Type']===tyF);
   if(srch) orders=orders.filter(o=>(o['Bride']+o['Groom']+o['Recipient']+o['Phone']+o['Order ID']).toLowerCase().includes(srch));
   orders.sort((a,b)=>{
     if(sort.startsWith('date')){const da=parseDateD(a['Delivery Date']),db=parseDateD(b['Delivery Date']);const diff=(da||new Date(0))-(db||new Date(0));return sort==='date-desc'?-diff:diff;}
     const diff=orderTotalD(a)-orderTotalD(b);return sort==='price-desc'?-diff:diff;
   });
-  const totalRev=orders.reduce((s,o)=>s+orderTotalD(o),0);
-  document.getElementById('dash-tbl-summary').textContent=`${orders.length} أوردر — إجمالي: ${totalRev} د.أ`;
+  const billOrders=billable(orders);
+  const totalRev=billOrders.reduce((s,o)=>s+orderTotalD(o),0);
+  document.getElementById('dash-tbl-summary').textContent=
+    `${orders.length} أوردر — إجمالي محتسب: ${totalRev} د.أ (${billOrders.length} أوردر، الملغي غير محتسب)`;
   if(!orders.length){document.getElementById('dash-tbody').innerHTML='<tr><td colspan="10" style="text-align:center;color:#8B7355;padding:30px">لا يوجد أوردرات</td></tr>';return;}
+  const stMapT={new:'New',preparing:'Preparing',shipped:'Shipped',done:'Done',cancelled:'Cancelled',waiting:'Waiting'};
   document.getElementById('dash-tbody').innerHTML=orders.map(o=>{
     const type=o['Product Type']||'';
     const groom=o['Groom']||'';const bride=o['Bride']||'';
     const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
     const total=parseFloat(o['Total']||0);const grandTotal=orderTotalD(o);
-    const status=o['Status']||'New';const st=STATUSES[status]||{lbl:status,cls:'b-other'};
+    const stKey=(stMapT[stOf(o)]||o['Status']||'New');
+    const status=stKey;const st=STATUSES[stKey]||{lbl:stKey,cls:'b-other'};
     return `<tr><td><span class="td-id">${o['Order ID']||'—'}</span></td><td class="td-names">${names||'—'}</td><td><span class="td-type">${TYPE_AR[type]||type}</span></td><td class="td-date">${o['Delivery Date']||o['Delivery Day']||'—'}</td><td>${o['Recipient']||'—'}</td><td class="td-date">${o['Phone']||'—'}</td><td>${o['Governorate']||'—'}</td><td class="td-price">${total} د.أ</td><td class="td-price">${grandTotal} د.أ</td><td><span class="badge ${st.cls}">${st.lbl}</span></td></tr>`;
   }).join('');
 }
@@ -2713,7 +2833,7 @@ function toast(msg){
         <div class="orders-filter">
           <select class="of-sel" id="dash-tbl-status" onchange="renderDashTable()">
             <option value="all">كل الحالات</option>
-            <option value="New">تم الاستلام</option>
+            <option value="New">طلب جديد</option>
             <option value="Preparing">جاري التجهيز</option>
             <option value="Shipped">مع التوصيل</option>
             <option value="Done">تم التسليم</option>
