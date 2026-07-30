@@ -323,7 +323,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
-  .hdr,.tabs,.main,.pmodal-bg,.panel-bg,.edit-bg,.toast{display:none!important}
+  .hdr,.tabs,.main,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
   #print-container{display:block!important;padding:5mm}
   @page{size:A4 portrait;margin:6mm}
 
@@ -341,15 +341,14 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   /* ── GRID ── */
   .pc-grid{display:block!important;margin-bottom:3mm}
 
-  /* ── CARD: FIXED HEIGHT ── */
+  /* ── CARD: يكبر حسب المحتوى، لا ارتفاع ثابت ── */
   .pc-card{
     break-inside:avoid;
     border:1.5px solid #1A1410;
     border-radius:4px;
-    overflow:hidden;
+    overflow:visible;
     margin-bottom:3mm;
     display:block;
-    height:36mm; /* ثابت دائماً */
   }
 
   /* CARD HEADER */
@@ -357,7 +356,6 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
     background:#1A1410!important;
     padding:3px 10px;
     display:flex!important;align-items:center;gap:6px;
-    height:7mm;
   }
   .pc-id{background:#C9A96E!important;color:#1A1410!important;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:900;flex-shrink:0}
   .pc-type{color:#E8D5B0!important;font-size:8px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.15);padding:1px 5px;border-radius:3px}
@@ -365,18 +363,18 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   .pc-date-hdr{color:#C9A96E!important;font-size:9px;font-weight:700;flex-shrink:0}
   .pc-price{color:#C9A96E!important;font-size:11px;font-weight:900;white-space:nowrap;flex-shrink:0}
 
-  /* TWO SECTIONS — right: prep (smaller), left: delivery (full) */
+  /* قسمان: يمين = التفاصيل (أوسع)، يسار = التوصيل (أضيق) */
   .pc-secs{
     display:grid!important;
-    grid-template-columns:1fr 1.2fr!important;
+    grid-template-columns:1.7fr 1fr!important;
     gap:0;
-    height:29mm; /* بقية الكارد بعد الهيدر */
+    align-items:stretch;
   }
 
   .pc-sec{
     padding:4px 8px;
     border-top:1px solid #DDD;
-    overflow:hidden; /* الحجم الثابت يقطع الزيادة */
+    overflow:visible; /* لا قطع — كل الملاحظات تظهر */
     position:relative;
   }
   .pc-sec-o{background:#FFFBF4!important;border-left:1.5px solid #CCC}
@@ -390,26 +388,28 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   .pc-sec-o .pc-sec-ttl{color:#6B5240!important}
   .pc-sec-d .pc-sec-ttl{color:#1A3F8A!important}
 
-  /* DELIVERY — each field on its own line for clarity */
+  /* التوصيل — قسم مضغوط، صف لكل حقل، يلتف بدل ما يُقطع */
   .pc-del-row{
-    display:flex;gap:4px;align-items:baseline;
-    margin-bottom:2px;
+    display:flex;gap:3px;align-items:baseline;
+    margin-bottom:1.5px;
   }
-  .pc-del-k{font-size:8px;color:#666!important;flex-shrink:0;min-width:18mm}
-  .pc-del-v{font-size:9px;font-weight:700;color:#1A1410!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pc-del-k{font-size:6.8px;color:#666!important;flex-shrink:0;min-width:11mm}
+  .pc-del-v{font-size:7.6px;font-weight:700;color:#1A1410!important;white-space:normal;word-break:break-word;line-height:1.25}
   .pc-del-total{
-    position:absolute;bottom:4px;left:8px;right:8px;
     display:flex;justify-content:space-between;align-items:center;
-    border-top:1px solid #BFDBFE;padding-top:3px;
+    border-top:1px solid #BFDBFE;padding-top:3px;margin-top:3px;
   }
-  .pc-del-total-k{font-size:8px;color:#1A3F8A!important;font-weight:700}
-  .pc-del-total-v{font-size:13px;font-weight:900;color:#C9A96E!important}
+  .pc-del-total-k{font-size:7.5px;color:#1A3F8A!important;font-weight:700}
+  .pc-del-total-v{font-size:12px;font-weight:900;color:#C9A96E!important}
 
-  /* PREP — compact inline */
-  .pc-fields{display:flex;flex-wrap:wrap;gap:0 6px;overflow:hidden;max-height:24mm}
-  .pc-row{display:inline-flex;align-items:baseline;gap:2px;margin-bottom:1px;white-space:nowrap}
-  .pc-k{font-size:7px;color:#888!important}
-  .pc-v{font-size:8.5px;font-weight:700;color:#1A1410!important}
+  /* التفاصيل — الحقول القصيرة أفقياً بصف واحد، والنصوص الطويلة كل واحدة بسطر كامل */
+  .pc-fields{display:flex;flex-direction:column;gap:2px;overflow:visible}
+  .pc-fields-short{display:flex;flex-wrap:wrap;align-items:baseline;gap:1.5px 10px;margin-bottom:2px}
+  .pc-fields-long{display:flex;flex-direction:column;gap:2px}
+  .pc-row{display:flex;align-items:baseline;gap:4px;white-space:normal}
+  .pc-row.short{white-space:nowrap;flex-shrink:0}
+  .pc-k{font-size:calc(var(--pv-size, 8.5px) - 1px);color:#888!important;flex-shrink:0;font-weight:700}
+  .pc-v{font-size:var(--pv-size, 8.5px);font-weight:700;color:#1A1410!important;word-break:break-word;line-height:1.3}
   .pc-v-total{font-size:11px;font-weight:900;color:#C9A96E!important}
   .pc-v-total-row{display:flex!important;justify-content:space-between;padding-top:2px;margin-top:2px;border-top:1px solid rgba(0,0,0,.1);width:100%}
 }
@@ -721,6 +721,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v13</span>
     </div>
   </div>
 </div>
@@ -816,6 +817,14 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <button onclick="expandAllDays(true)">توسيع الكل</button>
       <button onclick="expandAllDays(false)">طي الكل</button>
     </div>
+  </div>
+
+  <!-- أوردرات بلا تاريخ صالح -->
+  <div id="orphan-sec" style="display:none;margin-top:16px">
+    <div style="background:#FFF4E5;border:1.5px solid #F0A030;border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:13px;font-weight:800;color:#7A4A00">
+      ⚠️ أوردرات بدون تاريخ تسليم صالح — <span id="orphan-cnt">0</span>
+    </div>
+    <div id="orphan-list"></div>
   </div>
 
   <!-- CALENDAR -->
@@ -944,6 +953,13 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div class="fg"><label>رابط المحادثة</label><input type="url" id="f-link" placeholder="https://..."></div>
     </div>
 
+    <div class="sec-lbl">صور الأوردر <span class="opt">(اختياري)</span></div>
+    <div class="fg">
+      <label>ارفعي صورة أو أكثر (تصميم، مرجع، إلخ)</label>
+      <input type="file" id="f-photos" accept="image/*" multiple>
+      <div class="hint" id="f-photos-hint"></div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearForm()">مسح</button>
       <button class="btn btn-ghost" onclick="saveDraft()" style="border-color:#C9A96E;color:#8A6030">📝 حفظ كمسودة</button>
@@ -988,8 +1004,24 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   </div>
 </div>
 
+<!-- DIAGNOSTIC PANEL -->
+<div id="diag-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#FFF;border-radius:14px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;border-top:3px solid #C9A96E">
+    <div style="padding:14px 18px;border-bottom:1px solid #E5D9C7;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#FFF">
+      <strong style="color:#1A1410;font-size:15px">🔎 تشخيص النظام</strong>
+      <button onclick="document.getElementById('diag-bg').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8B7355">✕</button>
+    </div>
+    <div id="diag-body" style="padding:16px 18px;font-size:13px;color:#2C2218;line-height:1.9"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- LIGHTBOX لتكبير صور الأوردر -->
+<div id="lightbox-bg" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:950;align-items:center;justify-content:center;padding:20px">
+  <img id="lightbox-img" src="" style="max-width:100%;max-height:100%;border-radius:8px">
+</div>
 
 <!-- PRINT MODAL -->
 <!-- ══ PRINT TAB ══ -->
@@ -1069,8 +1101,8 @@ let selectedIds = new Set();
 window.addEventListener('DOMContentLoaded', ()=>loadOrders(true));
 
 // كل كتابة تمر من هنا: تتحقق من نجاح الشيت فعلياً وترمي خطأ واضح إن فشلت
-async function writeToSheet(params){
-  const res = await apiCall(params);
+async function writeToSheet(params, usePost){
+  const res = usePost ? await apiPost(params) : await apiCall(params);
   if(!res || res.success !== true) throw new Error((res && res.error) || 'الشيت لم يؤكد العملية');
   return res;
 }
@@ -1086,6 +1118,7 @@ async function loadOrders(silent){
     renderCal();
     updateStats();
     checkUnparsedDates();
+    logDiag();
     const dashApp = document.getElementById('dash-app');
     if(dashApp && dashApp.style.display === 'block') applyDashFilters();
     if(!silent) toast('✅ تم التحديث — '+allOrders.length+' أوردر');
@@ -1126,23 +1159,43 @@ function nowStamp(){
   const d = new Date();
   return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
-// يقبل: dd/mm/yyyy — yyyy-mm-dd — ISO — نص كائن Date من الشيت
+// ── تنظيف النص: محارف الاتجاه المخفية + الأرقام العربية/الفارسية ──
+function cleanNum(s){
+  return String(s)
+    .replace(/[\u200e\u200f\u061c\u202a-\u202e\u2066-\u2069]/g,'')  // محارف اتجاه
+    .replace(/[\u0660-\u0669]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x0660+48)) // ٠-٩
+    .replace(/[\u06f0-\u06f9]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x06f0+48)) // ۰-۹
+    .replace(/[\u00a0\s]+/g,' ')                                     // مسافات غريبة
+    .trim();
+}
+
+// يقبل: dd/mm/yyyy — dd-mm-yyyy — yyyy-mm-dd — ISO — نص كائن Date — أرقام عربية
 function parseDate(str){
   if(!str) return null;
   if(str instanceof Date) return isNaN(str)?null:new Date(str.getFullYear(),str.getMonth(),str.getDate());
-  const s=String(str).trim();
+  const s = cleanNum(str);
   if(!s) return null;
-  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m) return new Date(+m[3],+m[2]-1,+m[1]);
-  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+
+  let m = s.match(/(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4})/);   // dd/mm/yyyy
+  if(m){
+    let d=+m[1], mo=+m[2];
+    if(d>12 && mo<=12){ /* dd/mm مؤكد */ }
+    else if(mo>12 && d<=12){ const t=d; d=mo; mo=t; }                       // كان mm/dd
+    if(d>=1&&d<=31&&mo>=1&&mo<=12) return new Date(+m[3],mo-1,d);
+  }
+  m = s.match(/(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})/);       // yyyy-mm-dd
   if(m) return new Date(+m[1],+m[2]-1,+m[3]);
-  // نص كائن Date: "Mon Aug 03 2026 ..." — نقرأ المكونات مباشرة لتفادي انزياح المنطقة الزمنية
+
   const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-  m=s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+  m = s.match(/([A-Za-z]{3})[a-z]*\s+(\d{1,2})[,\s]+(\d{4})/);              // Aug 03 2026
   if(m && MON[m[1]]!==undefined) return new Date(+m[3],MON[m[1]],+m[2]);
-  const d=new Date(s);
-  return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  m = s.match(/(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})/);                 // 03 Aug 2026
+  if(m && MON[m[2]]!==undefined) return new Date(+m[3],MON[m[2]],+m[1]);
+
+  const d2=new Date(s);
+  return isNaN(d2)?null:new Date(d2.getFullYear(),d2.getMonth(),d2.getDate());
 }
+
 
 function isToday(d){
   const t=new Date(); t.setHours(0,0,0,0);
@@ -1181,25 +1234,81 @@ function groupWeek(days, orders){
 
 
 // ── CALENDAR RENDER ──
-// تكشف الأوردرات التي لا يُقرأ تاريخها فلا تظهر في التقويم
+// ضمان: أي أوردر لا يُقرأ تاريخه يظهر هنا بدل أن يختفي من النظام
+// لوحة تشخيص تُفتح بالنقر على رقم الإصدار
+function showDiag(){
+  const active = allOrders.filter(o=>!['done','cancelled'].includes((o['Status']||'').toLowerCase()));
+  const byDate = {}; const bad = [];
+  active.forEach(o=>{
+    const d = parseDate(o['Delivery Date']);
+    if(!d){ bad.push(o['Order ID']+' → «'+String(o['Delivery Date']||'فارغ').slice(0,30)+'»'); return; }
+    const k = fmtFull(d);
+    (byDate[k] = byDate[k] || []).push(o['Order ID']);
+  });
+  const keys = Object.keys(byDate).sort((a,b)=>parseDate(a)-parseDate(b));
+  const rows = keys.map(k=>{
+    const d = parseDate(k);
+    return `<tr><td style="padding:3px 6px;border-bottom:1px solid #F0E8DC">${DAYS[d.getDay()]} ${k}</td>
+            <td style="padding:3px 6px;border-bottom:1px solid #F0E8DC;font-weight:800;color:#8A6030">${byDate[k].length}</td>
+            <td style="padding:3px 6px;border-bottom:1px solid #F0E8DC;font-size:11px;color:#8B7355">${byDate[k].join(', ')}</td></tr>`;
+  }).join('');
+  document.getElementById('diag-body').innerHTML =
+    `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
+       <strong>الإصدار:</strong> v13<br>
+       <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
+       <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
+     </div>`
+    + (bad.length ? `<div style="background:#FFF4E5;border:1px solid #F0A030;border-radius:8px;padding:10px 12px;margin-bottom:12px;color:#7A4A00">
+         <strong>⚠️ تواريخ غير مقروءة (${bad.length}):</strong><br>${bad.join('<br>')}</div>` : '')
+    + `<table style="width:100%;border-collapse:collapse;font-size:12px">
+         <tr><th style="text-align:right;padding:4px 6px;border-bottom:2px solid #C9A96E">التاريخ</th>
+             <th style="text-align:right;padding:4px 6px;border-bottom:2px solid #C9A96E">العدد</th>
+             <th style="text-align:right;padding:4px 6px;border-bottom:2px solid #C9A96E">الأوردرات</th></tr>
+         ${rows}</table>`;
+  document.getElementById('diag-bg').style.display='flex';
+}
+
+// ملخص تشخيصي — يظهر في كونسول المتصفح
+function logDiag(){
+  const active = allOrders.filter(o=>!['done','cancelled'].includes((o['Status']||'').toLowerCase()));
+  const byDate = {};
+  active.forEach(o=>{
+    const d = parseDate(o['Delivery Date']);
+    const k = d ? fmtFull(d) : '❌ غير مقروء';
+    (byDate[k] = byDate[k] || []).push(o['Order ID']);
+  });
+  console.log('%c هدايا سلمى v13 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
+  console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
+}
+
 function checkUnparsedDates(){
-  const box=document.getElementById('date-warn');
-  if(!box) return;
-  const bad=allOrders.filter(o=>{
+  const box  = document.getElementById('date-warn');
+  const sec  = document.getElementById('orphan-sec');
+  const list = document.getElementById('orphan-list');
+  const cnt  = document.getElementById('orphan-cnt');
+  if(!sec) return;
+
+  const bad = allOrders.filter(o=>{
     const st=(o['Status']||'').toLowerCase();
     if(['done','cancelled'].includes(st)) return false;
     const raw=o['Delivery Date'];
-    if(!raw) return false;
-    return !parseDate(raw);
+    if(!raw) return true;              // بلا تاريخ إطلاقاً
+    return !parseDate(raw);            // أو تاريخ غير مقروء
   });
-  if(!bad.length){ box.style.display='none'; return; }
-  box.style.display='block';
-  box.innerHTML='⚠️ <strong>'+bad.length+' أوردر لا يظهر في التقويم</strong> — تاريخ التسليم بصيغة غير مقروءة:<br><br>'
-    + bad.slice(0,8).map(o=>'<code style="background:#fff;padding:1px 5px;border-radius:4px">'
-        +o['Order ID']+'</code> → <span style="direction:ltr;display:inline-block">'
-        +String(o['Delivery Date']).slice(0,60)+'</span>').join('<br>')
-    + (bad.length>8?'<br>… و'+(bad.length-8)+' غيرها':'');
+
+  if(box) box.style.display='none';
+
+  if(!bad.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  cnt.textContent = bad.length + ' أوردر';
+  list.innerHTML = bad.map(o=>{
+    const raw = o['Delivery Date'] ? String(o['Delivery Date']).slice(0,40) : '(فارغ)';
+    return miniCard(o).replace('</div>\n  </div>',
+      `</div><div style="font-size:10px;color:#A05000;margin-top:3px;direction:ltr;text-align:right">📅 ${raw}</div></div>`);
+  }).join('');
 }
+
 
 function renderCal(){
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1641,11 +1750,22 @@ function openPanel(id){
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${status===k?'selected':''}>${v.lbl}</option>`).join('');
   const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
 
+  const photos = getPhotos(o);
+  const photosSection = photos.length
+    ? `<div style="margin-top:12px">
+         <div class="psec-ttl" style="margin-bottom:8px">📷 صور الأوردر (${photos.length})</div>
+         <div style="display:flex;flex-wrap:wrap;gap:8px">
+           ${photos.map(u=>`<img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">`).join('')}
+         </div>
+       </div>`
+    : '';
+
   document.getElementById('panel-body').innerHTML=`
     <div class="p2col">
       <div class="psec psec-o"><div class="psec-ttl">📋 معلومات الطلب</div>${oF}</div>
       <div class="psec psec-d"><div class="psec-ttl">🚚 شركة التوصيل</div>${dF}</div>
     </div>
+    ${photosSection}
     ${createdRow}
     <div class="panel-acts">
       <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
@@ -1759,12 +1879,58 @@ function openEdit(id){
     <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="e-dnotes" value="${(o['Delivery Notes']||'').replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>رابط المحادثة</label><input type="url" id="e-link" value="${o['Link']||''}"></div>
 
+    <div class="sec-lbl">صور الأوردر</div>
+    <div id="e-photos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+    <div class="fg">
+      <label>إضافة صور جديدة</label>
+      <input type="file" id="e-photos-new" accept="image/*" multiple onchange="handleEditPhotosUpload('${id}', this)">
+      <div class="hint" id="e-photos-hint"></div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
       <button class="btn btn-gold" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
     </div>`;
 
+  renderEditPhotosGrid(id);
   document.getElementById('edit-panel').classList.add('open');
+}
+
+function renderEditPhotosGrid(id){
+  const o = allOrders.find(o=>o['Order ID']===id);
+  const grid = document.getElementById('e-photos-grid');
+  if(!o || !grid) return;
+  const photos = getPhotos(o);
+  if(!photos.length){ grid.innerHTML = '<div style="font-size:12px;color:#B8A898">لا يوجد صور مرفقة</div>'; return; }
+  grid.innerHTML = photos.map(u=>`
+    <div style="position:relative;width:72px;height:72px">
+      <img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">
+      <button onclick="handleDeleteEditPhoto('${id}','${u.replace(/'/g,"\'")}')"
+        style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;border-radius:50%;background:#C0392B;color:#fff;border:none;font-size:12px;line-height:1;cursor:pointer">✕</button>
+    </div>`).join('');
+}
+
+async function handleEditPhotosUpload(id, inputEl){
+  const files = inputEl.files;
+  if(!files.length) return;
+  document.getElementById('e-photos-hint').textContent = '⏳ جاري الرفع...';
+  const {uploaded, failed} = await uploadPhotosForOrder(id, files);
+  await loadOrders(true);
+  renderEditPhotosGrid(id);
+  inputEl.value = '';
+  document.getElementById('e-photos-hint').textContent = failed
+    ? ('⚠️ رُفعت '+uploaded+' — فشل '+failed)
+    : ('✅ رُفعت '+uploaded+' صورة');
+}
+
+async function handleDeleteEditPhoto(id, url){
+  if(!confirm('حذف هذه الصورة نهائياً؟')) return;
+  const ok = await deletePhotoFromOrder(id, url);
+  if(ok){
+    await loadOrders(true);
+    renderEditPhotosGrid(id);
+    toast('✅ تم حذف الصورة');
+  }
 }
 
 function toInputDate(str){
@@ -1992,6 +2158,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('f-price').addEventListener('input',updatePriceHint);
   buildDelDateOptions();
 
+  const fPhotos = document.getElementById('f-photos');
+  if(fPhotos) fPhotos.addEventListener('change', function(){
+    const n = this.files.length;
+    document.getElementById('f-photos-hint').textContent = n ? '📷 '+n+' صورة محددة' : '';
+  });
+
   // hidden date input change (for custom date option)
   document.getElementById('f-deldate').addEventListener('change',function(){
     if(!this.value) return;
@@ -2102,10 +2274,19 @@ async function saveOrder(){
   btn.textContent='⏳ جاري الحفظ...'; btn.disabled=true;
   try{
     const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data)});
+    const newId = res.id;
+
+    // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
+    const photosInput = document.getElementById('f-photos');
+    if(photosInput && photosInput.files.length){
+      const {uploaded, failed} = await uploadPhotosForOrder(newId, photosInput.files);
+      if(failed) toast('⚠️ رُفعت '+uploaded+' صورة، فشل '+failed);
+    }
+
     clearForm();
     await loadOrders(true);
     switchTab('cal');
-    toast('✅ تم حفظ الأوردر '+(res.id||''));
+    toast('✅ تم حفظ الأوردر '+(newId||''));
   }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
   btn.textContent='💾 حفظ في الشيت'; btn.disabled=false;
 }
@@ -2118,6 +2299,10 @@ function clearForm(){
   document.getElementById('f-deldate').style.display='none';
   document.getElementById('deldate-hint').textContent='';
   document.getElementById('price-hint').textContent='';
+  const fPhotosEl=document.getElementById('f-photos');
+  if(fPhotosEl){ fPhotosEl.value=''; }
+  const fPhotosHint=document.getElementById('f-photos-hint');
+  if(fPhotosHint) fPhotosHint.textContent='';
   // Reset all inputs
   ['f-type','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
@@ -2283,35 +2468,49 @@ function printCard(o){
   const model=MODEL_AR[o['Model']]||o['Model']||'';
   const delDate=o['Delivery Date']||o['Delivery Day']||'—';
 
-  // ── قسم التجهيز — compact inline (يُقطع إذا طال)
+  // ── قسم التجهيز — كل حقل فيه قيمة فعلية يظهر كاملاً بدون أي اقتطاع
   const oItems=[];
   if(type==='Graduation'){
-    oItems.push(['الخريج',bride]);
+    if(bride) oItems.push(['الخريج',bride]);
     if(o['Model']) oItems.push(['التخصص',o['Model']]);
   } else if(type==='Bouquet'){
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes'].slice(0,60)]);
-    if(o['Additions']) oItems.push(['إضافات',o['Additions'].slice(0,40)]);
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
+    if(o['Additions']) oItems.push(['إضافات',o['Additions']]);
   } else {
     if(groom) oItems.push(['العريس',groom]);
     if(bride) oItems.push(['العروس',bride]);
     if(o['Occasion Date']) oItems.push(['التاريخ',o['Occasion Date']]);
     if(model) oItems.push(['الموديل',model]);
     if(['Tray','Guest Book','Package'].includes(type)) oItems.push(['الآية','✅']);
-    if(o['Phrase']) oItems.push(['العبارة',o['Phrase'].slice(0,40)]);
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes'].slice(0,50)]);
-    if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions'].slice(0,30)]);
+    if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
+    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
+    if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions']]);
   }
-  const oRows='<div class="pc-fields">'+oItems.map(([k,v])=>prowInline(k,v)).join('')+'</div>';
+  // حجم خط ديناميكي: كل ما زادت الملاحظات كل ما صغر الخط تلقائياً ليتسع الكارد للكل
+  const totalChars = oItems.reduce((s,[k,v])=>s+String(v).length+String(k).length,0);
+  let pvSize = 8.5;
+  if(totalChars>350) pvSize=6.2;
+  else if(totalChars>250) pvSize=6.8;
+  else if(totalChars>180) pvSize=7.4;
+  else if(totalChars>110) pvSize=8;
+  const LONG_KEYS = new Set(['العبارة','ملاحظات','إضافات']);
+  const shortItems = oItems.filter(([k])=>!LONG_KEYS.has(k));
+  const longItems  = oItems.filter(([k])=>LONG_KEYS.has(k));
+  const shortHtml = shortItems.length
+    ? '<div class="pc-fields-short">'+shortItems.map(([k,v])=>prowInline(k,v,true)).join('')+'</div>' : '';
+  const longHtml = longItems.length
+    ? '<div class="pc-fields-long">'+longItems.map(([k,v])=>prowInline(k,v,false)).join('')+'</div>' : '';
+  const oRows='<div class="pc-fields">'+shortHtml+longHtml+'</div>';
 
-  // ── قسم التوصيل — صفوف واضحة ثابتة (المعلومات الإجبارية فقط)
+  // ── قسم التوصيل — مضغوط، يظهر فقط الحقول التي فيها قيمة
   const dRow = (k,v) => v?`<div class="pc-del-row"><span class="pc-del-k">${k}</span><span class="pc-del-v">${v}</span></div>`:'';
   const location = [prov, o['Area']].filter(Boolean).join(' — ');
   const dRows=
-    dRow('المستلم', o['Recipient']||'—') +
-    dRow('الهاتف',  o['Phone']||'—') +
-    dRow('العنوان', location||'—') +
+    dRow('المستلم', o['Recipient']) +
+    dRow('الهاتف',  o['Phone']) +
+    dRow('العنوان', location) +
     dRow('التسليم', delDate) +
-    (o['Delivery Notes']?dRow('ملاحظات', o['Delivery Notes'].slice(0,40)):'') +
+    dRow('ملاحظات', o['Delivery Notes']) +
     `<div class="pc-del-total">
       <span class="pc-del-total-k">الحساب الكامل</span>
       <span class="pc-del-total-v">${grandTotal} د.أ</span>
@@ -2326,7 +2525,7 @@ function printCard(o){
       <span class="pc-price">${grandTotal} د.أ</span>
     </div>
     <div class="pc-secs">
-      <div class="pc-sec pc-sec-o">
+      <div class="pc-sec pc-sec-o" style="--pv-size:${pvSize}px">
         <div class="pc-sec-ttl">📋 التجهيز</div>
         ${oRows}
       </div>
@@ -2338,8 +2537,8 @@ function printCard(o){
   </div>`;
 }
 
-function prowInline(k,v){
-  return `<div class="pc-row"><span class="pc-k">${k}:</span><span class="pc-v">${v}</span></div>`;
+function prowInline(k,v,isShort){
+  return `<div class="pc-row${isShort?' short':''}"><span class="pc-k">${k}:</span><span class="pc-v">${v}</span></div>`;
 }
 
 function prow(k,v){
@@ -2605,6 +2804,89 @@ function renderDashGovs(){
   const sorted=Object.entries(govs).sort((a,b)=>b[1]-a[1]);
   const max=sorted[0]?.[1]||1;
   document.getElementById('dash-govs').innerHTML='<div class="status-list">'+sorted.map(([g,cnt])=>`<div class="status-item"><div class="status-name">📍 ${g}</div><div class="status-bar-bg"><div class="status-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:#C9A96E"></div></div><div class="status-cnt">${cnt}</div></div>`).join('')+'</div>';
+}
+
+// ── PHOTOS ──
+const PHOTOS_SEP = ';;';
+
+function openLightbox(url){
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox-bg').style.display = 'flex';
+}
+function closeLightbox(){
+  document.getElementById('lightbox-bg').style.display = 'none';
+}
+
+function getPhotos(o){
+  return String(o['Photos']||'').split(PHOTOS_SEP).map(s=>s.trim()).filter(Boolean);
+}
+
+// يضغط الصورة ويصغّرها قبل الرفع (أسرع وأخف على بيانات الموبايل)
+function resizeImageFile(file, maxDim, quality){
+  maxDim = maxDim || 1280; quality = quality || 0.72;
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e=>{
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = ()=>{
+        let w=img.width, h=img.height;
+        if(w>maxDim || h>maxDim){
+          if(w>h){ h=Math.round(h*maxDim/w); w=maxDim; }
+          else{ w=Math.round(w*maxDim/h); h=maxDim; }
+        }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// رفع عبر POST (لا نستخدم GET لأن الصور المضغوطة أكبر من حد رابط URL)
+async function apiPost(params){
+  const body = new URLSearchParams(params);
+  const r = await fetch(API, {method:'POST', body, cache:'no-store'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const text = await r.text();
+  let json;
+  try{ json = JSON.parse(text); }
+  catch(e){ throw new Error('رد غير صالح من السيرفر'); }
+  if(json && json.error) throw new Error(json.error);
+  return json;
+}
+
+// يرفع كل الصور المختارة لأوردر معيّن، مع تقرير التقدّم عبر toast
+async function uploadPhotosForOrder(orderId, fileList){
+  const files = [...fileList];
+  if(!files.length) return {uploaded:0, failed:0};
+  let uploaded=0, failed=0;
+  for(let i=0;i<files.length;i++){
+    toast('📷 رفع الصورة '+(i+1)+'/'+files.length+' ...');
+    try{
+      const b64 = await resizeImageFile(files[i]);
+      const res = await writeToSheet({
+        action:'uploadPhoto',
+        orderId: orderId,
+        photo: b64,
+        fileName: (orderId+'_'+Date.now()+'_'+i+'.jpg'),
+        mimeType: 'image/jpeg'
+      }, true);
+      if(res && res.success) uploaded++; else failed++;
+    }catch(e){ failed++; }
+  }
+  return {uploaded, failed};
+}
+
+async function deletePhotoFromOrder(orderId, url){
+  try{
+    await writeToSheet({action:'deletePhoto', orderId, photoUrl:url}, true);
+    return true;
+  }catch(e){ toast('❌ تعذّر حذف الصورة'); return false; }
 }
 
 // ── DRAFTS ──
