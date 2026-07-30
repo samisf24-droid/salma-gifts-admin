@@ -953,13 +953,6 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div class="fg"><label>رابط المحادثة</label><input type="url" id="f-link" placeholder="https://..."></div>
     </div>
 
-    <div class="sec-lbl">صور الأوردر <span class="opt">(اختياري)</span></div>
-    <div class="fg">
-      <label>ارفعي صورة أو أكثر (تصميم، مرجع، إلخ)</label>
-      <input type="file" id="f-photos" accept="image/*" multiple>
-      <div class="hint" id="f-photos-hint"></div>
-    </div>
-
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearForm()">مسح</button>
       <button class="btn btn-ghost" onclick="saveDraft()" style="border-color:#C9A96E;color:#8A6030">📝 حفظ كمسودة</button>
@@ -1017,11 +1010,6 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- LIGHTBOX لتكبير صور الأوردر -->
-<div id="lightbox-bg" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:950;align-items:center;justify-content:center;padding:20px">
-  <img id="lightbox-img" src="" style="max-width:100%;max-height:100%;border-radius:8px">
-</div>
 
 <!-- PRINT MODAL -->
 <!-- ══ PRINT TAB ══ -->
@@ -1101,8 +1089,8 @@ let selectedIds = new Set();
 window.addEventListener('DOMContentLoaded', ()=>loadOrders(true));
 
 // كل كتابة تمر من هنا: تتحقق من نجاح الشيت فعلياً وترمي خطأ واضح إن فشلت
-async function writeToSheet(params, usePost){
-  const res = usePost ? await apiPost(params) : await apiCall(params);
+async function writeToSheet(params){
+  const res = await apiCall(params);
   if(!res || res.success !== true) throw new Error((res && res.error) || 'الشيت لم يؤكد العملية');
   return res;
 }
@@ -1750,22 +1738,11 @@ function openPanel(id){
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${status===k?'selected':''}>${v.lbl}</option>`).join('');
   const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
 
-  const photos = getPhotos(o);
-  const photosSection = photos.length
-    ? `<div style="margin-top:12px">
-         <div class="psec-ttl" style="margin-bottom:8px">📷 صور الأوردر (${photos.length})</div>
-         <div style="display:flex;flex-wrap:wrap;gap:8px">
-           ${photos.map(u=>`<img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">`).join('')}
-         </div>
-       </div>`
-    : '';
-
   document.getElementById('panel-body').innerHTML=`
     <div class="p2col">
       <div class="psec psec-o"><div class="psec-ttl">📋 معلومات الطلب</div>${oF}</div>
       <div class="psec psec-d"><div class="psec-ttl">🚚 شركة التوصيل</div>${dF}</div>
     </div>
-    ${photosSection}
     ${createdRow}
     <div class="panel-acts">
       <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
@@ -1879,58 +1856,12 @@ function openEdit(id){
     <div class="fg"><label>ملاحظات التوصيل</label><input type="text" id="e-dnotes" value="${(o['Delivery Notes']||'').replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>رابط المحادثة</label><input type="url" id="e-link" value="${o['Link']||''}"></div>
 
-    <div class="sec-lbl">صور الأوردر</div>
-    <div id="e-photos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
-    <div class="fg">
-      <label>إضافة صور جديدة</label>
-      <input type="file" id="e-photos-new" accept="image/*" multiple onchange="handleEditPhotosUpload('${id}', this)">
-      <div class="hint" id="e-photos-hint"></div>
-    </div>
-
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
       <button class="btn btn-gold" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
     </div>`;
 
-  renderEditPhotosGrid(id);
   document.getElementById('edit-panel').classList.add('open');
-}
-
-function renderEditPhotosGrid(id){
-  const o = allOrders.find(o=>o['Order ID']===id);
-  const grid = document.getElementById('e-photos-grid');
-  if(!o || !grid) return;
-  const photos = getPhotos(o);
-  if(!photos.length){ grid.innerHTML = '<div style="font-size:12px;color:#B8A898">لا يوجد صور مرفقة</div>'; return; }
-  grid.innerHTML = photos.map(u=>`
-    <div style="position:relative;width:72px;height:72px">
-      <img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">
-      <button onclick="handleDeleteEditPhoto('${id}','${u.replace(/'/g,"\'")}')"
-        style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;border-radius:50%;background:#C0392B;color:#fff;border:none;font-size:12px;line-height:1;cursor:pointer">✕</button>
-    </div>`).join('');
-}
-
-async function handleEditPhotosUpload(id, inputEl){
-  const files = inputEl.files;
-  if(!files.length) return;
-  document.getElementById('e-photos-hint').textContent = '⏳ جاري الرفع...';
-  const {uploaded, failed} = await uploadPhotosForOrder(id, files);
-  await loadOrders(true);
-  renderEditPhotosGrid(id);
-  inputEl.value = '';
-  document.getElementById('e-photos-hint').textContent = failed
-    ? ('⚠️ رُفعت '+uploaded+' — فشل '+failed)
-    : ('✅ رُفعت '+uploaded+' صورة');
-}
-
-async function handleDeleteEditPhoto(id, url){
-  if(!confirm('حذف هذه الصورة نهائياً؟')) return;
-  const ok = await deletePhotoFromOrder(id, url);
-  if(ok){
-    await loadOrders(true);
-    renderEditPhotosGrid(id);
-    toast('✅ تم حذف الصورة');
-  }
 }
 
 function toInputDate(str){
@@ -2158,12 +2089,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('f-price').addEventListener('input',updatePriceHint);
   buildDelDateOptions();
 
-  const fPhotos = document.getElementById('f-photos');
-  if(fPhotos) fPhotos.addEventListener('change', function(){
-    const n = this.files.length;
-    document.getElementById('f-photos-hint').textContent = n ? '📷 '+n+' صورة محددة' : '';
-  });
-
   // hidden date input change (for custom date option)
   document.getElementById('f-deldate').addEventListener('change',function(){
     if(!this.value) return;
@@ -2274,19 +2199,10 @@ async function saveOrder(){
   btn.textContent='⏳ جاري الحفظ...'; btn.disabled=true;
   try{
     const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data)});
-    const newId = res.id;
-
-    // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
-    const photosInput = document.getElementById('f-photos');
-    if(photosInput && photosInput.files.length){
-      const {uploaded, failed} = await uploadPhotosForOrder(newId, photosInput.files);
-      if(failed) toast('⚠️ رُفعت '+uploaded+' صورة، فشل '+failed);
-    }
-
     clearForm();
     await loadOrders(true);
     switchTab('cal');
-    toast('✅ تم حفظ الأوردر '+(newId||''));
+    toast('✅ تم حفظ الأوردر '+(res.id||''));
   }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
   btn.textContent='💾 حفظ في الشيت'; btn.disabled=false;
 }
@@ -2299,10 +2215,6 @@ function clearForm(){
   document.getElementById('f-deldate').style.display='none';
   document.getElementById('deldate-hint').textContent='';
   document.getElementById('price-hint').textContent='';
-  const fPhotosEl=document.getElementById('f-photos');
-  if(fPhotosEl){ fPhotosEl.value=''; }
-  const fPhotosHint=document.getElementById('f-photos-hint');
-  if(fPhotosHint) fPhotosHint.textContent='';
   // Reset all inputs
   ['f-type','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
@@ -2804,89 +2716,6 @@ function renderDashGovs(){
   const sorted=Object.entries(govs).sort((a,b)=>b[1]-a[1]);
   const max=sorted[0]?.[1]||1;
   document.getElementById('dash-govs').innerHTML='<div class="status-list">'+sorted.map(([g,cnt])=>`<div class="status-item"><div class="status-name">📍 ${g}</div><div class="status-bar-bg"><div class="status-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:#C9A96E"></div></div><div class="status-cnt">${cnt}</div></div>`).join('')+'</div>';
-}
-
-// ── PHOTOS ──
-const PHOTOS_SEP = ';;';
-
-function openLightbox(url){
-  document.getElementById('lightbox-img').src = url;
-  document.getElementById('lightbox-bg').style.display = 'flex';
-}
-function closeLightbox(){
-  document.getElementById('lightbox-bg').style.display = 'none';
-}
-
-function getPhotos(o){
-  return String(o['Photos']||'').split(PHOTOS_SEP).map(s=>s.trim()).filter(Boolean);
-}
-
-// يضغط الصورة ويصغّرها قبل الرفع (أسرع وأخف على بيانات الموبايل)
-function resizeImageFile(file, maxDim, quality){
-  maxDim = maxDim || 1280; quality = quality || 0.72;
-  return new Promise((resolve, reject)=>{
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = e=>{
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = ()=>{
-        let w=img.width, h=img.height;
-        if(w>maxDim || h>maxDim){
-          if(w>h){ h=Math.round(h*maxDim/w); w=maxDim; }
-          else{ w=Math.round(w*maxDim/h); h=maxDim; }
-        }
-        const canvas=document.createElement('canvas');
-        canvas.width=w; canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// رفع عبر POST (لا نستخدم GET لأن الصور المضغوطة أكبر من حد رابط URL)
-async function apiPost(params){
-  const body = new URLSearchParams(params);
-  const r = await fetch(API, {method:'POST', body, cache:'no-store'});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const text = await r.text();
-  let json;
-  try{ json = JSON.parse(text); }
-  catch(e){ throw new Error('رد غير صالح من السيرفر'); }
-  if(json && json.error) throw new Error(json.error);
-  return json;
-}
-
-// يرفع كل الصور المختارة لأوردر معيّن، مع تقرير التقدّم عبر toast
-async function uploadPhotosForOrder(orderId, fileList){
-  const files = [...fileList];
-  if(!files.length) return {uploaded:0, failed:0};
-  let uploaded=0, failed=0;
-  for(let i=0;i<files.length;i++){
-    toast('📷 رفع الصورة '+(i+1)+'/'+files.length+' ...');
-    try{
-      const b64 = await resizeImageFile(files[i]);
-      const res = await writeToSheet({
-        action:'uploadPhoto',
-        orderId: orderId,
-        photo: b64,
-        fileName: (orderId+'_'+Date.now()+'_'+i+'.jpg'),
-        mimeType: 'image/jpeg'
-      }, true);
-      if(res && res.success) uploaded++; else failed++;
-    }catch(e){ failed++; }
-  }
-  return {uploaded, failed};
-}
-
-async function deletePhotoFromOrder(orderId, url){
-  try{
-    await writeToSheet({action:'deletePhoto', orderId, photoUrl:url}, true);
-    return true;
-  }catch(e){ toast('❌ تعذّر حذف الصورة'); return false; }
 }
 
 // ── DRAFTS ──
