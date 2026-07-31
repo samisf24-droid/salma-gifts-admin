@@ -721,7 +721,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v14</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v16</span>
     </div>
   </div>
 </div>
@@ -1071,7 +1071,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div id="print-container" style="display:none"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwQd7oBe5-UZsRmidW5L-IKYDFce85IelauWzhhERWBm_Va1mjncJzo-ELswJ4Zh4ow/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzkrzR3982z7QbFuzH0VRAEd1RWYDaZnos8VMBkUPnrMLD2iU2GeEwbVlq7pWHBj-I-/exec';
 const DELIVERY_FEE = 2;
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 // تطبيع الحالة: الشيت فيه قيم قديمة بأحرف صغيرة (done) وجديدة بكبيرة (Done)
@@ -1254,7 +1254,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v14<br>
+       <strong>الإصدار:</strong> v16<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1277,7 +1277,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v14 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v16 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1914,11 +1914,13 @@ async function handleEditPhotosUpload(id, inputEl){
   const files = inputEl.files;
   if(!files.length) return;
   document.getElementById('e-photos-hint').textContent = '⏳ جاري الرفع...';
-  await uploadPhotosForOrder(id, files);
+  const {failed, lastError} = await uploadPhotosForOrder(id, files);
   await loadOrders(true);
   renderEditPhotosGrid(id);
   inputEl.value = '';
-  document.getElementById('e-photos-hint').textContent = '';
+  document.getElementById('e-photos-hint').textContent = failed
+    ? ('❌ فشل الرفع: '+lastError)
+    : '';
 }
 
 async function handleDeleteEditPhoto(id, url){
@@ -2277,7 +2279,8 @@ async function saveOrder(){
     // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
     const photosInput = document.getElementById('f-photos');
     if(photosInput && photosInput.files.length){
-      await uploadPhotosForOrder(newId, photosInput.files);
+      const {failed, lastError} = await uploadPhotosForOrder(newId, photosInput.files);
+      if(failed) toast('⚠️ الأوردر اتحفظ لكن الصور فشلت: '+lastError);
     }
 
     clearForm();
@@ -2873,13 +2876,13 @@ async function apiPost(params){
 // والرفع الفعلي (شبكة) يبقى صورة بعد وحدة تجنباً لتضارب الكتابة على نفس الصف بالشيت
 async function uploadPhotosForOrder(orderId, fileList){
   const files = [...fileList];
-  if(!files.length) return {uploaded:0, failed:0};
+  if(!files.length) return {uploaded:0, failed:0, lastError:null};
 
   const compressed = await Promise.all(files.map(f=>resizeImageFile(f).catch(()=>null)));
 
-  let uploaded=0, failed=0;
+  let uploaded=0, failed=0, lastError=null;
   for(let i=0;i<compressed.length;i++){
-    if(!compressed[i]){ failed++; continue; }
+    if(!compressed[i]){ failed++; lastError='تعذّر تجهيز الصورة'; continue; }
     toast('📷 رفع الصورة '+(i+1)+'/'+compressed.length+' ...');
     try{
       const res = await writeToSheet({
@@ -2889,10 +2892,11 @@ async function uploadPhotosForOrder(orderId, fileList){
         fileName: (orderId+'_'+Date.now()+'_'+i+'.jpg'),
         mimeType: 'image/jpeg'
       }, true);
-      if(res && res.success) uploaded++; else failed++;
-    }catch(e){ failed++; }
+      if(res && res.success) uploaded++;
+      else { failed++; lastError = (res && res.error) || 'خطأ غير معروف من الشيت'; }
+    }catch(e){ failed++; lastError = e.message; }
   }
-  return {uploaded, failed};
+  return {uploaded, failed, lastError};
 }
 
 async function deletePhotoFromOrder(orderId, url){
