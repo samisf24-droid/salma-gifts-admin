@@ -227,7 +227,10 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .mc-type.t-other  {background:#EEF0F3;color:#374151;border:1px solid #E5E7EB}
 /* عناوين الأسابيع */
 .wk-total{display:block;margin-top:4px;background:#C9A96E;color:#1A1410;border-radius:9999px;padding:1px 8px;font-size:10px;font-weight:900}
-.td-date-lbl{font-size:10px;font-weight:800;color:#8B7355;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #EFE7DA;text-align:center}
+.td-date-lbl{font-size:10px;font-weight:800;color:#8B7355;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #EFE7DA;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;position:relative}
+.day-dots{background:none;border:none;color:#8B7355;font-size:14px;font-weight:900;cursor:pointer;padding:2px 6px;line-height:1;border-radius:4px;flex-shrink:0}
+.day-dots:active{background:#EFE7DA}
+.cal-day-block-hdr .day-dots{color:#C9A96E;margin-right:auto;font-size:16px}
 .td-date-lbl.is-today{color:#8A6030;background:#FAF5EC;border-radius:5px;padding:2px 4px}
 .wk-sec{margin-bottom:16px}
 .wk-sec-hdr{display:flex;align-items:center;gap:8px;background:#EFE7DA;border:1px solid #E5D9C7;border-radius:9px;padding:9px 13px;margin-bottom:8px}
@@ -412,6 +415,9 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   .pc-v{font-size:var(--pv-size, 8.5px);font-weight:700;color:#1A1410!important;word-break:break-word;line-height:1.3}
   .pc-v-total{font-size:11px;font-weight:900;color:#C9A96E!important}
   .pc-v-total-row{display:flex!important;justify-content:space-between;padding-top:2px;margin-top:2px;border-top:1px solid rgba(0,0,0,.1);width:100%}
+  /* مصغّرات الصور — حجم ثابت لا يتأثر بحجم الخط الديناميكي أو ارتفاع الكارد */
+  .pc-photos{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+  .pc-photo-thumb{width:26px;height:26px;object-fit:cover;border-radius:3px;border:1px solid #CCC;flex-shrink:0}
 }
 
 /* ── CONTRAST RULES — نص دائماً مقروء على خلفيته ── */
@@ -426,6 +432,15 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .panel .st-sel,.edit-panel .st-sel{color:#2C2218 !important;background:#FFF8EE !important}
 .panel .btn-ghost,.edit-panel .btn-ghost{color:#8B7355 !important}
 .panel .btn-gold,.edit-panel .btn-gold{color:#1A1410 !important}
+
+/* ── MULTI-SELECT DROPDOWN ── */
+.ms-dropdown{position:relative;margin-bottom:16px}
+.ms-trigger{width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:11px 14px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;color:#1A1410;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(60,30,10,.06)}
+.ms-trigger:focus{outline:none;border-color:#C9A96E}
+.ms-arrow{color:#8B7355;font-size:12px;transition:transform 150ms ease}
+.ms-dropdown.open .ms-arrow{transform:rotate(180deg)}
+.ms-panel{display:none;position:absolute;top:calc(100% + 4px);right:0;left:0;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;padding:10px;z-index:50;max-height:320px;overflow-y:auto;box-shadow:0 8px 24px rgba(60,30,10,.14)}
+.ms-dropdown.open .ms-panel{display:block}
 
 /* ── PRINT CHECKBOXES ── */
 .pday-cb{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #E5D9C7;border-radius:8px;cursor:pointer;background:#FFFFFF;transition:border-color 150ms ease}
@@ -494,6 +509,8 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 /* LOADING / TOAST */
 .loading{text-align:center;padding:40px;color:var(--muted)}
 .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+.btn-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,20,16,.25);border-top-color:#1A1410;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.hint-spinner{display:inline-block;width:11px;height:11px;border:2px solid rgba(201,169,110,.3);border-top-color:#C9A96E;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;vertical-align:middle;margin-left:5px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -717,11 +734,11 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
   <div style="display:flex;align-items:center;gap:10px">
-    <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:13px;font-weight:800;padding:7px 14px;font-family:Tajawal,sans-serif;display:flex;align-items:center;gap:5px">↻ تحديث</button>
+    <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 10px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:118px;height:34px;flex-shrink:0">↻ تحديث</button>
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v16</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v20</span>
     </div>
   </div>
 </div>
@@ -912,14 +929,43 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
     <div id="bouquet-fields" style="display:none">
       <div class="sec-lbl">بيانات مسكة العروس</div>
-      <div class="fg"><label>ملاحظات <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-notes" placeholder="مثال: ورد أبيض، حجم كبير..."></div>
-      <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-add" placeholder="مثال: شريط، غلاف..."></div>
+      <div class="fg"><label>موديل المسكة <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-model" placeholder="مثال: توليب مع تل..."></div>
+
+      <div class="fg">
+        <label>إرفاق صورة المسكة <span class="opt">(اختياري)</span></label>
+        <label for="f-photos" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:11px 14px;font-family:Tajawal,sans-serif;font-size:15px;font-weight:700;color:#8A6030">
+          📷 اختيار صورة من المعرض
+        </label>
+        <div class="hint" id="bq-photo-hint"></div>
+      </div>
+
+      <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-bouquet-notes" placeholder="مثال: ورد أبيض، حجم كبير..." style="min-height:70px"></textarea></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px">
+        <span class="sec-lbl" style="margin:0;border:none;padding:0">الإضافات</span>
+        <button type="button" onclick="addBouquetAdditionRow()" style="background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:3px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة</button>
+      </div>
+      <div id="bq-additions-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+
+      <button type="button" onclick="toggleTaliqaForm()" style="background:#FAF5EC;border:1.5px dashed #C9A96E;color:#8A6030;border-radius:8px;padding:9px 12px;width:100%;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:10px">➕ إضافة تعليقة <span style="font-weight:600;opacity:.75">(٢ د.أ إضافية)</span></button>
+
+      <div id="bq-taliqa-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+        <div class="form-grid">
+          <div class="fg"><label>اسم العريس</label><input type="text" id="bq-t-groom"></div>
+          <div class="fg"><label>اسم العروس</label><input type="text" id="bq-t-bride"></div>
+          <div class="fg"><label>التاريخ</label><input type="date" id="bq-t-date"></div>
+          <div class="fg"><label>ملاحظات</label><input type="text" id="bq-t-notes"></div>
+        </div>
+        <button type="button" onclick="confirmTaliqaAddition()" class="btn btn-gold" style="margin-top:6px">✅ إضافة التعليقة</button>
+      </div>
     </div>
 
-    <div class="sec-lbl">العبارة والملاحظات</div>
-    <div class="fg"><label>عبارة خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-phrase"></div>
-    <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-notes" placeholder="مثال: علب الدبل فوق، بدون أحرف..."></textarea></div>
-    <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-additions" placeholder="مثال: ستاند، قصاصات..."></div>
+    <div id="generic-phrase-section">
+      <div class="sec-lbl">العبارة والملاحظات</div>
+      <div class="fg"><label>عبارة خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-phrase"></div>
+      <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-notes" placeholder="مثال: علب الدبل فوق، بدون أحرف..."></textarea></div>
+      <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-additions" placeholder="مثال: ستاند، قصاصات..."></div>
+    </div>
 
     <div class="sec-lbl">بيانات التوصيل</div>
     <div class="form-grid">
@@ -953,11 +999,13 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div class="fg"><label>رابط المحادثة</label><input type="url" id="f-link" placeholder="https://..."></div>
     </div>
 
-    <div class="sec-lbl">صور الأوردر <span class="opt">(اختياري)</span></div>
-    <div class="fg">
-      <input type="file" id="f-photos" accept="image/*" multiple style="display:none">
-      <label for="f-photos" class="btn btn-ghost" style="border-color:#C9A96E;color:#8A6030;width:auto;display:inline-flex;cursor:pointer">📷 اختيار صور من المعرض</label>
-      <div class="hint" id="f-photos-hint"></div>
+    <input type="file" id="f-photos" accept="image/*" multiple style="display:none">
+    <div id="generic-photo-section">
+      <div class="sec-lbl">صور الأوردر <span class="opt">(اختياري)</span></div>
+      <div class="fg">
+        <label for="f-photos" class="btn btn-ghost" style="border-color:#C9A96E;color:#8A6030;width:auto;display:inline-flex;cursor:pointer">📷 اختيار صور من المعرض</label>
+        <div class="hint" id="f-photos-hint"></div>
+      </div>
     </div>
 
     <div class="btn-row">
@@ -1018,6 +1066,12 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- قائمة النقاط الثلاث لكل يوم -->
+<div id="day-menu-popover" style="display:none;position:fixed;z-index:960;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;box-shadow:0 8px 24px rgba(60,30,10,.18);min-width:210px;overflow:hidden">
+  <button onclick="dayMenuAction('print')" style="display:block;width:100%;text-align:right;background:none;border:none;padding:12px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#1A1410;cursor:pointer">🖨️ طباعة كل طلبات هذا اليوم</button>
+  <button onclick="dayMenuAction('status')" style="display:block;width:100%;text-align:right;background:none;border:none;padding:12px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#1A1410;cursor:pointer;border-top:1px solid #F0E8DC">🔄 تغيير حالة الكل</button>
+</div>
+
 <!-- LIGHTBOX لتكبير صور الأوردر -->
 <div id="lightbox-bg" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:950;align-items:center;justify-content:center;padding:20px">
   <img id="lightbox-img" src="" style="max-width:100%;max-height:100%;border-radius:8px">
@@ -1029,38 +1083,50 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="form-card">
     <div class="form-ttl">🖨️ طباعة الأوردرات</div>
 
-    <!-- Days checkboxes -->
-    <div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="sec-lbl" style="margin:0;border:none;padding:0">اختر الأيام</div>
-        <div style="display:flex;gap:10px">
-          <button onclick="selectAllDays(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
-          <button onclick="selectAllDays(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+    <div class="sec-lbl">الأيام</div>
+    <div class="ms-dropdown" id="ms-days">
+      <button type="button" class="ms-trigger" onclick="toggleMsDropdown('days')">
+        <span id="ms-days-summary">اختر الأيام...</span>
+        <span class="ms-arrow">▾</span>
+      </button>
+      <div class="ms-panel" id="ms-days-panel">
+        <div style="display:flex;justify-content:space-between;padding:4px 2px 8px">
+          <button type="button" onclick="selectAllDays(true)" style="background:none;border:none;font-size:11px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
+          <button type="button" onclick="selectAllDays(false)" style="background:none;border:none;font-size:11px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
         </div>
-      </div>
-      <div id="print-days-checkboxes" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-
-    <!-- Status filter -->
-    <div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="sec-lbl" style="margin:0;border:none;padding:0">الحالة</div>
-        <div style="display:flex;gap:10px">
-          <button onclick="selectAllStatus(true)" style="background:none;border:none;font-size:12px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
-          <button onclick="selectAllStatus(false)" style="background:none;border:none;font-size:12px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+        <div id="print-days-checkboxes" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div id="ms-custom-date-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #EFE7DA">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#4A3728;cursor:pointer">
+            <span>📅 اختيار تاريخ محدد</span>
+            <input type="date" id="ms-custom-date-input" onchange="addCustomPrintDate(this.value)" style="flex:1;min-width:0;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:6px;padding:5px 8px;font-family:Tajawal,sans-serif;font-size:12px">
+          </label>
         </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="print-status-checkboxes">
-        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="New" checked><div class="pday-cb-info"><div class="pday-cb-name">طلب جديد</div></div></label>
-        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Preparing" checked><div class="pday-cb-info"><div class="pday-cb-name">جاري التجهيز</div></div></label>
-        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Shipped" checked><div class="pday-cb-info"><div class="pday-cb-name">مع التوصيل</div></div></label>
-        <label class="pday-cb"><input type="checkbox" name="print-status" value="Done"><div class="pday-cb-info"><div class="pday-cb-name">تم التسليم</div></div></label>
-        <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="Waiting" checked><div class="pday-cb-info"><div class="pday-cb-name">بانتظار تأكيد</div></div></label>
-        <label class="pday-cb"><input type="checkbox" name="print-status" value="Cancelled"><div class="pday-cb-info"><div class="pday-cb-name">ملغي</div></div></label>
       </div>
     </div>
 
-    <button class="popt" onclick="doPrint()" style="width:100%">
+    <div class="sec-lbl">الحالة</div>
+    <div class="ms-dropdown" id="ms-status">
+      <button type="button" class="ms-trigger" onclick="toggleMsDropdown('status')">
+        <span id="ms-status-summary">طلب جديد</span>
+        <span class="ms-arrow">▾</span>
+      </button>
+      <div class="ms-panel" id="ms-status-panel">
+        <div style="display:flex;justify-content:space-between;padding:4px 2px 8px">
+          <button type="button" onclick="selectAllStatus(true)" style="background:none;border:none;font-size:11px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
+          <button type="button" onclick="selectAllStatus(false)" style="background:none;border:none;font-size:11px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="print-status-checkboxes">
+          <label class="pday-cb has-orders"><input type="checkbox" name="print-status" value="New" checked onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">طلب جديد</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-status" value="Preparing" onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">جاري التجهيز</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-status" value="Shipped" onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">مع التوصيل</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-status" value="Done" onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">تم التسليم</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-status" value="Waiting" onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">بانتظار تأكيد</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-status" value="Cancelled" onchange="updateMsSummary('status')"><div class="pday-cb-info"><div class="pday-cb-name">ملغي</div></div></label>
+        </div>
+      </div>
+    </div>
+
+    <button class="popt" onclick="doPrint()" style="width:100%;margin-top:6px">
       <span class="popt-ico">🖨️</span>
       <span class="popt-name">طباعة الكاردات الآن</span>
     </button>
@@ -1254,7 +1320,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v16<br>
+       <strong>الإصدار:</strong> v20<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1277,7 +1343,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v16 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v20 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1357,7 +1423,10 @@ function renderCal(){
       const tod  = isToday(dt);
       const list = grouped[i];
       body += `<td class="${tod?'today-td':''}">
-        <div class="td-date-lbl ${tod?'is-today':''}">${fmtShort(dt)}${list.length?` · ${list.length}`:''}</div>
+        <div class="td-date-lbl ${tod?'is-today':''}">
+          <span>${fmtShort(dt)}${list.length?` · ${list.length}`:''}</span>
+          <button class="day-dots no-print" onclick="openDayMenu('${fmtFull(dt)}', event)">⋮</button>
+        </div>
         ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">—</div>'}
         <button class="mc-add no-print" onclick="openAddForDate('${fmtFull(dt)}')">+ إضافة</button>
       </td>`;
@@ -1391,6 +1460,7 @@ function renderCalMobile(weeksData){
           <span class="cal-day-block-name">${DAYS[dt.getDay()]}${tod?' — اليوم':''}</span>
           <span class="cal-day-block-date">${fmtShort(dt)}</span>
           <span class="cal-day-block-cnt ${list.length?'':'zero'}">${list.length}</span>
+          <button class="day-dots" onclick="openDayMenu('${key}', event)">⋮</button>
         </div>
         <div class="cal-day-block-body">
           ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
@@ -1428,6 +1498,28 @@ function expandAllDays(open){
     if(open){ calOpenDays.add(key); calClosedDays.delete(key); }
     else    { calClosedDays.add(key); calOpenDays.delete(key); }
   });
+}
+
+// يستخرج اسم العريس والعروس من نص التعليقة المخزّن ضمن Additions
+function extractTaliqaNames(additions){
+  if(!additions) return null;
+  const m = String(additions).match(/تعليقة\s*\(([^)]+)\)/);
+  if(!m) return null;
+  const names = m[1].split(/[,،]/).map(s=>s.trim()).filter(Boolean);
+  return names.length ? names.join(' و ') : null;
+}
+
+// التسمية الموحّدة لأي أوردر — تُستخدم في كل مكان (كاردات، بحث، طباعة، داشبورد)
+function getOrderNames(o){
+  const type = o['Product Type']||'';
+  const groom = o['Groom']||''; const bride = o['Bride']||'';
+  if(type==='Graduation') return bride;
+  if(type==='Bouquet'){
+    const taliqaNames = extractTaliqaNames(o['Additions']);
+    if(taliqaNames) return 'مسكة عروس — ('+taliqaNames+')';
+    return 'مسكة عروس — ('+(o['Recipient']||'—')+')';
+  }
+  return [bride,groom].filter(Boolean).join(' ❤️ ');
 }
 
 function typeClass(t){
@@ -1612,7 +1704,7 @@ function searchItemHTML(o, q){
   const id=o['Order ID']||'';
   const type=o['Product Type']||'';
   const groom=o['Groom']||''; const bride=o['Bride']||'';
-  const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
+  const names=getOrderNames(o);
   const status=normStatus(o);
   const st=STATUSES[status]||STATUSES.New;
   const dd=o['Delivery Date']||o['Delivery Day']||'—';
@@ -1646,7 +1738,7 @@ function showSearchPanel(results, q){
     const id=o['Order ID']||'';
     const type=o['Product Type']||'';
     const groom=o['Groom']||''; const bride=o['Bride']||'';
-    const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
+    const names=getOrderNames(o);
     const status=normStatus(o);
     const st=STATUSES[status]||STATUSES.New;
     const typeAr=TYPE_AR[type]||type;
@@ -1712,8 +1804,13 @@ function openPanel(id){
     oF+=pr('الخريج',bride);
     if(o['Model']) oF+=pr('التخصص',o['Model']);
   } else if(type==='Bouquet'){
+    if(o['Model']) oF+=pr('الموديل',o['Model']);
     if(o['Notes']) oF+=pr('ملاحظات',o['Notes']);
-    if(o['Additions']) oF+=pr('إضافات',o['Additions']);
+    const rawAdd2 = String(o['Additions']||'');
+    const taliqaM2 = rawAdd2.match(/تعليقة[^|]*/);
+    if(taliqaM2) oF+=pr('التعليقة', taliqaM2[0].trim());
+    const restAdd2 = rawAdd2.replace(/تعليقة[^|]*\|?/,'').split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+    if(restAdd2) oF+=pr('إضافات', restAdd2);
   } else {
     if(groom) oF+=pr('العريس',groom);
     if(bride) oF+=pr('العروس',bride);
@@ -1751,14 +1848,25 @@ function openPanel(id){
   const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
 
   const photos = getPhotos(o);
-  const photosSection = photos.length
-    ? `<div style="margin-top:12px">
-         <div class="psec-ttl" style="margin-bottom:8px">📷 صور الأوردر (${photos.length})</div>
-         <div style="display:flex;flex-wrap:wrap;gap:8px">
-           ${photos.map(u=>`<img src="${u}" onclick="openLightbox('${u.replace(/'/g,"\'")}')" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">`).join('')}
-         </div>
-       </div>`
-    : '';
+  const emptyBigTile = `<label id="panel-photo-add-btn" style="cursor:pointer;width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px dashed #E5D9C7;border-radius:8px;background:#FFF8EE;color:#C9A96E;font-size:28px;font-weight:900;flex-shrink:0">
+    +
+    <input type="file" accept="image/*" multiple onchange="handleQuickAddPhoto('${id}', this)" style="display:none">
+  </label>`;
+  const smallAddLink = `<label id="panel-photo-add-btn" style="cursor:pointer;color:#C9A96E;font-weight:800;font-size:12px;display:flex;align-items:center;gap:4px">
+    + إضافة صورة
+    <input type="file" accept="image/*" multiple onchange="handleQuickAddPhoto('${id}', this)" style="display:none">
+  </label>`;
+
+  const photosSection = `<div style="margin-top:12px" id="panel-photos-section">
+    <div class="psec-ttl" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+      <span>📷 صور الأوردر (${photos.length})</span>
+      ${photos.length ? smallAddLink : ''}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="panel-photos-grid">
+      ${photos.length ? photos.map(u=>printPanelThumb(u)).join('') : emptyBigTile}
+    </div>
+    <div class="hint" id="panel-photos-hint"></div>
+  </div>`;
 
   document.getElementById('panel-body').innerHTML=`
     <div class="p2col">
@@ -1778,6 +1886,49 @@ function openPanel(id){
     </div>`;
 
   document.getElementById('panel').classList.add('open');
+}
+
+function printPanelThumb(u){
+  return '<img src="'+u+'" onclick="openLightbox(\''+u.replace(/'/g,"\\'")+'\')" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1.5px solid #E5D9C7;cursor:pointer">';
+}
+
+// إضافة صورة سريعة من نافذة التفاصيل مباشرة — بدون الدخول لشاشة التعديل
+function renderPanelPhotosHeaderAndGrid(id){
+  const o = allOrders.find(o=>o['Order ID']===id);
+  if(!o) return;
+  const photos = getPhotos(o);
+  const emptyBigTile = `<label id="panel-photo-add-btn" style="cursor:pointer;width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px dashed #E5D9C7;border-radius:8px;background:#FFF8EE;color:#C9A96E;font-size:28px;font-weight:900;flex-shrink:0">
+    +
+    <input type="file" accept="image/*" multiple onchange="handleQuickAddPhoto('${id}', this)" style="display:none">
+  </label>`;
+  const smallAddLink = `<label id="panel-photo-add-btn" style="cursor:pointer;color:#C9A96E;font-weight:800;font-size:12px;display:flex;align-items:center;gap:4px">
+    + إضافة صورة
+    <input type="file" accept="image/*" multiple onchange="handleQuickAddPhoto('${id}', this)" style="display:none">
+  </label>`;
+
+  const titleEl = document.querySelector('#panel-photos-section .psec-ttl');
+  if(titleEl) titleEl.innerHTML = `<span>📷 صور الأوردر (${photos.length})</span>${photos.length?smallAddLink:''}`;
+  const grid = document.getElementById('panel-photos-grid');
+  if(grid) grid.innerHTML = photos.length ? photos.map(u=>printPanelThumb(u)).join('') : emptyBigTile;
+}
+
+async function handleQuickAddPhoto(id, inputEl){
+  const files = inputEl.files;
+  if(!files.length) return;
+  const addBtn = document.getElementById('panel-photo-add-btn');
+  const hintEl0 = document.getElementById('panel-photos-hint');
+  if(addBtn){ addBtn.style.pointerEvents='none'; addBtn.style.opacity='.5'; }
+  if(hintEl0) hintEl0.innerHTML = '<span class="hint-spinner"></span> جاري رفع الصور...';
+
+  const {failed, lastError} = await uploadPhotosForOrder(id, files);
+  await loadOrders(true);
+  inputEl.value = '';
+
+  const hintEl = document.getElementById('panel-photos-hint');
+  if(hintEl) hintEl.textContent = failed ? ('❌ فشل الرفع: '+lastError) : '';
+
+  renderPanelPhotosHeaderAndGrid(id);
+  if(!failed) toast('✅ تم رفع الصور بنجاح');
 }
 
 function pr(k,v){ return `<div class="pr"><span class="prk">${k}</span><span class="prv">${v}</span></div>`; }
@@ -1883,13 +2034,13 @@ function openEdit(id){
     <div id="e-photos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
     <div class="fg">
       <input type="file" id="e-photos-new" accept="image/*" multiple onchange="handleEditPhotosUpload('${id}', this)" style="display:none">
-      <label for="e-photos-new" class="btn btn-ghost" style="border-color:#C9A96E;color:#8A6030;width:auto;display:inline-flex;cursor:pointer">📷 إضافة صور من المعرض</label>
+      <label for="e-photos-new" id="e-photos-add-btn" class="btn btn-ghost" style="border-color:#C9A96E;color:#8A6030;width:auto;display:inline-flex;cursor:pointer">📷 إضافة صور من المعرض</label>
       <div class="hint" id="e-photos-hint"></div>
     </div>
 
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
-      <button class="btn btn-gold" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
+      <button class="btn btn-gold" id="edit-save-btn" onclick="applyEdit('${id}')">💾 حفظ التعديل</button>
     </div>`;
 
   renderEditPhotosGrid(id);
@@ -1913,14 +2064,20 @@ function renderEditPhotosGrid(id){
 async function handleEditPhotosUpload(id, inputEl){
   const files = inputEl.files;
   if(!files.length) return;
-  document.getElementById('e-photos-hint').textContent = '⏳ جاري الرفع...';
+  const addBtn = document.getElementById('e-photos-add-btn');
+  const hintEl0 = document.getElementById('e-photos-hint');
+  if(addBtn){ addBtn.style.pointerEvents='none'; addBtn.style.opacity='.5'; }
+  if(hintEl0) hintEl0.innerHTML = '<span class="hint-spinner"></span> جاري رفع الصور...';
+
   const {failed, lastError} = await uploadPhotosForOrder(id, files);
   await loadOrders(true);
   renderEditPhotosGrid(id);
   inputEl.value = '';
-  document.getElementById('e-photos-hint').textContent = failed
-    ? ('❌ فشل الرفع: '+lastError)
-    : '';
+
+  if(addBtn){ addBtn.style.pointerEvents=''; addBtn.style.opacity=''; }
+  const hintEl = document.getElementById('e-photos-hint');
+  if(hintEl) hintEl.textContent = failed ? ('❌ فشل الرفع: '+lastError) : '';
+  if(!failed) toast('✅ تم رفع الصور بنجاح');
 }
 
 async function handleDeleteEditPhoto(id, url){
@@ -1980,12 +2137,17 @@ async function applyEdit(id){
     'Delivery Notes': getVal('e-dnotes'),
     Link:           getVal('e-link'),
   };
+  const editBtn = document.getElementById('edit-save-btn');
+  if(editBtn){ editBtn.disabled=true; editBtn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...'; }
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     closeEdit();
     await loadOrders(true);
     toast('✅ تم حفظ التعديل');
-  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
+  }catch(e){
+    toast('❌ لم يُحفظ: '+e.message);
+    if(editBtn){ editBtn.disabled=false; editBtn.innerHTML = '💾 حفظ التعديل'; }
+  }
 }
 
 function openReschedule(id){
@@ -2010,7 +2172,7 @@ function openReschedule(id){
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
-      <button class="btn btn-gold" onclick="applyReschedule('${id}')">💾 حفظ الموعد الجديد</button>
+      <button class="btn btn-gold" id="resched-save-btn" onclick="applyReschedule('${id}')">💾 حفظ الموعد الجديد</button>
     </div>`;
   // Date hint
   document.getElementById('r-deldate').addEventListener('change',function(){
@@ -2030,12 +2192,17 @@ async function applyReschedule(id){
     'Delivery Date': fmtFull(deldateObj),
     'Delivery Day': dayNames[deldateObj.getDay()],
   };
+  const rBtn = document.getElementById('resched-save-btn');
+  if(rBtn){ rBtn.disabled=true; rBtn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...'; }
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     closeEdit();
     await loadOrders(true);
     toast('✅ تم تغيير الموعد إلى '+data['Delivery Date']);
-  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
+  }catch(e){
+    toast('❌ لم يُحفظ: '+e.message);
+    if(rBtn){ rBtn.disabled=false; rBtn.innerHTML = '💾 حفظ الموعد الجديد'; }
+  }
 }
 
 function closeEdit(){ document.getElementById('edit-panel').classList.remove('open'); }
@@ -2138,12 +2305,95 @@ function toggleFields(){
   document.getElementById('grad-fields').style.display=t==='Graduation'?'block':'none';
   document.getElementById('model-fields').style.display=hasTray?'block':'none';
   document.getElementById('bouquet-fields').style.display=isBouquet?'block':'none';
+  // للمسكات: قسم الصور المختصر يغني عن القسم العام بأسفل الفورم
+  const genericPhoto = document.getElementById('generic-photo-section');
+  if(genericPhoto) genericPhoto.style.display = isBouquet ? 'none' : 'block';
+  const genericPhrase = document.getElementById('generic-phrase-section');
+  if(genericPhrase) genericPhrase.style.display = isBouquet ? 'none' : 'block';
   document.querySelectorAll('.bookdate-f').forEach(el=>el.style.display=['Guest Book','Package'].includes(t)?'block':'none');
   document.querySelectorAll('.pkg-f').forEach(el=>el.style.display=t==='Package'?'block':'none');
   const prices={Tray:15,'Guest Book':9,Package:22,Graduation:13,Bouquet:18};
   if(prices[t]) document.getElementById('f-price').value=prices[t];
+  if(!isBouquet) resetBouquetAdditions(); // لا داعي لبقاء إضافات مسكة إذا غيّرت النوع
   updatePriceHint();
 }
+// ── إضافات مسكة العروس (بناء ديناميكي + تعليقة بسعر إضافي) ──
+function addBouquetAdditionRow(value){
+  value = value || '';
+  const list = document.getElementById('bq-additions-list');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  row.innerHTML = `
+    <input type="text" class="bq-add-input" value="${value.replace(/"/g,'&quot;')}" placeholder="مثال: شريط، غلاف..." style="flex:1;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none">
+    <button type="button" onclick="removeBouquetAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>`;
+  list.appendChild(row);
+  if(!value) row.querySelector('input').focus();
+}
+
+function removeBouquetAdditionRow(btn){
+  const row = btn.closest('div');
+  if(row.dataset.taliqa === '1'){
+    const priceEl = document.getElementById('f-price');
+    const cur = parseFloat(priceEl.value)||0;
+    priceEl.value = Math.max(0, cur-2);
+    updatePriceHint();
+    toast('تم خصم ٢ د.أ (إزالة التعليقة)');
+  }
+  row.remove();
+}
+
+function toggleTaliqaForm(){
+  const el = document.getElementById('bq-taliqa-form');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+function confirmTaliqaAddition(){
+  const groom = document.getElementById('bq-t-groom').value.trim();
+  const bride = document.getElementById('bq-t-bride').value.trim();
+  const dateRaw = document.getElementById('bq-t-date').value;
+  const notes = document.getElementById('bq-t-notes').value.trim();
+
+  if(!groom && !bride){ toast('❌ أدخلي اسم العريس أو العروس على الأقل'); return; }
+
+  const dateStr = dateRaw ? fmtFull(new Date(dateRaw+'T00:00:00')) : '';
+  const names = [groom,bride].filter(Boolean).join(' ، ');
+  const text = 'تعليقة ('+names+')'+(dateStr?' '+dateStr:'')+(notes?' - '+notes:'');
+
+  const list = document.getElementById('bq-additions-list');
+  const row = document.createElement('div');
+  row.dataset.taliqa = '1';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  row.innerHTML = `
+    <input type="text" class="bq-add-input" value="${text.replace(/"/g,'&quot;')}" readonly style="flex:1;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#8A6030;outline:none">
+    <button type="button" onclick="removeBouquetAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>`;
+  list.appendChild(row);
+
+  // +2 د.أ لكل تعليقة تُضاف
+  const priceEl = document.getElementById('f-price');
+  priceEl.value = (parseFloat(priceEl.value)||0) + 2;
+  updatePriceHint();
+
+  // تصفير مربعات نافذة التعليقة وإغلاقها
+  ['bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bq-taliqa-form').style.display='none';
+  toast('✅ أُضيفت التعليقة (+٢ د.أ)');
+}
+
+function getBouquetAdditionsJoined(){
+  return [...document.querySelectorAll('#bq-additions-list .bq-add-input')]
+    .map(i=>i.value.trim()).filter(Boolean).join(' | ');
+}
+
+function resetBouquetAdditions(){
+  const list = document.getElementById('bq-additions-list');
+  if(list) list.innerHTML = '';
+  const tform = document.getElementById('bq-taliqa-form');
+  if(tform) tform.style.display = 'none';
+  ['bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
 function toggleModelOther(){
   const isO=document.getElementById('f-model').value==='Other';
   document.querySelectorAll('.model-other-f').forEach(el=>el.style.display=isO?'block':'none');
@@ -2161,7 +2411,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const fPhotos = document.getElementById('f-photos');
   if(fPhotos) fPhotos.addEventListener('change', function(){
     const n = this.files.length;
-    document.getElementById('f-photos-hint').textContent = n ? '📷 '+n+' صورة محددة' : '';
+    const msg = n ? '📷 '+n+' صورة محددة' : '';
+    const h1 = document.getElementById('f-photos-hint'); if(h1) h1.textContent = msg;
+    const h2 = document.getElementById('bq-photo-hint'); if(h2) h2.textContent = msg;
   });
 
   // hidden date input change (for custom date option)
@@ -2244,7 +2496,9 @@ async function saveOrder(){
   if(type==='Graduation'&&!document.getElementById('f-gradname').value.trim()){toast('❌ أدخلي اسم الخريج');return;}
 
   const modelVal=document.getElementById('f-model').value;
-  const model=modelVal==='Other'?document.getElementById('f-model-other').value.trim():modelVal;
+  const model=isBouquet
+    ? document.getElementById('f-bouquet-model').value.trim()
+    : (modelVal==='Other'?document.getElementById('f-model-other').value.trim():modelVal);
   const dateRaw=document.getElementById('f-date').value;
   const deldateObj=new Date(deldate+'T00:00:00');
   const dayNames=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -2257,7 +2511,7 @@ async function saveOrder(){
     phrase:document.getElementById('f-phrase').value.trim(),
     verse:true,
     notes:isBouquet?document.getElementById('f-bouquet-notes').value.trim():document.getElementById('f-notes').value.trim(),
-    additions:isBouquet?document.getElementById('f-bouquet-add').value.trim():document.getElementById('f-additions').value.trim(),
+    additions:isBouquet?getBouquetAdditionsJoined():document.getElementById('f-additions').value.trim(),
     deliveryDay:dayNames[deldateObj.getDay()],
     deliveryDate:fmtFull(deldateObj),
     recipient:rname, phone,
@@ -2271,7 +2525,7 @@ async function saveOrder(){
   };
 
   const btn=document.getElementById('save-btn');
-  btn.textContent='⏳ جاري الحفظ...'; btn.disabled=true;
+  btn.disabled=true; btn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...';
   try{
     const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data)});
     const newId = res.id;
@@ -2279,6 +2533,7 @@ async function saveOrder(){
     // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
     const photosInput = document.getElementById('f-photos');
     if(photosInput && photosInput.files.length){
+      btn.innerHTML = '<span class="btn-spinner"></span> جاري رفع الصور...';
       const {failed, lastError} = await uploadPhotosForOrder(newId, photosInput.files);
       if(failed) toast('⚠️ الأوردر اتحفظ لكن الصور فشلت: '+lastError);
     }
@@ -2288,7 +2543,7 @@ async function saveOrder(){
     switchTab('cal');
     toast('✅ تم حفظ الأوردر '+(newId||''));
   }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
-  btn.textContent='💾 حفظ في الشيت'; btn.disabled=false;
+  btn.innerHTML = '💾 حفظ في الشيت'; btn.disabled=false;
 }
 
 function clearForm(){
@@ -2307,7 +2562,7 @@ function clearForm(){
   ['f-type','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link',
-   'f-bouquet-notes','f-bouquet-add'
+   'f-bouquet-notes','f-bouquet-model'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   // Reset hidden sections
   ['eng-fields','grad-fields','model-fields','bouquet-fields','model-other-f'].forEach(id=>{
@@ -2317,6 +2572,12 @@ function clearForm(){
   // Reset phone duplicate warning
   const dupWarn=document.getElementById('phone-dup-warn'); if(dupWarn) dupWarn.style.display='none';
   const phoneEl=document.getElementById('f-phone'); if(phoneEl) phoneEl.style.borderColor='';
+  // Reset bouquet additions builder
+  resetBouquetAdditions();
+  const genericPhoto = document.getElementById('generic-photo-section');
+  if(genericPhoto) genericPhoto.style.display='block';
+  const genericPhrase = document.getElementById('generic-phrase-section');
+  if(genericPhrase) genericPhrase.style.display='block';
 }
 
 // ── PRINT ──
@@ -2350,14 +2611,13 @@ function buildPrintDayOptions(){
   const today = new Date(); today.setHours(0,0,0,0);
   const dayNamesAll = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
-  // Build next 7 days
+  // أقرب 5 أيام قادمة
   const days = [];
-  for(let i=0; i<=7; i++){
+  for(let i=0; i<5; i++){
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
     const dayName = dayNamesAll[d.getDay()];
-    // Count orders on this date
     const cnt = allOrders.filter(o=>{
       const dd = String(o['Delivery Date']||'').trim();
       return dd === dateStr && o['Status'] !== 'Cancelled';
@@ -2367,7 +2627,7 @@ function buildPrintDayOptions(){
 
   container.innerHTML = days.map(d=>`
     <label class="pday-cb ${d.cnt>0?'has-orders':''}">
-      <input type="checkbox" name="print-day" value="${d.dateStr}" ${d.cnt>0?'checked':''}>
+      <input type="checkbox" name="print-day" value="${d.dateStr}" ${d.cnt>0?'checked':''} onchange="updateMsSummary('days')">
       <div class="pday-cb-info">
         <div class="pday-cb-name">${d.dayName}${d.isToday?' — اليوم':''}</div>
         <div class="pday-cb-date">${d.dateStr}</div>
@@ -2375,15 +2635,85 @@ function buildPrintDayOptions(){
       <span class="pday-cb-cnt ${d.cnt===0?'zero':''}">${d.cnt} أوردر</span>
     </label>
   `).join('');
+  updateMsSummary('days');
+  updateMsSummary('status');
+}
+
+// إضافة تاريخ مخصص (خارج الخمس أيام القادمة) لقائمة الطباعة
+function addCustomPrintDate(inputVal){
+  if(!inputVal) return;
+  const d = new Date(inputVal+'T00:00:00');
+  const dayNamesAll = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+  const dayName = dayNamesAll[d.getDay()];
+
+  // لا تكرري لو التاريخ موجود أصلاً
+  const container = document.getElementById('print-days-checkboxes');
+  if(container.querySelector(`input[value="${dateStr}"]`)){
+    document.getElementById('ms-custom-date-input').value = '';
+    return;
+  }
+
+  const cnt = allOrders.filter(o=>{
+    const dd = String(o['Delivery Date']||'').trim();
+    return dd === dateStr && o['Status'] !== 'Cancelled';
+  }).length;
+
+  const label = document.createElement('label');
+  label.className = 'pday-cb '+(cnt>0?'has-orders':'');
+  label.innerHTML = `
+    <input type="checkbox" name="print-day" value="${dateStr}" checked onchange="updateMsSummary('days')">
+    <div class="pday-cb-info">
+      <div class="pday-cb-name">${dayName} <span style="color:#8B7355;font-weight:600">(مخصص)</span></div>
+      <div class="pday-cb-date">${dateStr}</div>
+    </div>
+    <span class="pday-cb-cnt ${cnt===0?'zero':''}">${cnt} أوردر</span>`;
+  container.appendChild(label);
+  document.getElementById('ms-custom-date-input').value = '';
+  updateMsSummary('days');
 }
 
 function selectAllStatus(checked){
   document.querySelectorAll('input[name="print-status"]').forEach(cb=>cb.checked=checked);
+  updateMsSummary('status');
 }
 
 function selectAllDays(checked){
   document.querySelectorAll('input[name="print-day"]').forEach(cb=>cb.checked=checked);
+  updateMsSummary('days');
 }
+
+// فتح/طي القائمة المنسدلة (أيام أو حالات) — تُغلق الأخرى تلقائياً
+function toggleMsDropdown(which){
+  const id = 'ms-'+which;
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.ms-dropdown').forEach(d=>d.classList.remove('open'));
+  if(!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.ms-dropdown')) document.querySelectorAll('.ms-dropdown').forEach(d=>d.classList.remove('open'));
+});
+
+// تحديث نص الملخص الظاهر على زر القائمة المغلقة
+function updateMsSummary(which){
+  const name = which==='days' ? 'print-day' : 'print-status';
+  const summaryEl = document.getElementById('ms-'+which+'-summary');
+  if(!summaryEl) return;
+  const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)];
+  if(!checked.length){ summaryEl.textContent = which==='days' ? 'اختر الأيام...' : 'اختر الحالة...'; return; }
+  if(which==='status'){
+    const labels = {New:'طلب جديد',Preparing:'جاري التجهيز',Shipped:'مع التوصيل',Done:'تم التسليم',Waiting:'بانتظار تأكيد',Cancelled:'ملغي'};
+    summaryEl.textContent = checked.length<=2
+      ? checked.map(c=>labels[c.value]||c.value).join('، ')
+      : checked.length+' حالات محددة';
+  } else {
+    summaryEl.textContent = checked.length===1
+      ? checked[0].closest('.pday-cb').querySelector('.pday-cb-name').textContent
+      : checked.length+' أيام محددة';
+  }
+}
+
 function closePrintModal(){
   
 }
@@ -2461,7 +2791,7 @@ function printCard(o){
   const type=o['Product Type']||'';
   const typeAr=TYPE_AR[type]||type;
   const groom=o['Groom']||''; const bride=o['Bride']||'';
-  const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
+  const names=getOrderNames(o);
   const total=parseFloat(o['Total']||0);
   const prov=o['Governorate']||'';
   const grandTotal=prov?total+DELIVERY_FEE:total;
@@ -2474,8 +2804,14 @@ function printCard(o){
     if(bride) oItems.push(['الخريج',bride]);
     if(o['Model']) oItems.push(['التخصص',o['Model']]);
   } else if(type==='Bouquet'){
+    if(o['Model']) oItems.push(['الموديل',o['Model']]);
     if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
-    if(o['Additions']) oItems.push(['إضافات',o['Additions']]);
+    // تُفصل تفاصيل التعليقة عن باقي الإضافات وتظهر بشكل مستقل وواضح
+    const rawAdd = String(o['Additions']||'');
+    const taliqaMatch = rawAdd.match(/تعليقة[^|]*/);
+    if(taliqaMatch) oItems.push(['التعليقة', taliqaMatch[0].trim()]);
+    const restAdd = rawAdd.replace(/تعليقة[^|]*\|?/,'').split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+    if(restAdd) oItems.push(['إضافات', restAdd]);
   } else {
     if(groom) oItems.push(['العريس',groom]);
     if(bride) oItems.push(['العروس',bride]);
@@ -2486,13 +2822,14 @@ function printCard(o){
     if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
     if(o['Additions']&&type!=='Package') oItems.push(['إضافات',o['Additions']]);
   }
-  // حجم خط ديناميكي: كل ما زادت الملاحظات كل ما صغر الخط تلقائياً ليتسع الكارد للكل
+  // حجم خط ديناميكي بالاتجاهين: قليل التفاصيل → خط أكبر يملأ المساحة، كثير التفاصيل → خط أصغر ليتسع الكل
   const totalChars = oItems.reduce((s,[k,v])=>s+String(v).length+String(k).length,0);
-  let pvSize = 8.5;
+  let pvSize = 11.5;                       // سقف أعلى لملء الفراغ عند قلة التفاصيل (مثل المسكات)
   if(totalChars>350) pvSize=6.2;
   else if(totalChars>250) pvSize=6.8;
   else if(totalChars>180) pvSize=7.4;
   else if(totalChars>110) pvSize=8;
+  else if(totalChars>60)  pvSize=9.5;
   const LONG_KEYS = new Set(['العبارة','ملاحظات','إضافات']);
   const shortItems = oItems.filter(([k])=>!LONG_KEYS.has(k));
   const longItems  = oItems.filter(([k])=>LONG_KEYS.has(k));
@@ -2500,7 +2837,14 @@ function printCard(o){
     ? '<div class="pc-fields-short">'+shortItems.map(([k,v])=>prowInline(k,v,true)).join('')+'</div>' : '';
   const longHtml = longItems.length
     ? '<div class="pc-fields-long">'+longItems.map(([k,v])=>prowInline(k,v,false)).join('')+'</div>' : '';
-  const oRows='<div class="pc-fields">'+shortHtml+longHtml+'</div>';
+
+  // مصغّرات الصور المرفقة (إن وجدت) — للتذكير بالموديل المطلوب فقط، بحجم ثابت لا يتأثر بحجم الخط أو الكارد
+  const photoUrls = getPhotos(o);
+  const photosHtml = photoUrls.length
+    ? '<div class="pc-photos">'+photoUrls.slice(0,4).map(u=>'<img src="'+u+'" class="pc-photo-thumb">').join('')+'</div>'
+    : '';
+
+  const oRows='<div class="pc-fields">'+shortHtml+longHtml+photosHtml+'</div>';
 
   // ── قسم التوصيل — مضغوط، يظهر فقط الحقول التي فيها قيمة
   const dRow = (k,v) => v?`<div class="pc-del-row"><span class="pc-del-k">${k}</span><span class="pc-del-v">${v}</span></div>`:'';
@@ -2568,7 +2912,7 @@ function openDashboard(){
   if(sessionStorage.getItem('dash_auth')==='1'){
     document.getElementById('dash-login').style.display='none';
     document.getElementById('dash-app').style.display='block';
-    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'today');
+    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
     loadDashData();
   }
 }
@@ -2584,7 +2928,7 @@ function doDashLogin(){
     sessionStorage.setItem('dash_auth','1');
     document.getElementById('dash-login').style.display='none';
     document.getElementById('dash-app').style.display='block';
-    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'today');
+    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
     loadDashData();
   } else {
     document.getElementById('dash-pw-err').classList.add('show');
@@ -2691,27 +3035,30 @@ function renderDashAlerts(){
 function renderDashKPIs(){
   const t=dashFiltered;
   const total=t.length;
-  const bill=billable(t);                       // المحتسب مالياً (بدون الملغي)
+  const bill=billable(t);                       // المحتسب مالياً (بدون الملغي) — ضمن الفترة المحددة
   const billCount=bill.length;
   const prodRev=bill.reduce((s,o)=>s+parseFloat(o['Total']||0),0);      // سعر المنتجات
   const delivCount=bill.filter(o=>o['Governorate']).length;
   const delivRev=delivCount*DELIVERY_FEE;                                // رسوم التوصيل
   const rev=prodRev+delivRev;                                            // الإجمالي
   const avg=billCount?Math.round(rev/billCount*10)/10:0;                 // المتوسط على المحتسب فقط
-  const active=t.filter(o=>['new','preparing','shipped'].includes(stOf(o))).length;
   const done=t.filter(o=>stOf(o)==='done').length;
   const cancelled=t.filter(o=>isCancelled(o)).length;
-  const waiting=t.filter(o=>stOf(o)==='waiting').length;
   const doneRate=billCount?Math.round(done/billCount*100):0;
+
+  // عدادات الحالة التشغيلية الحقيقية — لا تتقيّد بفلتر التاريخ لأنها تمثّل الوضع الآن فعلياً
+  const active=allOrders.filter(o=>['new','preparing','shipped'].includes(stOf(o))).length;
+  const waiting=allOrders.filter(o=>stOf(o)==='waiting').length;
+
   const kpis=[
-    {ico:'📦',val:total,lbl:'إجمالي الأوردرات',sub:cancelled?('منها '+cancelled+' ملغي'):'في الفترة المحددة',cls:'gold'},
-    {ico:'💰',val:rev+' د.أ',lbl:'إجمالي الإيرادات',sub:'شامل التوصيل — بدون الملغي',cls:'green'},
-    {ico:'🛍️',val:prodRev+' د.أ',lbl:'إيرادات المنتجات',sub:'بدون التوصيل',cls:'gold'},
+    {ico:'📦',val:total,lbl:'إجمالي الأوردرات',sub:cancelled?('منها '+cancelled+' ملغي — في الفترة المحددة'):'في الفترة المحددة',cls:'gold'},
+    {ico:'💰',val:rev+' د.أ',lbl:'إجمالي الإيرادات',sub:'شامل التوصيل — بدون الملغي — الفترة المحددة',cls:'green'},
+    {ico:'🛍️',val:prodRev+' د.أ',lbl:'إيرادات المنتجات',sub:'بدون التوصيل — الفترة المحددة',cls:'gold'},
     {ico:'🚚',val:delivRev+' د.أ',lbl:'رسوم التوصيل',sub:delivCount+' أوردر خارج عمّان',cls:'blue'},
-    {ico:'⚡',val:active,lbl:'قيد التنفيذ',sub:'استلام + تجهيز + توصيل',cls:'orange'},
-    {ico:'✅',val:done,lbl:'تم التسليم',sub:doneRate+'% من المحتسب',cls:'green'},
-    {ico:'⏳',val:waiting,lbl:'بانتظار تأكيد',sub:'يحتاج متابعة',cls:'purple'},
-    {ico:'❌',val:cancelled,lbl:'ملغي',sub:'',cls:'red'},
+    {ico:'⚡',val:active,lbl:'قيد التنفيذ الآن',sub:'كل الأوردرات — بغض النظر عن الفترة',cls:'orange'},
+    {ico:'✅',val:done,lbl:'تم التسليم',sub:doneRate+'% من المحتسب — الفترة المحددة',cls:'green'},
+    {ico:'⏳',val:waiting,lbl:'بانتظار تأكيد الآن',sub:'كل الأوردرات — بغض النظر عن الفترة',cls:'purple'},
+    {ico:'❌',val:cancelled,lbl:'ملغي',sub:'في الفترة المحددة',cls:'red'},
     {ico:'📊',val:avg+' د.أ',lbl:'متوسط قيمة الأوردر',sub:'على '+billCount+' أوردر',cls:'gold'},
     {ico:'📅',val:[...new Set(t.map(o=>o['Delivery Date']).filter(Boolean))].length,lbl:'أيام تسليم',sub:'',cls:'blue'},
     {ico:'🏙️',val:[...new Set(t.map(o=>o['Governorate']).filter(Boolean))].length,lbl:'محافظات',sub:'',cls:'purple'},
@@ -2781,7 +3128,7 @@ function renderDashTable(){
   document.getElementById('dash-tbody').innerHTML=orders.map(o=>{
     const type=o['Product Type']||'';
     const groom=o['Groom']||'';const bride=o['Bride']||'';
-    const names=type==='Graduation'?bride:type==='Bouquet'?'مسكة عروس':[bride,groom].filter(Boolean).join(' ❤️ ');
+    const names=getOrderNames(o);
     const total=parseFloat(o['Total']||0);const grandTotal=orderTotalD(o);
     const stKey=(stMapT[stOf(o)]||o['Status']||'New');
     const status=stKey;const st=STATUSES[stKey]||{lbl:stKey,cls:'b-other'};
@@ -2790,12 +3137,22 @@ function renderDashTable(){
 }
 
 function renderDashDays(){
-  const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  // تجميع حسب التاريخ الفعلي (لا اسم اليوم) — حتى يميّز كل يوم عن نظيره بأسبوع آخر
+  const dayNamesAr=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const counts={};
-  dashFiltered.forEach(o=>{const d=o['Delivery Day']||'غير محدد';counts[d]=(counts[d]||0)+1;});
+  dashFiltered.forEach(o=>{
+    const dd=String(o['Delivery Date']||'').trim();
+    if(!dd) return;
+    counts[dd]=(counts[dd]||0)+1;
+  });
+  const sortedDates=Object.keys(counts).sort((a,b)=>{const da=parseDateD(a),db=parseDateD(b);if(!da)return 1;if(!db)return -1;return da-db;});
   const max=Math.max(...Object.values(counts),1);
-  const colors=['#4CAF50','#795548','#2196F3','#9E9E9E','#FF9800','#E91E63','#9C27B0'];
-  document.getElementById('dash-days').innerHTML='<div class="status-list">'+days.map((d,i)=>{const cnt=counts[d]||0;if(!cnt)return '';return `<div class="status-item"><div class="status-name">${d}</div><div class="status-bar-bg"><div class="status-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${colors[i]}"></div></div><div class="status-cnt">${cnt}</div></div>`;}).join('')+'</div>';
+  document.getElementById('dash-days').innerHTML='<div class="status-list">'+sortedDates.map(dateStr=>{
+    const cnt=counts[dateStr];
+    const d=parseDateD(dateStr);
+    const label=d?(dayNamesAr[d.getDay()]+' '+dateStr):dateStr;
+    return `<div class="status-item"><div class="status-name">${label}</div><div class="status-bar-bg"><div class="status-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:#C9A96E"></div></div><div class="status-cnt">${cnt}</div></div>`;
+  }).join('')+'</div>';
 }
 
 function renderDashGovs(){
@@ -2808,6 +3165,73 @@ function renderDashGovs(){
 
 // ── PHOTOS ──
 const PHOTOS_SEP = ';;';
+
+// ── قائمة النقاط الثلاث لكل يوم ──
+let dayMenuDate = null;
+
+function openDayMenu(dateStr, ev){
+  ev.stopPropagation();
+  dayMenuDate = dateStr;
+  const pop = document.getElementById('day-menu-popover');
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const popW = 210;
+  let left = rect.right - popW;
+  if(left < 8) left = 8;
+  if(left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+  pop.style.top = (rect.bottom + 4) + 'px';
+  pop.style.left = left + 'px';
+  pop.style.display = 'block';
+}
+
+function dayMenuAction(action){
+  document.getElementById('day-menu-popover').style.display = 'none';
+  if(!dayMenuDate) return;
+  if(action === 'print') printOrdersForDate(dayMenuDate);
+  else if(action === 'status') bulkStatusForDate(dayMenuDate);
+}
+
+document.addEventListener('click', e=>{
+  const pop = document.getElementById('day-menu-popover');
+  if(pop && pop.style.display === 'block' && !e.target.closest('#day-menu-popover') && !e.target.closest('.day-dots')){
+    pop.style.display = 'none';
+  }
+});
+
+// طباعة كل طلبات يوم محدد — تنتقل لتاب الطباعة وتحدد ذلك اليوم فقط بكل الحالات
+function printOrdersForDate(dateStr){
+  switchTab('print');
+  setTimeout(()=>{
+    buildPrintDayOptions();
+    const container = document.getElementById('print-days-checkboxes');
+    container.querySelectorAll('input[name="print-day"]').forEach(cb=>cb.checked=false);
+
+    let cb = container.querySelector(`input[value="${dateStr}"]`);
+    if(!cb){
+      const [d,m,y] = dateStr.split('/');
+      addCustomPrintDate(`${y}-${m}-${d}`);
+      cb = container.querySelector(`input[value="${dateStr}"]`);
+    }
+    if(cb) cb.checked = true;
+
+    selectAllStatus(true); // كل طلبات اليوم بغض النظر عن حالتها
+    updateMsSummary('days');
+    updateMsSummary('status');
+    toast('📅 حُدد '+dateStr+' — راجعي واضغطي طباعة الكاردات الآن');
+  }, 60);
+}
+
+// تحديد كل أوردرات يوم معيّن دفعة وحدة لتغيير حالتها الجماعي (يستخدم شريط التحديث الجماعي الموجود)
+function bulkStatusForDate(dateStr){
+  const ids = allOrders.filter(o=>String(o['Delivery Date']||'').trim()===dateStr).map(o=>o['Order ID']);
+  if(!ids.length){ toast('لا يوجد أوردرات بهذا التاريخ'); return; }
+  selectedIds.clear();
+  ids.forEach(id=>selectedIds.add(id));
+  updateBulkBar();
+  renderCal();
+  toast('✅ تم تحديد '+ids.length+' أوردر — اختاري الحالة من الشريط أعلى التقويم');
+  const bar = document.getElementById('bulk-bar');
+  if(bar) bar.scrollIntoView({behavior:'smooth', block:'center'});
+}
 
 function openLightbox(url){
   document.getElementById('lightbox-img').src = url;
@@ -3143,13 +3567,13 @@ function toast(msg){
       <!-- DATE FILTER -->
       <div class="date-filter">
         <span class="df-label">الفترة:</span>
-        <button class="df-preset on" onclick="setDashPreset(this,'today')">اليوم</button>
+        <button class="df-preset on" onclick="setDashPreset(this,'all')">الكل</button>
+        <button class="df-preset" onclick="setDashPreset(this,'today')">اليوم</button>
         <button class="df-preset" onclick="setDashPreset(this,'yesterday')">أمس</button>
         <button class="df-preset" onclick="setDashPreset(this,'week')">هذا الأسبوع</button>
         <button class="df-preset" onclick="setDashPreset(this,'lastweek')">الأسبوع الماضي</button>
         <button class="df-preset" onclick="setDashPreset(this,'month')">هذا الشهر</button>
         <button class="df-preset" onclick="setDashPreset(this,'lastmonth')">الشهر الماضي</button>
-        <button class="df-preset" onclick="setDashPreset(this,'all')">الكل</button>
         <span class="df-sep">أو:</span>
         <input type="date" class="df-date" id="dash-date-from">
         <span class="df-sep">←</span>
