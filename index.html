@@ -738,7 +738,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v20</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v29</span>
     </div>
   </div>
 </div>
@@ -807,7 +807,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         <option value="">غيّر الحالة...</option>
         <option value="New">طلب جديد</option>
         <option value="Preparing">جاري التجهيز</option>
-        <option value="Shipped">تم التسليم لشركة التوصيل</option>
+        <option value="Shipped">مع التوصيل</option>
         <option value="Done">تم التسليم</option>
         <option value="Cancelled">ملغي</option>
         <option value="Waiting">بانتظار تأكيد</option>
@@ -820,6 +820,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
   <!-- شريط تنبيه: أوردرات بتاريخ غير مقروء -->
   <div id="date-warn" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7A4A00"></div>
+  <div id="type-filter-banner" style="display:none;background:#FAF5EC;border:1.5px solid #C9A96E;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#4A3728"></div>
 
   <!-- MOBILE TOOLBAR + LEGEND -->
   <div class="cal-mobile-bar">
@@ -907,14 +908,18 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         </div>
         <div class="fg model-other-f" style="display:none"><label>اسم الموديل</label><input type="text" id="f-model-other"></div>
         <div class="fg"><label>لون الستراس</label>
-          <select id="f-color"><option value="">—</option><option>فضي</option><option>ذهبي</option></select>
+          <select id="f-color"><option value="">—</option><option value="فضي">فضي</option><option value="ذهبي">ذهبي</option></select>
         </div>
         <div class="fg pkg-f" style="display:none"><label>نوع البكج</label>
-          <select id="f-pkg">
-            <option>البكج الأساسي</option>
-            <option>بكج القصاصات</option>
-            <option>البكج المميز</option>
+          <select id="f-pkg" onchange="onPkgTypeChange()">
+            <option value="">اختر...</option>
+            <option value="basic">البكج الأساسي (صينية + كتاب) — 22 د.أ</option>
+            <option value="full">البكج الشامل (صينية + كتاب + فناجين + قصاصات) — 30 د.أ</option>
+            <option value="frame">بكج البرواز (صينية + برواز) — 20 د.أ</option>
           </select>
+          <div id="pkg-full-reminder" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:8px;padding:9px 12px;margin-top:6px;font-size:12px;color:#7A4A00;font-weight:700">
+            ⚠️ البكج الشامل يتضمّن قصاصات وفناجين — لا تنسي إضافتهم يدوياً بقسم "الإضافات" تحت، وإلا ما ينحسبوا بالمستودع
+          </div>
         </div>
       </div>
     </div>
@@ -940,34 +945,58 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       </div>
 
       <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-bouquet-notes" placeholder="مثال: ورد أبيض، حجم كبير..." style="min-height:70px"></textarea></div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px">
-        <span class="sec-lbl" style="margin:0;border:none;padding:0">الإضافات</span>
-        <button type="button" onclick="addBouquetAdditionRow()" style="background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:3px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة</button>
-      </div>
-      <div id="bq-additions-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
-
-      <button type="button" onclick="toggleTaliqaForm()" style="background:#FAF5EC;border:1.5px dashed #C9A96E;color:#8A6030;border-radius:8px;padding:9px 12px;width:100%;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:10px">➕ إضافة تعليقة <span style="font-weight:600;opacity:.75">(٢ د.أ إضافية)</span></button>
-
-      <div id="bq-taliqa-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
-        <div class="form-grid">
-          <div class="fg"><label>اسم العريس</label><input type="text" id="bq-t-groom"></div>
-          <div class="fg"><label>اسم العروس</label><input type="text" id="bq-t-bride"></div>
-          <div class="fg"><label>التاريخ</label><input type="date" id="bq-t-date"></div>
-          <div class="fg"><label>ملاحظات</label><input type="text" id="bq-t-notes"></div>
-        </div>
-        <button type="button" onclick="confirmTaliqaAddition()" class="btn btn-gold" style="margin-top:6px">✅ إضافة التعليقة</button>
-      </div>
     </div>
 
     <div id="generic-phrase-section">
       <div class="sec-lbl">العبارة والملاحظات</div>
       <div class="fg"><label>عبارة خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-phrase"></div>
       <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-notes" placeholder="مثال: علب الدبل فوق، بدون أحرف..."></textarea></div>
-      <div class="fg"><label>إضافات <span class="opt">(اختياري)</span></label><input type="text" id="f-additions" placeholder="مثال: ستاند، قصاصات..."></div>
+    </div>
+
+    <!-- ── قسم الإضافات الموحّد — لكل الأنواع، بمكان ثابت ── -->
+    <div class="sec-lbl">إضافات <span class="opt">(اختياري)</span></div>
+    <div class="fg">
+      <input type="text" id="f-additions-free" placeholder="اكتبي أي إضافة حرة هنا..." style="margin-bottom:10px">
+    </div>
+    <div style="font-size:11px;color:#8B7355;margin-bottom:8px">اضغطي على أي إضافة مضافة لتعديل تفاصيلها</div>
+    <div id="additions-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <button type="button" id="ap-letters-btn" onclick="addOrEditAddition('letters')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ أحرف على العلب</button>
+      <button type="button" id="ap-stand-btn" onclick="addOrEditAddition('stand')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة ستاند (٢ د.أ)</button>
+      <button type="button" id="ap-qassasat-btn" onclick="addOrEditAddition('qassasat')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصات (٣ د.أ)</button>
+      <button type="button" id="ap-fanajin-btn" onclick="addOrEditAddition('fanajin')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ فناجين (٥ د.أ)</button>
+      <button type="button" id="ap-qalam-btn" onclick="addOrEditAddition('qalam')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصة التقويم / رسالة العمر (٢ د.أ)</button>
+      <button type="button" id="ap-taliqa-btn" onclick="addOrEditAddition('taliqa')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة تعليقة (٢ د.أ)</button>
+    </div>
+
+    <!-- النماذج المصغّرة المشتركة — تُملأ ديناميكياً بحسب إضافة/تعديل -->
+    <div id="qassasat-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div class="fg"><label>تفاصيل القصاصات</label><textarea id="qs-details" placeholder="مثال: قصاصات ٧ + قصاصة التقويم..." style="min-height:60px"></textarea></div>
+      <button type="button" onclick="confirmQassasat()" class="btn btn-gold" style="margin-top:6px">✅ حفظ القصاصات</button>
+    </div>
+    <div id="fanajin-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div class="form-grid">
+        <div class="fg"><label>الكتابة على الفنجان الأول</label><input type="text" id="fj-cup1"></div>
+        <div class="fg"><label>الكتابة على الفنجان الثاني</label><input type="text" id="fj-cup2"></div>
+      </div>
+      <button type="button" onclick="confirmFanajin()" class="btn btn-gold" style="margin-top:6px">✅ حفظ الفناجين</button>
+    </div>
+    <div id="qalam-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div class="fg"><label>تفاصيل</label><input type="text" id="ql-details" placeholder="مثال: رسالة العمر، أو تفاصيل قصاصة التقويم..."></div>
+      <button type="button" onclick="confirmQalam()" class="btn btn-gold" style="margin-top:6px">✅ حفظ</button>
+    </div>
+    <div id="bq-taliqa-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div class="form-grid">
+        <div class="fg"><label>اسم العريس</label><input type="text" id="bq-t-groom"></div>
+        <div class="fg"><label>اسم العروس</label><input type="text" id="bq-t-bride"></div>
+        <div class="fg"><label>التاريخ</label><input type="date" id="bq-t-date"></div>
+        <div class="fg"><label>ملاحظات</label><input type="text" id="bq-t-notes"></div>
+      </div>
+      <button type="button" onclick="confirmTaliqaAddition()" class="btn btn-gold" style="margin-top:6px">✅ حفظ التعليقة</button>
     </div>
 
     <div class="sec-lbl">بيانات التوصيل</div>
+
     <div class="form-grid">
       <div class="fg"><label>اسم المستلم <span class="req">*</span></label><input type="text" id="f-rname"></div>
       <div class="fg">
@@ -1067,9 +1096,23 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div class="toast" id="toast"></div>
 
 <!-- قائمة النقاط الثلاث لكل يوم -->
-<div id="day-menu-popover" style="display:none;position:fixed;z-index:960;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;box-shadow:0 8px 24px rgba(60,30,10,.18);min-width:210px;overflow:hidden">
+<div id="day-menu-popover" style="display:none;position:fixed;z-index:960;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;box-shadow:0 8px 24px rgba(60,30,10,.18);min-width:220px;max-height:70vh;overflow-y:auto">
   <button onclick="dayMenuAction('print')" style="display:block;width:100%;text-align:right;background:none;border:none;padding:12px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#1A1410;cursor:pointer">🖨️ طباعة كل طلبات هذا اليوم</button>
   <button onclick="dayMenuAction('status')" style="display:block;width:100%;text-align:right;background:none;border:none;padding:12px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#1A1410;cursor:pointer;border-top:1px solid #F0E8DC">🔄 تغيير حالة الكل</button>
+  <div style="padding:8px 16px 4px;font-size:10px;font-weight:800;color:#8B7355;border-top:1px solid #F0E8DC;text-transform:uppercase">فلترة حسب النوع (اختيار متعدد)</div>
+  <div id="day-menu-types"></div>
+</div>
+
+<!-- شاشة تحميل كاملة الحجم — تمنع أي تفاعل أثناء الحفظ/التعديل/الحذف -->
+<div id="fullscreen-loading" style="display:none;position:fixed;inset:0;background:rgba(26,20,16,.8);z-index:2000;align-items:center;justify-content:center;flex-direction:column;gap:18px">
+  <div style="width:52px;height:52px;border:4px solid rgba(232,213,176,.25);border-top-color:#C9A96E;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div id="fullscreen-loading-text" style="color:#E8D5B0;font-size:16px;font-weight:800;font-family:'Tajawal',sans-serif;text-align:center;padding:0 20px"></div>
+</div>
+
+<!-- شاشة نتيجة العملية — نجاح أو فشل -->
+<div id="fullscreen-result" style="display:none;position:fixed;inset:0;background:rgba(26,20,16,.94);z-index:2001;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px">
+  <div id="fullscreen-result-icon" style="font-size:64px;line-height:1"></div>
+  <div id="fullscreen-result-text" style="color:#FFFFFF;font-size:19px;font-weight:900;font-family:'Tajawal',sans-serif;max-width:320px"></div>
 </div>
 
 <!-- LIGHTBOX لتكبير صور الأوردر -->
@@ -1177,12 +1220,15 @@ async function writeToSheet(params, usePost){
 async function loadOrders(silent){
   const btn = document.getElementById('refresh-btn');
   if(btn){ btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; }
+  // أي تحديث (يدوي أو تلقائي) يصفّر فلتر النوع من قائمة النقاط الثلاث
+  if(typeof typeFilterSet !== 'undefined'){ typeFilterSet.clear(); }
   try {
     const data = await apiCall({action:'getOrders'});
     allOrders = data.orders || [];
     setConn(true);
     renderCal();
     updateStats();
+    if(typeof updateTypeFilterBanner === 'function') updateTypeFilterBanner();
     checkUnparsedDates();
     logDiag();
     const dashApp = document.getElementById('dash-app');
@@ -1218,6 +1264,18 @@ function setConn(ok){
 
 // ── DATE UTILS ──
 function pad(n){ return String(n).padStart(2,'0'); }
+
+// توحيد صيغة الهاتف الأردني: يشيل المسافات والشرطات، يستبدل مفتاح +962/962/00962 بصفر
+// النتيجة دائماً 07XXXXXXXX (10 خانات) إن أمكن استنتاجها
+function normalizePhone(raw){
+  if(!raw) return '';
+  let s = String(raw).trim().replace(/[\s\-]/g,'');
+  s = s.replace(/^\+/,'');
+  if(s.startsWith('00962')) s = '0'+s.slice(5);
+  else if(s.startsWith('962')) s = '0'+s.slice(3);
+  if(!s.startsWith('0') && /^7\d{8}$/.test(s)) s = '0'+s; // أرقام بلا صفر بادئ زي 7XXXXXXXX
+  return s;
+}
 function fmtShort(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1); }
 function fmtFull(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
 // ختم وقت الإضافة من ساعة الجهاز: dd/mm/yyyy HH:MM
@@ -1320,7 +1378,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v20<br>
+       <strong>الإصدار:</strong> v29<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1343,7 +1401,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v20 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v29 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1389,8 +1447,11 @@ function renderCal(){
   const fs = String(filterStatus||'all').toLowerCase();
   const orders = allOrders.filter(o=>{
     const st = (o['Status']||'').toLowerCase();
-    if(fs==='all') return !['done','cancelled'].includes(st);
-    return st === fs;
+    if(fs==='all'){ if(['done','cancelled'].includes(st)) return false; }
+    else if(st !== fs) return false;
+    // فلتر النوع من قائمة النقاط الثلاث (اختياري، متعدد)
+    if(typeFilterSet.size && !typeFilterSet.has(o['Product Type'])) return false;
+    return true;
   });
 
   // ── رأس الجدول: أيام السبت→الجمعة ──
@@ -1948,17 +2009,20 @@ async function deleteOrder(id){
     'موافق (OK) = حذف نهائي من الشيت\n' +
     'إلغاء (Cancel) = وضع الأوردر كـ "ملغي" فقط'
   );
+  showFullscreenLoading('⏳ جاري حذف الطلب...');
   try{
     if(choice){
       await writeToSheet({action:'deleteOrder', id});
-      toast('✅ تم حذف الأوردر '+id+' نهائياً');
+      closePanel();
+      await loadOrders(true);
+      showFullscreenSuccess('تم حذف الطلب ✅');
     } else {
       await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
-      toast('✅ تم وضع الأوردر '+id+' كملغي');
+      closePanel();
+      await loadOrders(true);
+      showFullscreenSuccess('تم إلغاء الطلب ✅');
     }
-    closePanel();
-    await loadOrders(true);
-  }catch(e){ toast('❌ فشل الحذف: '+e.message); }
+  }catch(e){ showFullscreenError('فشل الحذف ❌\n'+e.message); }
 }
 function closePanel(){ document.getElementById('panel').classList.remove('open'); }
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
@@ -1974,10 +2038,20 @@ async function changeStatus(id,status){
 }
 
 // ── EDIT PANEL ──
-function openEdit(id){
+// تبديل نوع المنتج بمنتصف التعديل — يعيد بناء الفورم بالكامل ليطابق الحقول الصحيحة للنوع الجديد
+function handleEditTypeSwitch(id, newType){
+  if(!confirm('تغيير نوع المنتج بيعيد بناء الفورم وبيمسح أي تعديلات غير محفوظة بالحقول الأخرى. متأكدة؟')){
+    // إرجاع القائمة لقيمتها الأصلية
+    openEdit(id);
+    return;
+  }
+  openEdit(id, newType);
+}
+
+function openEdit(id, overrideType){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
-  const type=o['Product Type']||'';
+  const type=overrideType || o['Product Type']||'';
   const isEng=['Tray','Guest Book','Package'].includes(type);
   const isGrad=type==='Graduation';
   const isBouquet=type==='Bouquet';
@@ -1994,7 +2068,7 @@ function openEdit(id){
     <div class="sec-lbl">الحالة والنوع</div>
     <div class="form-grid">
       <div class="fg"><label>الحالة</label><select id="e-status" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${stOpts}</select></div>
-      <div class="fg"><label>نوع المنتج</label><select id="e-type" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${typeOpts}</select></div>
+      <div class="fg"><label>نوع المنتج</label><select id="e-type" onchange="handleEditTypeSwitch('${id}', this.value)" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${typeOpts}</select></div>
     </div>
 
     ${isEng?`
@@ -2004,6 +2078,17 @@ function openEdit(id){
       <div class="fg"><label>اسم العروس</label><input type="text" id="e-bride" value="${o['Bride']||''}"></div>
       <div class="fg"><label>تاريخ المناسبة</label><input type="date" id="e-occdate" value="${toInputDate(o['Occasion Date'])}"></div>
       ${hasTray?`<div class="fg"><label>الموديل</label><select id="e-model" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${modelOpts}</select></div>`:''}
+      ${hasTray?`<div class="fg"><label>لون الستراس</label><select id="e-color" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">
+        <option value="" ${!o['Color']?'selected':''}>—</option>
+        <option value="فضي" ${o['Color']==='فضي'?'selected':''}>فضي</option>
+        <option value="ذهبي" ${o['Color']==='ذهبي'?'selected':''}>ذهبي</option>
+      </select></div>`:''}
+      ${type==='Package'?`<div class="fg"><label>نوع البكج</label><select id="e-pkg" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">
+        <option value="" ${!o['PkgType']?'selected':''}>اختر...</option>
+        <option value="basic" ${o['PkgType']==='basic'?'selected':''}>البكج الأساسي (صينية + كتاب)</option>
+        <option value="full" ${o['PkgType']==='full'?'selected':''}>البكج الشامل (صينية + كتاب + فناجين + قصاصات)</option>
+        <option value="frame" ${o['PkgType']==='frame'?'selected':''}>بكج البرواز (صينية + برواز)</option>
+      </select></div>`:''}
     </div>`:''}
 
     ${isGrad?`
@@ -2101,7 +2186,8 @@ async function applyEdit(id){
   const deldateRaw=document.getElementById('e-deldate').value;
   if(!deldateRaw){toast('❌ تاريخ التسليم إجباري');return;}
   // Check duplicate phone (exclude current order)
-  const newPhone = document.getElementById('e-phone').value.trim();
+  const newPhone = normalizePhone(document.getElementById('e-phone').value.trim());
+  if(newPhone && newPhone.length<10){toast('❌ رقم الهاتف ناقص — لازم ١٠ خانات على الأقل (٠٧XXXXXXXX)');return;}
   if(newPhone){
     function normPh(ph){return String(ph||'').replace(/[\s\-]/g,'').replace(/^0+/,'');}
     const norm = normPh(newPhone);
@@ -2127,26 +2213,30 @@ async function applyEdit(id){
     Bride:          getVal('e-bride'),
     'Occasion Date': (() => { const el=document.getElementById('e-occdate'); if(!el||!el.value) return ''; const d=new Date(el.value+'T00:00:00'); return fmtFull(d); })(),
     Model:          getVal('e-model'),
+    Color:          getVal('e-color'),
+    PkgType:        getVal('e-pkg'),
     Phrase:         getVal('e-phrase'),
     Notes:          document.getElementById('e-notes') ? document.getElementById('e-notes').value.trim() : '',
     Additions:      getVal('e-add'),
     Recipient:      getVal('e-rname'),
-    Phone:          getVal('e-phone'),
+    Phone:          normalizePhone(getVal('e-phone')),
     Governorate:    getVal('e-prov'),
     Area:           getVal('e-area'),
     'Delivery Notes': getVal('e-dnotes'),
     Link:           getVal('e-link'),
   };
   const editBtn = document.getElementById('edit-save-btn');
-  if(editBtn){ editBtn.disabled=true; editBtn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...'; }
+  if(editBtn) editBtn.disabled=true;
+  showFullscreenLoading('⏳ جاري تعديل الطلب...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     closeEdit();
     await loadOrders(true);
-    toast('✅ تم حفظ التعديل');
+    if(editBtn) editBtn.disabled=false;
+    showFullscreenSuccess('تم تعديل الطلب ✅');
   }catch(e){
-    toast('❌ لم يُحفظ: '+e.message);
-    if(editBtn){ editBtn.disabled=false; editBtn.innerHTML = '💾 حفظ التعديل'; }
+    if(editBtn) editBtn.disabled=false;
+    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
   }
 }
 
@@ -2192,16 +2282,27 @@ async function applyReschedule(id){
     'Delivery Date': fmtFull(deldateObj),
     'Delivery Day': dayNames[deldateObj.getDay()],
   };
+  // حفظ سبب التغيير (إن وُجد) ضمن الملاحظات — بدل ما يضيع
+  const reasonEl = document.getElementById('r-reason');
+  const reason = reasonEl ? reasonEl.value.trim() : '';
+  if(reason){
+    const o = allOrders.find(o=>o['Order ID']===id);
+    const existingNotes = o ? (o['Notes']||'') : '';
+    const reasonLine = 'سبب تغيير الموعد ('+fmtFull(new Date())+'): '+reason;
+    data['Notes'] = existingNotes ? reasonLine+' | '+existingNotes : reasonLine;
+  }
   const rBtn = document.getElementById('resched-save-btn');
-  if(rBtn){ rBtn.disabled=true; rBtn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...'; }
+  if(rBtn) rBtn.disabled=true;
+  showFullscreenLoading('⏳ جاري تغيير الموعد...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     closeEdit();
     await loadOrders(true);
-    toast('✅ تم تغيير الموعد إلى '+data['Delivery Date']);
+    if(rBtn) rBtn.disabled=false;
+    showFullscreenSuccess('تم تغيير الموعد ✅\n'+data['Delivery Date']);
   }catch(e){
-    toast('❌ لم يُحفظ: '+e.message);
-    if(rBtn){ rBtn.disabled=false; rBtn.innerHTML = '💾 حفظ الموعد الجديد'; }
+    if(rBtn) rBtn.disabled=false;
+    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
   }
 }
 
@@ -2296,11 +2397,37 @@ function checkDuplicatePhone(phone){
   }
 }
 
+let lastFType = '';
+
 function toggleFields(){
   const t=document.getElementById('f-type').value;
   const isEng=['Tray','Guest Book','Package'].includes(t);
   const hasTray=['Tray','Package'].includes(t);
   const isBouquet=t==='Bouquet';
+  const isGrad=t==='Graduation';
+
+  // مسح الحقول غير المتعلقة بالنوع الجديد فوراً — يمنع تسرّب بيانات قديمة بصمت لأوردر من نوع آخر
+  if(t !== lastFType){
+    if(!isEng){
+      ['f-groom','f-bride','f-date','f-bookdate'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+    }
+    if(!hasTray){
+      ['f-model','f-model-other','f-color'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+    }
+    if(t!=='Package'){
+      const pkgEl=document.getElementById('f-pkg'); if(pkgEl) pkgEl.value='';
+      const reminderEl=document.getElementById('pkg-full-reminder'); if(reminderEl) reminderEl.style.display='none';
+    }
+    if(!isGrad){
+      ['f-gradname','f-major'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+    }
+    if(!isBouquet){
+      ['f-bouquet-model','f-bouquet-notes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+    }
+    resetAdditions(); // الإضافات وأسعارها لا تنتقل بين الأنواع أبداً
+    lastFType = t;
+  }
+
   document.getElementById('eng-fields').style.display=isEng?'block':'none';
   document.getElementById('grad-fields').style.display=t==='Graduation'?'block':'none';
   document.getElementById('model-fields').style.display=hasTray?'block':'none';
@@ -2310,88 +2437,267 @@ function toggleFields(){
   if(genericPhoto) genericPhoto.style.display = isBouquet ? 'none' : 'block';
   const genericPhrase = document.getElementById('generic-phrase-section');
   if(genericPhrase) genericPhrase.style.display = isBouquet ? 'none' : 'block';
+
+  // أزرار الإضافات — تظهر بحسب النوع
+  const btnVis = (id, show) => { const el=document.getElementById(id); if(el) el.style.display = show ? 'inline-flex' : 'none'; };
+  btnVis('ap-letters-btn',  hasTray);
+  btnVis('ap-stand-btn',    ['Tray','Package','Graduation'].includes(t));
+  btnVis('ap-qassasat-btn', t && t!=='Graduation');
+  btnVis('ap-fanajin-btn',  t && t!=='Graduation');
+  btnVis('ap-qalam-btn',    t && t!=='Graduation');
+  btnVis('ap-taliqa-btn',   isBouquet);
   document.querySelectorAll('.bookdate-f').forEach(el=>el.style.display=['Guest Book','Package'].includes(t)?'block':'none');
   document.querySelectorAll('.pkg-f').forEach(el=>el.style.display=t==='Package'?'block':'none');
   const prices={Tray:15,'Guest Book':9,Package:22,Graduation:13,Bouquet:18};
-  if(prices[t]) document.getElementById('f-price').value=prices[t];
-  if(!isBouquet) resetBouquetAdditions(); // لا داعي لبقاء إضافات مسكة إذا غيّرت النوع
+  if(t!=='Package' && prices[t]) document.getElementById('f-price').value=prices[t];
+  if(t==='Package'){ document.getElementById('f-pkg').value=''; document.getElementById('f-price').value=''; }
   updatePriceHint();
 }
-// ── إضافات مسكة العروس (بناء ديناميكي + تعليقة بسعر إضافي) ──
-function addBouquetAdditionRow(value){
+
+// عند اختيار نوع البكج — يملأ السعر الأساسي تلقائياً (بدون توصيل)
+function onPkgTypeChange(){
+  const prices = {basic:22, full:30, frame:20};
+  const v = document.getElementById('f-pkg').value;
+  if(prices[v]) document.getElementById('f-price').value = prices[v];
+  updatePriceHint();
+  // تذكير واضح: البكج الشامل يحتاج إضافة قصاصات/فناجين يدوياً حتى تُحسَب بالمستودع
+  const reminder = document.getElementById('pkg-full-reminder');
+  if(reminder) reminder.style.display = (v==='full') ? 'block' : 'none';
+}
+// ══════════════════════════════════════════════════════
+// نظام الإضافات الموحّد — لكل أنواع الأوردر
+// كل نوع إضافة يُضاف مرة واحدة فقط ويمكن فتحه للتعديل بالضغط عليه
+// ══════════════════════════════════════════════════════
+const ADDITION_META = {
+  letters:  {price:0, fields:[]},
+  stand:    {price:2, fields:[]},
+  qassasat: {price:3, fields:['details']},
+  fanajin:  {price:5, fields:['cup1','cup2']},
+  qalam:    {price:2, fields:['details']},
+  taliqa:   {price:2, fields:['groom','bride','date','notes']},
+};
+
+function additionRowText(kind, d){
+  d = d || {};
+  if(kind==='letters')  return 'أحرف على العلب';
+  if(kind==='stand')    return 'ستاند';
+  if(kind==='qassasat') return 'قصاصات: '+(d.details||'');
+  if(kind==='fanajin')  return 'فناجين (١: '+(d.cup1||'—')+' / ٢: '+(d.cup2||'—')+')';
+  if(kind==='qalam')    return 'قصاصة التقويم/رسالة العمر: '+(d.details||'');
+  if(kind==='taliqa'){
+    const names=[d.groom,d.bride].filter(Boolean).join(' ، ');
+    const dateStr=d.date?fmtFull(new Date(d.date+'T00:00:00')):'';
+    return 'تعليقة ('+names+')'+(dateStr?' '+dateStr:'')+(d.notes?' - '+d.notes:'');
+  }
+  return '';
+}
+
+function findAdditionRow(kind){
+  return document.querySelector('#additions-list [data-kind="'+kind+'"]');
+}
+
+function additionRowHTML(kind, data){
+  const meta = ADDITION_META[kind];
+  const text = additionRowText(kind, data);
+  const editable = meta.fields.length>0;
+  const priceTag = meta.price ? ' <span style="opacity:.7;font-weight:600">(+'+meta.price+' د.أ)</span>' : '';
+  const editIcon = editable ? ' <span style="opacity:.55">✏️</span>' : '';
+  return `<div data-kind="${kind}" data-price-delta="${meta.price}" data-fields='${JSON.stringify(data).replace(/'/g,"&#39;")}' style="display:flex;gap:6px;align-items:center">
+    <div ${editable?`onclick="addOrEditAddition('${kind}')"`:''} style="flex:1;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#8A6030;${editable?'cursor:pointer':''}">${text}${priceTag}${editIcon}</div>
+    <button type="button" onclick="removeAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>
+  </div>`;
+}
+
+function createAdditionRow(kind, data){
+  const meta = ADDITION_META[kind];
+  document.getElementById('additions-list').insertAdjacentHTML('beforeend', additionRowHTML(kind, data));
+  const priceEl = document.getElementById('f-price');
+  priceEl.value = (parseFloat(priceEl.value)||0) + meta.price;
+  updatePriceHint();
+}
+
+function updateAdditionRowInPlace(kind, data){
+  const row = findAdditionRow(kind);
+  if(!row) return;
+  row.outerHTML = additionRowHTML(kind, data); // السعر ما يتغيّر — نفس نوع الإضافة بسعر ثابت
+}
+
+function removeAdditionRow(btn){
+  const row = btn.closest('[data-kind]');
+  const delta = parseFloat(row.dataset.priceDelta||'0');
+  if(delta>0){
+    const priceEl = document.getElementById('f-price');
+    priceEl.value = Math.max(0, (parseFloat(priceEl.value)||0)-delta);
+    updatePriceHint();
+  }
+  row.remove();
+  toast(delta ? 'تم حذف الإضافة وخصم '+delta+' د.أ' : 'تم حذف الإضافة');
+}
+
+function addFreeAdditionRow(value){
   value = value || '';
-  const list = document.getElementById('bq-additions-list');
+  const list = document.getElementById('additions-list');
   const row = document.createElement('div');
+  row.dataset.kind = 'free';
+  row.dataset.priceDelta = '0';
   row.style.cssText = 'display:flex;gap:6px;align-items:center';
   row.innerHTML = `
-    <input type="text" class="bq-add-input" value="${value.replace(/"/g,'&quot;')}" placeholder="مثال: شريط، غلاف..." style="flex:1;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none">
-    <button type="button" onclick="removeBouquetAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>`;
+    <input type="text" class="free-add-input" value="${value.replace(/"/g,'&quot;')}" placeholder="مثال: شريط، غلاف..." style="flex:1;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none">
+    <button type="button" onclick="removeAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>`;
   list.appendChild(row);
   if(!value) row.querySelector('input').focus();
 }
 
-function removeBouquetAdditionRow(btn){
-  const row = btn.closest('div');
-  if(row.dataset.taliqa === '1'){
-    const priceEl = document.getElementById('f-price');
-    const cur = parseFloat(priceEl.value)||0;
-    priceEl.value = Math.max(0, cur-2);
-    updatePriceHint();
-    toast('تم خصم ٢ د.أ (إزالة التعليقة)');
+function closeAllAdditionForms(){
+  ['qassasat-form','fanajin-form','qalam-form','bq-taliqa-form'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+}
+
+// زر "+ نوع الإضافة": لو موجودة أصلاً تفتح للتعديل، وإلا تفتح فورم فاضي أو تُضاف مباشرة (لو بلا تفاصيل)
+function addOrEditAddition(kind){
+  const meta = ADDITION_META[kind];
+  const existing = findAdditionRow(kind);
+
+  if(meta.fields.length===0){
+    if(existing){ toast('مضافة أصلاً — اضغطي ✕ بجانبها لحذفها'); return; }
+    createAdditionRow(kind, {});
+    toast('✅ أُضيفت');
+    return;
   }
-  row.remove();
+
+  closeAllAdditionForms();
+  const data = existing ? JSON.parse(existing.dataset.fields.replace(/&#39;/g,"'")||'{}') : {};
+
+  if(kind==='qassasat'){ document.getElementById('qs-details').value = data.details||''; document.getElementById('qassasat-form').style.display='block'; }
+  else if(kind==='fanajin'){ document.getElementById('fj-cup1').value=data.cup1||''; document.getElementById('fj-cup2').value=data.cup2||''; document.getElementById('fanajin-form').style.display='block'; }
+  else if(kind==='qalam'){ document.getElementById('ql-details').value = data.details||''; document.getElementById('qalam-form').style.display='block'; }
+  else if(kind==='taliqa'){
+    document.getElementById('bq-t-groom').value=data.groom||'';
+    document.getElementById('bq-t-bride').value=data.bride||'';
+    document.getElementById('bq-t-date').value=data.date||'';
+    document.getElementById('bq-t-notes').value=data.notes||'';
+    document.getElementById('bq-taliqa-form').style.display='block';
+  }
 }
 
-function toggleTaliqaForm(){
-  const el = document.getElementById('bq-taliqa-form');
-  el.style.display = el.style.display==='none' ? 'block' : 'none';
+function saveAdditionFromForm(kind, data, requiredMsg){
+  const hasAny = Object.values(data).some(v=>v&&String(v).trim());
+  if(!hasAny){ toast(requiredMsg); return false; }
+  if(findAdditionRow(kind)) updateAdditionRowInPlace(kind, data);
+  else createAdditionRow(kind, data);
+  closeAllAdditionForms();
+  return true;
 }
 
+function confirmQassasat(){
+  const details = document.getElementById('qs-details').value.trim();
+  if(saveAdditionFromForm('qassasat', {details}, '❌ أدخلي تفاصيل القصاصات')){
+    document.getElementById('qs-details').value='';
+    toast('✅ تم حفظ القصاصات');
+  }
+}
+function confirmFanajin(){
+  const cup1 = document.getElementById('fj-cup1').value.trim();
+  const cup2 = document.getElementById('fj-cup2').value.trim();
+  if(saveAdditionFromForm('fanajin', {cup1,cup2}, '❌ أدخلي كتابة فنجان واحد على الأقل')){
+    document.getElementById('fj-cup1').value=''; document.getElementById('fj-cup2').value='';
+    toast('✅ تم حفظ الفناجين');
+  }
+}
+function confirmQalam(){
+  const details = document.getElementById('ql-details').value.trim();
+  if(saveAdditionFromForm('qalam', {details}, '❌ أدخلي التفاصيل')){
+    document.getElementById('ql-details').value='';
+    toast('✅ تم الحفظ');
+  }
+}
 function confirmTaliqaAddition(){
   const groom = document.getElementById('bq-t-groom').value.trim();
   const bride = document.getElementById('bq-t-bride').value.trim();
-  const dateRaw = document.getElementById('bq-t-date').value;
+  const date  = document.getElementById('bq-t-date').value;
   const notes = document.getElementById('bq-t-notes').value.trim();
-
-  if(!groom && !bride){ toast('❌ أدخلي اسم العريس أو العروس على الأقل'); return; }
-
-  const dateStr = dateRaw ? fmtFull(new Date(dateRaw+'T00:00:00')) : '';
-  const names = [groom,bride].filter(Boolean).join(' ، ');
-  const text = 'تعليقة ('+names+')'+(dateStr?' '+dateStr:'')+(notes?' - '+notes:'');
-
-  const list = document.getElementById('bq-additions-list');
-  const row = document.createElement('div');
-  row.dataset.taliqa = '1';
-  row.style.cssText = 'display:flex;gap:6px;align-items:center';
-  row.innerHTML = `
-    <input type="text" class="bq-add-input" value="${text.replace(/"/g,'&quot;')}" readonly style="flex:1;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#8A6030;outline:none">
-    <button type="button" onclick="removeBouquetAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>`;
-  list.appendChild(row);
-
-  // +2 د.أ لكل تعليقة تُضاف
-  const priceEl = document.getElementById('f-price');
-  priceEl.value = (parseFloat(priceEl.value)||0) + 2;
-  updatePriceHint();
-
-  // تصفير مربعات نافذة التعليقة وإغلاقها
-  ['bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('bq-taliqa-form').style.display='none';
-  toast('✅ أُضيفت التعليقة (+٢ د.أ)');
+  if(saveAdditionFromForm('taliqa', {groom,bride,date,notes}, '❌ أدخلي اسم العريس أو العروس على الأقل')){
+    ['bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>document.getElementById(id).value='');
+    toast('✅ تم حفظ التعليقة');
+  }
 }
 
-function getBouquetAdditionsJoined(){
-  return [...document.querySelectorAll('#bq-additions-list .bq-add-input')]
-    .map(i=>i.value.trim()).filter(Boolean).join(' | ');
+// يجمع كل الإضافات (الحقل الحر + القوالب) بترتيب ظهورها لحفظها بعمود Additions
+function getAdditionsJoined(){
+  const freeEl = document.getElementById('f-additions-free');
+  const freeVal = freeEl ? freeEl.value.trim() : '';
+  const templateItems = [...document.querySelectorAll('#additions-list > [data-kind]')]
+    .map(row=>additionRowText(row.dataset.kind, JSON.parse((row.dataset.fields||'{}').replace(/&#39;/g,"'"))))
+    .filter(Boolean);
+  return [freeVal, ...templateItems].filter(Boolean).join(' | ');
 }
 
-function resetBouquetAdditions(){
-  const list = document.getElementById('bq-additions-list');
-  if(list) list.innerHTML = '';
-  const tform = document.getElementById('bq-taliqa-form');
-  if(tform) tform.style.display = 'none';
-  ['bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>{
+function resetAdditions(){
+  const list = document.getElementById('additions-list'); if(list) list.innerHTML='';
+  const freeEl = document.getElementById('f-additions-free'); if(freeEl) freeEl.value='';
+  closeAllAdditionForms();
+  ['qs-details','fj-cup1','fj-cup2','ql-details','bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+}
+
+// ══════════════════════════════════════════════════════
+// نظام المستودع — حساب الاستهلاك التلقائي لكل أوردر جديد
+// ══════════════════════════════════════════════════════
+const INV_LABELS = {
+  gypsophila:'جبسوفيل أبيض', envelope:'مغلف شهادة', mirror:'مري زجاج',
+  woodDisc:'طبقة خشب دائرية', paper:'ورق طباعة', ink:'حبر بصمات',
+  box:'كراتين تغليف', pearls:'لولو', ringBoxes:'علب للخواتم',
+  boneFlower:'ورد عظم', stand:'ستاند', frame:'برواز', gradCap:'طواقي تخرج',
+};
+const INV_UNITS = {
+  gypsophila:'حبة', envelope:'قطعة', mirror:'قطعة', woodDisc:'قطعة',
+  paper:'ورقة', ink:'قطعة', box:'قطعة', pearls:'بكيت', ringBoxes:'قطعة',
+  boneFlower:'بكيت', stand:'قطعة', frame:'قطعة', gradCap:'قطعة',
+};
+
+// يحسب استهلاك المواد الخام لأوردر معيّن بناءً على نوعه وموديله وإضافاته
+function computeInventoryDeductions(data){
+  const d = {};
+  const add = (key, qty) => { d[key] = (d[key]||0) + qty; };
+  const type = data.productType;
+  const additionsText = data.additions || '';
+  const hasAdd = (kw) => additionsText.indexOf(kw) !== -1;
+
+  if(type === 'Bouquet') return d; // نواقص المسكات لاحقاً — بدون استهلاك حالياً
+
+  const applyTrayMaterials = () => {
+    add('mirror', 1);
+    add('woodDisc', 1);
+    add('ringBoxes', 2);
+    add('pearls', 100/500);           // ١٠٠ غرام من كيت وزنه ٥٠٠ غرام
+    if(data.model === 'Turkish') add('boneFlower', 8/45);   // ٨ حبات من كيت فيه ٤٥ حبة
+    else add('gypsophila', 0.5);
+  };
+  const applyBookMaterials = () => { add('envelope', 1); add('ink', 1); add('paper', 3); };
+  const applyFrameMaterials = () => { add('ink', 1); add('frame', 1); };
+
+  if(type === 'Tray'){
+    applyTrayMaterials();
+    add('box', 1);
+  } else if(type === 'Guest Book'){
+    applyBookMaterials(); // بدون كرتونة — كتاب منفصل لا يحتاجها
+  } else if(type === 'Graduation'){
+    add('gradCap', 1);
+    add('box', 1);
+  } else if(type === 'Package'){
+    applyTrayMaterials();
+    add('box', 1); // كرتونة واحدة للبكج كامل بغض النظر عن نوعه
+    if(data.pkgType === 'frame') applyFrameMaterials();
+    else applyBookMaterials(); // الأساسي والشامل كلاهما يحتاجان كتاب
+  }
+
+  if(hasAdd('ستاند')) add('stand', 1);
+  if(hasAdd('قصاصات:')) add('paper', 2);
+  if(hasAdd('قصاصة التقويم') || hasAdd('رسالة العمر')) add('paper', 2);
+
+  return d;
 }
 
 function toggleModelOther(){
@@ -2474,8 +2780,9 @@ async function saveOrder(){
 
   const rname=document.getElementById('f-rname').value.trim();
   if(!rname){toast('❌ أدخلي اسم المستلم');return;}
-  const phone=document.getElementById('f-phone').value.trim();
+  const phone=normalizePhone(document.getElementById('f-phone').value);
   if(!phone){toast('❌ أدخلي رقم الهاتف');return;}
+  if(phone.length<10){toast('❌ رقم الهاتف ناقص — لازم ١٠ خانات على الأقل (٠٧XXXXXXXX)');return;}
   // منع الحفظ لو في تكرار هاتف لم يُؤكَّد
   const dupWarnEl=document.getElementById('phone-dup-warn');
   if(dupWarnEl && dupWarnEl.style.display!=='none' && document.getElementById('f-phone').style.borderColor==='rgb(255, 152, 0)'){
@@ -2492,13 +2799,16 @@ async function saveOrder(){
     if(!document.getElementById('f-groom').value.trim()){toast('❌ أدخلي اسم العريس');return;}
     if(!document.getElementById('f-bride').value.trim()){toast('❌ أدخلي اسم العروس');return;}
     if(hasTray&&!document.getElementById('f-model').value){toast('❌ اختاري الموديل');return;}
+    if(type==='Package'&&!document.getElementById('f-pkg').value){toast('❌ اختاري نوع البكج');return;}
   }
   if(type==='Graduation'&&!document.getElementById('f-gradname').value.trim()){toast('❌ أدخلي اسم الخريج');return;}
 
   const modelVal=document.getElementById('f-model').value;
   const model=isBouquet
     ? document.getElementById('f-bouquet-model').value.trim()
-    : (modelVal==='Other'?document.getElementById('f-model-other').value.trim():modelVal);
+    : type==='Graduation'
+      ? document.getElementById('f-major').value.trim()
+      : (modelVal==='Other'?document.getElementById('f-model-other').value.trim():modelVal);
   const dateRaw=document.getElementById('f-date').value;
   const deldateObj=new Date(deldate+'T00:00:00');
   const dayNames=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -2510,8 +2820,18 @@ async function saveOrder(){
     occasionDate:dateRaw?fmtFull(new Date(dateRaw+'T00:00:00')):'',
     phrase:document.getElementById('f-phrase').value.trim(),
     verse:true,
-    notes:isBouquet?document.getElementById('f-bouquet-notes').value.trim():document.getElementById('f-notes').value.trim(),
-    additions:isBouquet?getBouquetAdditionsJoined():document.getElementById('f-additions').value.trim(),
+    notes:(()=>{
+      if(isBouquet) return document.getElementById('f-bouquet-notes').value.trim();
+      const baseNotes = document.getElementById('f-notes').value.trim();
+      const bookdateRaw = document.getElementById('f-bookdate').value;
+      if(!bookdateRaw) return baseNotes;
+      const bookDateStr = fmtFull(new Date(bookdateRaw+'T00:00:00'));
+      const bookLine = 'تاريخ الكتاب: '+bookDateStr;
+      return baseNotes ? bookLine+' | '+baseNotes : bookLine;
+    })(),
+    additions:getAdditionsJoined(),
+    color:hasTray?document.getElementById('f-color').value:'',
+    pkgType:type==='Package'?document.getElementById('f-pkg').value:'',
     deliveryDay:dayNames[deldateObj.getDay()],
     deliveryDate:fmtFull(deldateObj),
     recipient:rname, phone,
@@ -2524,16 +2844,20 @@ async function saveOrder(){
     createdAt:nowStamp()          // وقت الإضافة من جهاز المُدخِل
   };
 
+  // خطة استهلاك المستودع لهذا الأوردر — تُطبَّق مرة واحدة عند الإنشاء فقط (وليس عند التعديل)
+  const invDeductions = computeInventoryDeductions(data);
+
   const btn=document.getElementById('save-btn');
-  btn.disabled=true; btn.innerHTML = '<span class="btn-spinner"></span> جاري الحفظ...';
+  btn.disabled=true;
+  showFullscreenLoading('⏳ جاري حفظ الطلب الجديد...');
   try{
-    const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data)});
+    const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data),inventoryDeductions:JSON.stringify(invDeductions)});
     const newId = res.id;
 
     // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
     const photosInput = document.getElementById('f-photos');
     if(photosInput && photosInput.files.length){
-      btn.innerHTML = '<span class="btn-spinner"></span> جاري رفع الصور...';
+      showFullscreenLoading('📷 جاري رفع الصور...');
       const {failed, lastError} = await uploadPhotosForOrder(newId, photosInput.files);
       if(failed) toast('⚠️ الأوردر اتحفظ لكن الصور فشلت: '+lastError);
     }
@@ -2541,12 +2865,16 @@ async function saveOrder(){
     clearForm();
     await loadOrders(true);
     switchTab('cal');
-    toast('✅ تم حفظ الأوردر '+(newId||''));
-  }catch(e){ toast('❌ لم يُحفظ: '+e.message); }
-  btn.innerHTML = '💾 حفظ في الشيت'; btn.disabled=false;
+    btn.disabled=false;
+    showFullscreenSuccess('تم حفظ الطلب الجديد ✅'+(newId?' — '+newId:''));
+  }catch(e){
+    btn.disabled=false;
+    showFullscreenError('لم يُحفظ الطلب ❌\n'+e.message);
+  }
 }
 
 function clearForm(){
+  lastFType = ''; // يسمح لأول toggleFields بعد المسح أن تمسح كل شيء بنظافة
   // Reset date selector
   const fDelSel=document.getElementById('f-deldate-sel');
   if(fDelSel) fDelSel.selectedIndex=0;
@@ -2560,7 +2888,7 @@ function clearForm(){
   if(fPhotosHint) fPhotosHint.textContent='';
   // Reset all inputs
   ['f-type','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
-   'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes','f-additions',
+   'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes',
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link',
    'f-bouquet-notes','f-bouquet-model'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -2572,8 +2900,8 @@ function clearForm(){
   // Reset phone duplicate warning
   const dupWarn=document.getElementById('phone-dup-warn'); if(dupWarn) dupWarn.style.display='none';
   const phoneEl=document.getElementById('f-phone'); if(phoneEl) phoneEl.style.borderColor='';
-  // Reset bouquet additions builder
-  resetBouquetAdditions();
+  // Reset unified additions system
+  resetAdditions();
   const genericPhoto = document.getElementById('generic-photo-section');
   if(genericPhoto) genericPhoto.style.display='block';
   const genericPhrase = document.getElementById('generic-phrase-section');
@@ -2985,10 +3313,136 @@ async function loadDashData(){
     document.getElementById('dash-conn-lbl').textContent='متصل';
     applyDashFilters();
     renderCal(); updateStats();   // مزامنة التقويم مع نفس البيانات
+    loadInventoryData();
   }catch(e){
     document.getElementById('dash-conn-dot').style.background='#FF5252';
     document.getElementById('dash-conn-lbl').textContent='خطأ في الاتصال';
   }
+}
+
+// ══════════════════════════════════════════════════════
+// المستودع — تحميل، عرض، وتسجيل مشتريات جديدة
+// ══════════════════════════════════════════════════════
+let inventoryData = {};
+
+async function loadInventoryData(){
+  try{
+    const res = await apiCall({action:'getInventory'});
+    inventoryData = {};
+    (res.items||[]).forEach(it=>{ inventoryData[it.key] = it; });
+    renderInventory();
+  }catch(e){
+    const list = document.getElementById('inv-list');
+    if(list) list.innerHTML = '<div style="font-size:12px;color:#B8A898">تعذّر تحميل بيانات المستودع — تأكدي من تحديث Apps Script</div>';
+  }
+}
+
+function renderInventory(){
+  const list = document.getElementById('inv-list');
+  const banner = document.getElementById('inv-alert-banner');
+  if(!list) return;
+
+  const keys = Object.keys(INV_LABELS);
+  const low = [];
+
+  list.innerHTML = keys.map(key=>{
+    const it = inventoryData[key] || {stock:0, maxStock:0};
+    const stockRaw = parseFloat(it.stock)||0;
+    const stock = Math.round(stockRaw*100)/100; // تقريب للعرض فقط
+    // لو Max Stock فاضي، نعتبر الرصيد الحالي هو المرجع الأولي — يتحدّث لحاله لاحقاً مع أي شراء أعلى
+    const max = parseFloat(it.maxStock) || stock;
+    const pct = max>0 ? Math.min(100, Math.round(stock/max*100)) : 0;
+    const isLow = max>0 && pct<=30;
+    if(isLow) low.push(INV_LABELS[key]+' ('+stock+' '+INV_UNITS[key]+')');
+    const barColor = pct<=30 ? '#C0392B' : pct<=50 ? '#E67E22' : '#4CAF50';
+
+    return `<div style="background:#FFFFFF10;border:1.5px solid rgba(201,169,110,.2);border-radius:10px;padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:800;color:#E8D5B0">${INV_LABELS[key]}</span>
+        <span style="font-size:12px;color:#8B7355">${stock} ${INV_UNITS[key]}${max>0?' / '+max:''}</span>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px">
+        <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" step="any" min="0" id="inv-qty-${key}" placeholder="الكمية المشتراة" style="flex:1;background:#1A1410;border:1px solid rgba(201,169,110,.3);border-radius:6px;padding:6px 10px;font-family:Tajawal,sans-serif;font-size:12px;color:#E8D5B0;outline:none">
+        <button onclick="addInventoryPurchase('${key}')" style="background:#C9A96E;border:none;border-radius:6px;padding:6px 14px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;color:#1A1410;cursor:pointer;white-space:nowrap">+ إضافة</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(low.length){
+    banner.style.display='block';
+    banner.innerHTML = '⚠️ <strong>نواقص تحتاج شراء:</strong> '+low.join('، ');
+  } else {
+    banner.style.display='none';
+  }
+}
+
+async function addInventoryPurchase(key){
+  const input = document.getElementById('inv-qty-'+key);
+  const qty = parseFloat(input.value);
+  if(!qty || qty<=0){ toast('❌ أدخلي كمية صحيحة'); return; }
+  try{
+    await apiCall({action:'addInventoryPurchase', key, qty});
+    input.value='';
+    toast('✅ أُضيف '+qty+' '+INV_UNITS[key]+' لـ'+INV_LABELS[key]);
+    await loadInventoryData();
+  }catch(e){ toast('❌ فشل التسجيل: '+e.message); }
+}
+
+// توقّع الاحتياج المتوقع من المواد الخام ليوم أو أسبوع قادم — بناءً على الأوردرات المسجّلة فعلياً بهذه الفترة
+function forecastInventoryNeeds(mode){
+  const dateVal = document.getElementById('inv-forecast-date').value;
+  if(!dateVal){ toast('❌ اختاري تاريخاً أولاً'); return; }
+
+  const start = new Date(dateVal+'T00:00:00');
+  const days = mode==='week' ? 7 : 1;
+  const dateStrs = [];
+  for(let i=0;i<days;i++){
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    dateStrs.push(fmtFull(d));
+  }
+
+  const matched = allOrders.filter(o=>{
+    const st = (o['Status']||'').toLowerCase();
+    if(st==='cancelled') return false;
+    return dateStrs.includes(String(o['Delivery Date']||'').trim());
+  });
+
+  const totals = {};
+  matched.forEach(o=>{
+    const orderData = {
+      productType: o['Product Type']||'',
+      model: o['Model']||'',
+      pkgType: o['PkgType']||'',
+      additions: o['Additions']||'',
+    };
+    const ded = computeInventoryDeductions(orderData);
+    Object.keys(ded).forEach(k=>{ totals[k] = (totals[k]||0) + ded[k]; });
+  });
+
+  renderForecastResult(totals, matched.length, dateStrs);
+}
+
+function renderForecastResult(totals, orderCount, dateStrs){
+  const box = document.getElementById('inv-forecast-result');
+  const rangeLabel = dateStrs.length>1 ? dateStrs[0]+' → '+dateStrs[dateStrs.length-1] : dateStrs[0];
+  const keys = Object.keys(totals);
+
+  if(!orderCount){
+    box.innerHTML = `<div style="font-size:12px;color:#8B7355;margin-bottom:6px">${rangeLabel}</div><div style="font-size:13px;color:#B8A898">لا يوجد أوردرات مسجّلة بهذه الفترة</div>`;
+    return;
+  }
+
+  box.innerHTML = `<div style="font-size:12px;color:#8B7355;margin-bottom:10px">${orderCount} أوردر — ${rangeLabel}</div>` +
+    keys.map(k=>{
+      const rounded = Math.round(totals[k]*100)/100;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(201,169,110,.1)">
+      <span style="font-size:13px;color:#E8D5B0;font-weight:700">${INV_LABELS[k]}</span>
+      <span style="font-size:14px;color:#C9A96E;font-weight:900">${rounded} ${INV_UNITS[k]}</span>
+    </div>`;
+    }).join('');
 }
 
 function orderTotalD(o){return parseFloat(o['Total']||0)+(o['Governorate']?DELIVERY_FEE:0)}
@@ -3169,12 +3623,66 @@ const PHOTOS_SEP = ';;';
 // ── قائمة النقاط الثلاث لكل يوم ──
 let dayMenuDate = null;
 
+// فلتر النوع النشط حالياً على التقويم (اختيار متعدد) — يصفّر تلقائياً عند كل تحديث
+let typeFilterSet = new Set();
+
+function renderDayMenuTypes(dateStr){
+  const container = document.getElementById('day-menu-types');
+  if(!container) return;
+  const dayOrders = allOrders.filter(o=>{
+    const st = (o['Status']||'').toLowerCase();
+    if(st==='cancelled') return false;
+    return String(o['Delivery Date']||'').trim() === dateStr;
+  });
+  const counts = {};
+  dayOrders.forEach(o=>{
+    const t = o['Product Type']||'Other';
+    counts[t] = (counts[t]||0)+1;
+  });
+  const types = Object.keys(counts);
+  if(!types.length){ container.innerHTML = '<div style="padding:8px 16px 12px;font-size:12px;color:#B8A898">لا يوجد طلبات</div>'; return; }
+
+  container.innerHTML = types.map(t=>{
+    const label = TYPE_AR[t]||t;
+    const active = typeFilterSet.has(t);
+    return `<button onclick="toggleDayTypeFilter('${t}')" style="display:flex;align-items:center;justify-content:space-between;width:100%;text-align:right;background:${active?'#FAF5EC':'none'};border:none;padding:10px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:${active?'900':'700'};color:${active?'#8A6030':'#1A1410'};cursor:pointer">
+      <span>${active?'✅ ':''}${label}</span>
+      <span style="color:#C9A96E;font-weight:900">(${counts[t]})</span>
+    </button>`;
+  }).join('');
+}
+
+// تبديل نوع داخل/خارج فلتر التقويم — اختيار متعدد، لا يُغلق القائمة
+function toggleDayTypeFilter(type){
+  if(typeFilterSet.has(type)) typeFilterSet.delete(type);
+  else typeFilterSet.add(type);
+  renderDayMenuTypes(dayMenuDate);
+  renderCal();
+  updateTypeFilterBanner();
+}
+
+function updateTypeFilterBanner(){
+  const banner = document.getElementById('type-filter-banner');
+  if(!banner) return;
+  if(!typeFilterSet.size){ banner.style.display='none'; return; }
+  const labels = [...typeFilterSet].map(t=>TYPE_AR[t]||t).join('، ');
+  banner.innerHTML = `🔍 مفلتر حسب النوع: <strong>${labels}</strong> <span style="text-decoration:underline;cursor:pointer" onclick="clearTypeFilter()">إلغاء الفلتر ✕</span>`;
+  banner.style.display = 'block';
+}
+
+function clearTypeFilter(){
+  typeFilterSet.clear();
+  renderCal();
+  updateTypeFilterBanner();
+}
+
 function openDayMenu(dateStr, ev){
   ev.stopPropagation();
   dayMenuDate = dateStr;
+  renderDayMenuTypes(dateStr);
   const pop = document.getElementById('day-menu-popover');
   const rect = ev.currentTarget.getBoundingClientRect();
-  const popW = 210;
+  const popW = 220;
   let left = rect.right - popW;
   if(left < 8) left = 8;
   if(left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
@@ -3222,15 +3730,53 @@ function printOrdersForDate(dateStr){
 
 // تحديد كل أوردرات يوم معيّن دفعة وحدة لتغيير حالتها الجماعي (يستخدم شريط التحديث الجماعي الموجود)
 function bulkStatusForDate(dateStr){
-  const ids = allOrders.filter(o=>String(o['Delivery Date']||'').trim()===dateStr).map(o=>o['Order ID']);
-  if(!ids.length){ toast('لا يوجد أوردرات بهذا التاريخ'); return; }
+  // يحترم فلتر النوع النشط من قائمة النقاط الثلاث (إن وُجد) — بدل ما يحدد كل الأنواع دايماً
+  const hasTypeFilter = typeof typeFilterSet !== 'undefined' && typeFilterSet.size > 0;
+  const matched = allOrders.filter(o=>{
+    if(String(o['Delivery Date']||'').trim() !== dateStr) return false;
+    if(hasTypeFilter && !typeFilterSet.has(o['Product Type'])) return false;
+    return true;
+  });
+  const ids = matched.map(o=>o['Order ID']);
+  if(!ids.length){ toast('لا يوجد أوردرات بهذا التاريخ'+(hasTypeFilter?' بالنوع المفلتر':'')); return; }
   selectedIds.clear();
   ids.forEach(id=>selectedIds.add(id));
   updateBulkBar();
   renderCal();
-  toast('✅ تم تحديد '+ids.length+' أوردر — اختاري الحالة من الشريط أعلى التقويم');
+  const filterNote = hasTypeFilter ? ' (حسب النوع المفلتر فقط)' : '';
+  toast('✅ تم تحديد '+ids.length+' أوردر'+filterNote+' — اختاري الحالة من الشريط أعلى التقويم');
   const bar = document.getElementById('bulk-bar');
   if(bar) bar.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// ── شاشات التحميل والنتيجة الكاملة ──
+function showFullscreenLoading(text){
+  document.getElementById('fullscreen-loading-text').textContent = text;
+  document.getElementById('fullscreen-loading').style.display = 'flex';
+}
+function hideFullscreenLoading(){
+  document.getElementById('fullscreen-loading').style.display = 'none';
+}
+// تُغلق تلقائياً بعد مدة قصيرة؛ onDone تُستدعى بعد الإغلاق (مفيدة لو الشاشة الحالية لسا مفتوحة وقتها)
+function showFullscreenSuccess(text, onDone){
+  hideFullscreenLoading();
+  document.getElementById('fullscreen-result-icon').textContent = '✅';
+  document.getElementById('fullscreen-result-text').textContent = text;
+  document.getElementById('fullscreen-result').style.display = 'flex';
+  setTimeout(()=>{
+    document.getElementById('fullscreen-result').style.display = 'none';
+    if(onDone) onDone();
+  }, 1400);
+}
+function showFullscreenError(text){
+  hideFullscreenLoading();
+  document.getElementById('fullscreen-result-icon').textContent = '❌';
+  document.getElementById('fullscreen-result-text').textContent = text;
+  document.getElementById('fullscreen-result').style.display = 'flex';
+  setTimeout(()=>{
+    document.getElementById('fullscreen-result').style.display = 'none';
+    // لا يغلق أو يغيّر الشاشة الحالية — يبقى المستخدم بنفس الفورم لإعادة المحاولة
+  }, 2000);
 }
 
 function openLightbox(url){
@@ -3365,7 +3911,7 @@ function getFormData(){
     modelOther:document.getElementById('f-model-other').value.trim(),
     phrase:    document.getElementById('f-phrase').value.trim(),
     notes:     document.getElementById('f-notes').value.trim(),
-    additions: document.getElementById('f-additions').value.trim(),
+    additions: getAdditionsJoined(),
     rname:     document.getElementById('f-rname').value.trim(),
     phone:     document.getElementById('f-phone').value.trim(),
     prov:      document.getElementById('f-prov').value,
@@ -3423,7 +3969,7 @@ function loadDraft(draftId){
     set('f-model-other', d.modelOther);
     set('f-phrase', d.phrase);
     set('f-notes', d.notes);
-    set('f-additions', d.additions);
+    const freeEl=document.getElementById('f-additions-free'); if(freeEl && d.additions) freeEl.value = d.additions;
     set('f-rname', d.rname);
     set('f-phone', d.phone);
     set('f-prov', d.prov);
@@ -3582,6 +4128,23 @@ function toast(msg){
       </div>
 
       <div class="alerts" id="dash-alerts"></div>
+
+      <div class="section">
+        <div class="section-ttl">📦 إدارة المستودع (النواقص)</div>
+        <div id="inv-alert-banner" style="display:none;background:#FFF0F0;border:1.5px solid #FFCDD2;border-radius:8px;padding:11px 16px;margin-bottom:14px;font-size:13px;color:#C0392B;font-weight:700"></div>
+        <div id="inv-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+
+        <div style="border-top:1px solid rgba(201,169,110,.15);padding-top:16px">
+          <div style="font-size:14px;font-weight:800;color:#C9A96E;margin-bottom:10px">🔮 توقّع الاحتياج القادم</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+            <input type="date" id="inv-forecast-date" style="background:#1A1410;border:1px solid rgba(201,169,110,.3);border-radius:6px;padding:7px 10px;font-family:Tajawal,sans-serif;font-size:13px;color:#E8D5B0">
+            <button onclick="forecastInventoryNeeds('day')" style="background:none;border:1.5px solid #C9A96E;color:#C9A96E;border-radius:6px;padding:7px 14px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">هذا اليوم فقط</button>
+            <button onclick="forecastInventoryNeeds('week')" style="background:none;border:1.5px solid #C9A96E;color:#C9A96E;border-radius:6px;padding:7px 14px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">أسبوع كامل من هذا التاريخ</button>
+          </div>
+          <div id="inv-forecast-result" style="background:rgba(255,255,255,.03);border-radius:8px;padding:12px 14px"></div>
+        </div>
+      </div>
+
       <div class="kpi-grid" id="dash-kpi"></div>
 
       <div class="charts-row">
