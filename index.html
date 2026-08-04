@@ -328,6 +328,10 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
   .hdr,.tabs,.main,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
   #print-container{display:block!important;padding:5mm}
+  #names-print-container{display:block!important;padding:10mm}
+  .names-print-item{margin-bottom:9mm;text-align:center;break-inside:avoid;padding-bottom:6mm;border-bottom:1px dashed #999}
+  .names-print-l1{font-size:18pt;font-weight:900;color:#000}
+  .names-print-l2{font-size:13pt;color:#333;margin-top:2mm}
   @page{size:A4 portrait;margin:6mm}
 
   /* ── DAY HEADER ── */
@@ -738,7 +742,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v31</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v35</span>
     </div>
   </div>
 </div>
@@ -758,7 +762,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="stats">
     <div class="stat stat-all"><div class="stat-n" id="st-all">—</div><div class="stat-l" id="st-all-label">أقرب يوم تسليم</div></div>
     <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🔥 نشطة</div></div>
-    <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">📅 هذا الأسبوع</div></div>
+    <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">📅 الأيام الظاهرة</div></div>
     <div class="stat stat-done"><div class="stat-n" id="st-done">—</div><div class="stat-l">✅ تم التسليم</div></div>
   </div>
 
@@ -1173,11 +1177,28 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <span class="popt-ico">🖨️</span>
       <span class="popt-name">طباعة الكاردات الآن</span>
     </button>
+
+    <div style="border-top:1px solid var(--border);margin:20px 0 16px;padding-top:16px">
+      <div class="form-ttl" style="font-size:15px">🏷️ طباعة الأسماء</div>
+      <div style="font-size:11px;color:#8B7355;margin-bottom:10px">قائمة مختصرة (أسماء + تاريخ فقط) لإرسالها للمصمّم — تستخدم نفس الأيام المحدّدة فوق</div>
+      <select id="names-mode" style="width:100%;background:#F5F0E8;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:14px;color:#2C2218;margin-bottom:10px">
+        <option value="taliqa">تعليقات (أسماء + تاريخ من المسكات)</option>
+        <option value="trays">صواني (صينية / بكج / تخرج)</option>
+      </select>
+      <button class="btn btn-gold" onclick="generateNamesList()" style="margin-bottom:12px">📝 توليد القائمة</button>
+
+      <div id="names-list-result" style="display:none;background:#FFFBF4;border:1.5px solid #E5D9C7;border-radius:10px;padding:14px;margin-bottom:10px;max-height:400px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px">
+        <button id="copy-names-btn" onclick="copyNamesList()" style="display:none;flex:1;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">📋 نسخ الكل</button>
+        <button id="print-names-btn" onclick="printNamesList()" style="display:none;flex:1;background:#C9A96E;border:none;color:#1A1410;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ طباعة كورقة</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- PRINT CONTAINER — only visible when printing -->
 <div id="print-container" style="display:none"></div>
+<div id="names-print-container" style="display:none"></div>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbzkrzR3982z7QbFuzH0VRAEd1RWYDaZnos8VMBkUPnrMLD2iU2GeEwbVlq7pWHBj-I-/exec';
@@ -1222,10 +1243,22 @@ async function loadOrders(silent){
   if(btn){ btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; }
   // أي تحديث (يدوي أو تلقائي) يصفّر فلتر النوع من قائمة النقاط الثلاث
   if(typeof typeFilterSet !== 'undefined'){ typeFilterSet.clear(); }
+
+  // مرحلة ١: الاتصال الفعلي بالشيت — أي فشل هنا هو خطأ اتصال حقيقي
+  let data;
   try {
-    const data = await apiCall({action:'getOrders'});
-    allOrders = data.orders || [];
-    setConn(true);
+    data = await apiCall({action:'getOrders'});
+  } catch(e){
+    setConn(false);
+    toast('❌ تعذّر الاتصال بالشيت — البيانات المعروضة قد تكون قديمة');
+    if(btn){ btn.disabled = false; btn.textContent = '↻ تحديث'; }
+    return;
+  }
+
+  // مرحلة ٢: البيانات وصلت بنجاح — أي خطأ من هون فصاعداً هو خطأ برمجي بالمعالجة، مو خطأ اتصال
+  allOrders = data.orders || [];
+  setConn(true);
+  try {
     renderCal();
     updateStats();
     if(typeof updateTypeFilterBanner === 'function') updateTypeFilterBanner();
@@ -1235,8 +1268,8 @@ async function loadOrders(silent){
     if(dashApp && dashApp.style.display === 'block') applyDashFilters();
     if(!silent) toast('✅ تم التحديث — '+allOrders.length+' أوردر');
   } catch(e){
-    setConn(false);
-    toast('❌ تعذّر الاتصال بالشيت — البيانات المعروضة قد تكون قديمة');
+    console.error('خطأ برمجي بعد نجاح الاتصال (مو مشكلة شيت):', e);
+    toast('⚠️ وصلت البيانات لكن صار خطأ بعرضها: '+e.message);
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = '↻ تحديث'; }
   }
@@ -1330,21 +1363,20 @@ function isSameDay(a,b){
   return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
 }
 
-// Get week days for the given offset (week starting Sunday)
-// الأسبوع يبدأ من السبت وينتهي الجمعة
-const WEEKS_SHOWN = 3;
+// نطاق التقويم: يومين قبل اليوم + اليوم نفسه + ٣ أيام بعده = ٦ أيام بلا تقسيم أسابيع
+const DAYS_BACK = 2;
+const DAYS_FORWARD = 3;
+const WINDOW_SIZE = DAYS_BACK + 1 + DAYS_FORWARD; // 6
+const WEEKS_SHOWN = 1; // نافذة واحدة بس، لا تكديس أسابيع
 function getWeekDays(offset){
   const today = new Date(); today.setHours(0,0,0,0);
-  const back = (today.getDay() + 1) % 7;
-  const sat = new Date(today);
-  sat.setDate(today.getDate() - back + offset*7);
-  return Array.from({length:7},(_,i)=>{ const d=new Date(sat); d.setDate(sat.getDate()+i); return d; });
+  const start = new Date(today);
+  start.setDate(today.getDate() - DAYS_BACK + offset*WINDOW_SIZE);
+  return Array.from({length:WINDOW_SIZE},(_,i)=>{ const d=new Date(start); d.setDate(start.getDate()+i); return d; });
 }
 function weekLabel(off){
-  if(off===0) return 'هذا الأسبوع';
-  if(off===1) return 'الأسبوع القادم';
-  if(off===-1) return 'الأسبوع الماضي';
-  return off>0 ? ('بعد '+off+' أسابيع') : ('قبل '+Math.abs(off)+' أسابيع');
+  if(off===0) return '';
+  return off>0 ? ('بعد '+off+' نطاق') : ('قبل '+Math.abs(off)+' نطاق');
 }
 function groupWeek(days, orders){
   const g = days.map(()=>[]);
@@ -1354,6 +1386,13 @@ function groupWeek(days, orders){
     days.forEach((dt,i)=>{ if(isSameDay(d,dt)) g[i].push(o); });
   });
   return g;
+}
+
+// نطاق بحث أوسع مستقل عن نافذة التقويم المرئية — يُستخدم لإيجاد "أقرب يوم" حتى لو كان خارج الأيام الظاهرة
+function getExtendedSearchDays(totalDays){
+  totalDays = totalDays || 30;
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Array.from({length:totalDays},(_,i)=>{ const d=new Date(today); d.setDate(today.getDate()+i); return d; });
 }
 
 
@@ -1378,7 +1417,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v31<br>
+       <strong>الإصدار:</strong> v35<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1401,7 +1440,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v31 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v35 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1440,8 +1479,9 @@ function renderCal(){
   // تسمية الفترة المعروضة
   const firstWeek = getWeekDays(weekOffset);
   const lastWeek  = getWeekDays(weekOffset + WEEKS_SHOWN - 1);
+  const lastDay   = lastWeek[lastWeek.length-1]; // آخر يوم بالنطاق — مرن بغض النظر عن حجم النافذة
   document.getElementById('week-lbl').textContent =
-    fmtShort(firstWeek[0])+' — '+fmtShort(lastWeek[6])+' — '+lastWeek[6].getFullYear();
+    fmtShort(firstWeek[0])+' — '+fmtShort(lastDay)+' — '+lastDay.getFullYear();
 
   // فلترة الحالات (غير حساسة لحالة الأحرف)
   const fs = String(filterStatus||'all').toLowerCase();
@@ -1475,11 +1515,9 @@ function renderCal(){
     const grouped = groupWeek(days, orders);
     weeksData.push({off, days, grouped});
 
-    const isCur = off===0;
     const total = grouped.reduce((s,g)=>s+g.length,0);
     body += `<tr class="week-row">
-      <td><span class="week-lbl ${isCur?'cur':''}">${weekLabel(off)}</span>
-          ${total?`<span class="wk-total">${total}</span>`:''}</td>`;
+      <td>${total?`<span class="wk-total">${total} طلب</span>`:'<span class="week-lbl">—</span>'}</td>`;
     days.forEach((dt,i)=>{
       const tod  = isToday(dt);
       const list = grouped[i];
@@ -1499,24 +1537,20 @@ function renderCal(){
 }
 
 function renderCalMobile(weeksData){
-  // أقرب يوم زمنياً فيه أوردر واحد على الأقل (عبر كل الأسابيع المعروضة) — هذا الوحيد يفتح تلقائياً
+  // أقرب يوم فيه أوردر ابتداءً من اليوم نفسه فصاعداً — الأيام الماضية لا تُفتح تلقائياً أبداً
+  const todayMid = new Date(); todayMid.setHours(0,0,0,0);
   let nearestNonEmptyKey = null;
   outerSearch:
   for(const {days, grouped} of weeksData){
     for(let i=0;i<days.length;i++){
+      const d = new Date(days[i]); d.setHours(0,0,0,0);
+      if(d < todayMid) continue;               // تخطّي كل يوم ماضي
       if(grouped[i].length>0){ nearestNonEmptyKey = fmtFull(days[i]); break outerSearch; }
     }
   }
 
   let html = '';
-  weeksData.forEach(({off, days, grouped})=>{
-    const total = grouped.reduce((s,g)=>s+g.length,0);
-    html += `<div class="wk-sec">
-      <div class="wk-sec-hdr ${off===0?'cur':''}">
-        <span class="wk-sec-name">${weekLabel(off)}</span>
-        <span class="wk-sec-range">${fmtShort(days[0])} — ${fmtShort(days[6])}</span>
-        <span class="wk-sec-cnt">${total}</span>
-      </div>`;
+  weeksData.forEach(({days, grouped})=>{
     days.forEach((dt,i)=>{
       const list = grouped[i];
       const tod  = isToday(dt);
@@ -1538,7 +1572,6 @@ function renderCalMobile(weeksData){
         </div>
       </div>`;
     });
-    html += '</div>';
   });
   let el = document.getElementById('cal-mobile');
   if(!el){
@@ -1692,40 +1725,35 @@ async function applyBulk(){
   const status=document.getElementById('bulk-st').value;
   if(!status){toast('❌ اختاري الحالة');return;}
   const ids=[...selectedIds];
-  const btn=document.querySelector('.bulk-apply');
-  btn.textContent='⏳...'; btn.disabled=true;
   let ok=0;
   let failed=[];
-  for(const id of ids){
+  showFullscreenLoading('⏳ جاري تحديث '+ids.length+' أوردر...');
+  for(let i=0;i<ids.length;i++){
+    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+ids.length+')...');
     try{
-      await writeToSheet({action:'updateOrder',id,data:JSON.stringify({Status:status})});
+      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify({Status:status})});
       ok++;
-    }catch(e){ failed.push(id); }
+    }catch(e){ failed.push(ids[i]); }
     await new Promise(r=>setTimeout(r,150));
   }
-  btn.textContent='تطبيق'; btn.disabled=false;
   clearSel();
   await loadOrders(true);
-  if(failed.length) toast('⚠️ نجح '+ok+' — فشل: '+failed.join(', '));
-  else toast('✅ تم تحديث '+ok+' أوردر');
+  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
+  else showFullscreenSuccess('تم تحديث '+ok+' أوردر ✅');
 }
 
 // ── STATS ──
 function updateStats(){
-  // أقرب يوم تسليم فيه أوردر واحد على الأقل (بدل إجمالي كل الأوردرات) — بيبحث ضمن نفس نطاق الأسابيع المعروضة بالتقويم
+  // أقرب يوم تسليم فيه أوردر واحد على الأقل — بحث بمجال واسع (٣٠ يوم قادم) بغض النظر عن ضيق نافذة التقويم المعروضة
   let nearestDay=null, nearestCount=0;
-  outerStat:
-  for(let w=0; w<WEEKS_SHOWN; w++){
-    const wd = getWeekDays(w);
-    for(const dt of wd){
-      const cnt = allOrders.filter(o=>{
-        const st=(o['Status']||'').toLowerCase();
-        if(['done','cancelled'].includes(st)) return false;
-        const dd=parseDate(o['Delivery Date']);
-        return dd && isSameDay(dd,dt);
-      }).length;
-      if(cnt>0){ nearestDay=dt; nearestCount=cnt; break outerStat; }
-    }
+  for(const dt of getExtendedSearchDays(30)){
+    const cnt = allOrders.filter(o=>{
+      const st=(o['Status']||'').toLowerCase();
+      if(['done','cancelled'].includes(st)) return false;
+      const dd=parseDate(o['Delivery Date']);
+      return dd && isSameDay(dd,dt);
+    }).length;
+    if(cnt>0){ nearestDay=dt; nearestCount=cnt; break; }
   }
   const labelEl = document.getElementById('st-all-label');
   if(nearestDay){
@@ -1910,17 +1938,24 @@ function openPanel(id){
     if(o['Occasion Date']) oF+=pr('تاريخ المناسبة',o['Occasion Date']);
     if(model) oF+=pr('الموديل',model);
     if(o['Color']) oF+=pr('الستراس',o['Color']);
+    if(type==='Package'&&o['PkgType']){
+      const pkgLbl = {basic:'البكج الأساسي (صينية+كتاب)', full:'البكج الشامل', frame:'بكج البرواز (صينية+برواز)'}[o['PkgType']]||o['PkgType'];
+      oF += pr('نوع البكج', pkgLbl);
+    }
     if(type==='Package'&&o['Additions']) oF+=pr('البكج',o['Additions']);
   }
   if(o['Phrase']&&type!=='Bouquet') oF+=pr('العبارة',o['Phrase']);
-  if(['Tray','Guest Book','Package'].includes(type)) oF+=pr('الآية','موجودة ✅');
+  if(['Tray','Guest Book','Package'].includes(type)){
+    const verseVal = String(o['Verse']||'').toLowerCase();
+    oF += verseVal==='no' ? pr('الآية','بدون آية ❌') : pr('الآية','موجودة ✅');
+  }
   if(o['Notes']&&type!=='Bouquet') oF+=pr('ملاحظات',o['Notes']);
   if(o['Additions']&&!['Package','Bouquet'].includes(type)) oF+=pr('إضافات',o['Additions']);
   oF+=pr('سعر المنتج',total+' د.أ');
 
   let dF='';
   dF+=pr('المستلم',o['Recipient']||'—');
-  dF+=pr('الهاتف',o['Phone']||'—');
+  dF+=pr('الهاتف',normalizePhone(o['Phone'])||'—');
   if(prov) dF+=pr('المحافظة',prov);
   if(o['Area']) dF+=pr('المنطقة',o['Area']);
   dF+=pr('تاريخ التسليم',o['Delivery Date']||o['Delivery Day']||'—');
@@ -1974,7 +2009,8 @@ function openPanel(id){
       <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>
       ${linkHTML}
     </div>
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC">
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="confirmFreezeToDraft('${id}')" style="background:#EFF6FF;color:#1E40AF;border:1.5px solid #BFDBFE;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🧊 تجميد (نقل للمسودة)</button>
       <button onclick="confirmDelete('${id}')" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🗑️ حذف الأوردر</button>
     </div>`;
 
@@ -2008,23 +2044,89 @@ function renderPanelPhotosHeaderAndGrid(id){
 async function handleQuickAddPhoto(id, inputEl){
   const files = inputEl.files;
   if(!files.length) return;
-  const addBtn = document.getElementById('panel-photo-add-btn');
-  const hintEl0 = document.getElementById('panel-photos-hint');
-  if(addBtn){ addBtn.style.pointerEvents='none'; addBtn.style.opacity='.5'; }
-  if(hintEl0) hintEl0.innerHTML = '<span class="hint-spinner"></span> جاري رفع الصور...';
+  showFullscreenLoading('📷 جاري رفع الصور...');
 
   const {failed, lastError} = await uploadPhotosForOrder(id, files);
   await loadOrders(true);
   inputEl.value = '';
-
-  const hintEl = document.getElementById('panel-photos-hint');
-  if(hintEl) hintEl.textContent = failed ? ('❌ فشل الرفع: '+lastError) : '';
-
   renderPanelPhotosHeaderAndGrid(id);
-  if(!failed) toast('✅ تم رفع الصور بنجاح');
+
+  if(failed) showFullscreenError('فشل رفع الصور ❌\n'+lastError);
+  else showFullscreenSuccess('تم رفع الصور ✅');
 }
 
 function pr(k,v){ return `<div class="pr"><span class="prk">${k}</span><span class="prv">${v}</span></div>`; }
+
+// تحويل تاريخ dd/mm/yyyy لصيغة yyyy-mm-dd (لملء حقول input type=date)
+function toISODate(ddmmyyyy){
+  const m = String(ddmmyyyy||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return '';
+  return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+}
+
+const STANDARD_MODELS = ['Turkish','White','Elegant','Luxury','Royal'];
+
+// نقل أوردر موجود فعلياً لمسودة — يختفي تماماً من كل الحسابات والتقويم والبحث كأنه لم يكن
+// يرجع فقط لو انفتحت مسودته يدوياً وانحفظت من جديد (برقم جديد بالكامل)
+function confirmFreezeToDraft(id){
+  const o = allOrders.find(o=>o['Order ID']===id);
+  if(!o) return;
+  const names = getOrderNames(o);
+  if(!confirm('🧊 تجميد "'+names+'" ('+id+')؟\n\nبيختفي فوراً من كل الحسابات والتقويم والبحث تماماً كأنه لم يكن، ويضيع رقمه للأبد.\nبترجعي تلاقيه بس بتاب المسودات، ولو حفظتيه من جديد بياخد رقم جديد بالكامل.')) return;
+  freezeOrderToDraft(id, o);
+}
+
+async function freezeOrderToDraft(id, o){
+  showFullscreenLoading('🧊 جاري تجميد الطلب...');
+
+  const type = o['Product Type']||'';
+  const isBouquetOrder = type==='Bouquet';
+  const isGradOrder = type==='Graduation';
+
+  // تحديد الموديل: لو قيمة قياسية تُحفظ كما هي، وإلا تُحفظ كـ"أخرى" + نص حر
+  const rawModel = o['Model']||'';
+  const isStdModel = STANDARD_MODELS.includes(rawModel);
+
+  const draftData = {
+    type,
+    groom:      isGradOrder ? '' : (o['Groom']||''),
+    bride:      isGradOrder ? '' : (o['Bride']||''),
+    gradname:   isGradOrder ? (o['Bride']||'') : '',
+    major:      isGradOrder ? (o['Model']||'') : '',
+    date:       toISODate(o['Occasion Date']),
+    model:      isBouquetOrder ? rawModel : (isGradOrder ? '' : (isStdModel ? rawModel : 'Other')),
+    modelOther: (!isBouquetOrder && !isGradOrder && !isStdModel) ? rawModel : '',
+    phrase:     o['Phrase']||'',
+    notes:      o['Notes']||'',
+    additions:  o['Additions']||'', // نص مسطّح — يُستعاد كحقل حر (بدون فقدان المحتوى، بس بدون تفكيك لصفوف قابلة للتعديل)
+    additionsRows: [],
+    rname:      o['Recipient']||'',
+    phone:      o['Phone']||'',
+    prov:       o['Governorate']||'',
+    area:       o['Area']||'',
+    dnotes:     o['Delivery Notes']||'',
+    price:      o['Total']||'',
+    link:       o['Link']||'',
+    delSel:     '',
+    deldate:    toISODate(o['Delivery Date']),
+    deliveryDay:  o['Delivery Day']||'',
+    deliveryDate: o['Delivery Date']||'',
+  };
+
+  const draftId = 'draft_' + Date.now();
+  const savedAt = new Date().toISOString();
+
+  try{
+    await writeToSheet({action:'saveDraft', id:draftId, data:JSON.stringify(draftData), savedAt});
+    await writeToSheet({action:'deleteOrder', id});
+    await loadOrders(true);
+    await fetchDraftsFromServer();
+    closePanel();
+    showFullscreenSuccess('تم تجميد الطلب ✅\nموجود الآن بتاب المسودات');
+  }catch(e){
+    showFullscreenError('فشل التجميد ❌\n'+e.message);
+  }
+}
 
 function confirmDelete(id){
   const o = allOrders.find(o=>o['Order ID']===id);
@@ -2060,13 +2162,17 @@ function closePanel(){ document.getElementById('panel').classList.remove('open')
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
 
 async function changeStatus(id,status){
+  showFullscreenLoading('⏳ جاري تحديث الحالة...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify({Status:status})});
     await loadOrders(true);
-    toast('✅ تم تحديث الحالة');
     const panel=document.getElementById('panel');
     if(panel.classList.contains('open')) openPanel(id);
-  }catch(e){ toast('❌ لم يتم التحديث: '+e.message); await loadOrders(true); }
+    showFullscreenSuccess('تم تحديث الحالة ✅');
+  }catch(e){
+    await loadOrders(true);
+    showFullscreenError('لم يتم التحديث ❌\n'+e.message);
+  }
 }
 
 // ── EDIT PANEL ──
@@ -2181,29 +2287,27 @@ function renderEditPhotosGrid(id){
 async function handleEditPhotosUpload(id, inputEl){
   const files = inputEl.files;
   if(!files.length) return;
-  const addBtn = document.getElementById('e-photos-add-btn');
-  const hintEl0 = document.getElementById('e-photos-hint');
-  if(addBtn){ addBtn.style.pointerEvents='none'; addBtn.style.opacity='.5'; }
-  if(hintEl0) hintEl0.innerHTML = '<span class="hint-spinner"></span> جاري رفع الصور...';
+  showFullscreenLoading('📷 جاري رفع الصور...');
 
   const {failed, lastError} = await uploadPhotosForOrder(id, files);
   await loadOrders(true);
   renderEditPhotosGrid(id);
   inputEl.value = '';
 
-  if(addBtn){ addBtn.style.pointerEvents=''; addBtn.style.opacity=''; }
-  const hintEl = document.getElementById('e-photos-hint');
-  if(hintEl) hintEl.textContent = failed ? ('❌ فشل الرفع: '+lastError) : '';
-  if(!failed) toast('✅ تم رفع الصور بنجاح');
+  if(failed) showFullscreenError('فشل رفع الصور ❌\n'+lastError);
+  else showFullscreenSuccess('تم رفع الصور ✅');
 }
 
 async function handleDeleteEditPhoto(id, url){
   if(!confirm('حذف هذه الصورة نهائياً؟')) return;
+  showFullscreenLoading('🗑️ جاري حذف الصورة...');
   const ok = await deletePhotoFromOrder(id, url);
   if(ok){
     await loadOrders(true);
     renderEditPhotosGrid(id);
-    toast('✅ تم حذف الصورة');
+    showFullscreenSuccess('تم حذف الصورة ✅');
+  } else {
+    showFullscreenError('تعذّر حذف الصورة ❌');
   }
 }
 
@@ -3084,6 +3188,101 @@ function closePrintModal(){
 }
 
 
+// ══════════════════════════════════════════════════════
+// طباعة الأسماء — قائمة مختصرة (أسماء + تاريخ فقط) للمصمّم
+// ══════════════════════════════════════════════════════
+
+// من dd/mm/yyyy إلى d-m-yyyy (بدون أصفار بادئة) — مطابق لصيغة القوائم المطلوبة
+function toDashDate(ddmmyyyy){
+  const m = String(ddmmyyyy||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return '';
+  return parseInt(m[1],10)+'-'+parseInt(m[2],10)+'-'+m[3];
+}
+
+function generateNamesList(){
+  const mode = document.getElementById('names-mode').value;
+  const selectedDates = [...document.querySelectorAll('#print-days-checkboxes input[name="print-day"]:checked')].map(cb=>cb.value);
+  if(!selectedDates.length){ toast('❌ اختاري يوم أو أكثر من قائمة "الأيام" فوق أولاً'); return; }
+
+  const matched = allOrders.filter(o=>{
+    const st = (o['Status']||'').toLowerCase();
+    if(st==='cancelled') return false;
+    return selectedDates.includes(String(o['Delivery Date']||'').trim());
+  });
+
+  let entries = [];
+  if(mode==='taliqa'){
+    // بس أوردرات المسكة اللي فيها تعليقة فعلية (أسماء + تاريخ) — الباقي يُستبعد لأنه ما إله أسماء عريس/عروس أصلاً
+    matched.filter(o=>o['Product Type']==='Bouquet').forEach(o=>{
+      const add = String(o['Additions']||'');
+      const m = add.match(/تعليقة\s*\(([^)]+)\)\s*(\d{1,2}\/\d{1,2}\/\d{4})?/);
+      if(!m) return;
+      const names = m[1].split(/[,،]/).map(s=>s.trim()).filter(Boolean).join(' ');
+      const dateStr = m[2] ? toDashDate(m[2]) : '';
+      if(names) entries.push({line1:names, line2:dateStr});
+    });
+  } else {
+    // صواني/بكج/تخرج — يستثني الكتاب المنفصل والمسكة
+    matched.filter(o=>['Tray','Package','Graduation'].includes(o['Product Type'])).forEach(o=>{
+      if(o['Product Type']==='Graduation'){
+        const major = o['Model'] ? ' ('+o['Model']+')' : '';
+        entries.push({line1:(o['Bride']||'—')+major+' (تخرج)', line2:''});
+      } else {
+        const names = [o['Groom'],o['Bride']].filter(Boolean).join(' ');
+        const dateStr = toDashDate(o['Occasion Date']);
+        if(names) entries.push({line1:names, line2:dateStr});
+      }
+    });
+  }
+
+  renderNamesList(entries);
+}
+
+let namesListEntries = [];
+
+function renderNamesList(entries){
+  namesListEntries = entries;
+  const box = document.getElementById('names-list-result');
+  const copyBtn = document.getElementById('copy-names-btn');
+  const printBtn = document.getElementById('print-names-btn');
+  box.style.display = 'block';
+
+  if(!entries.length){
+    box.innerHTML = '<div style="text-align:center;color:#B8A898;font-size:13px;padding:10px 0">ما في نتائج مطابقة بهذه الأيام</div>';
+    copyBtn.style.display = 'none';
+    printBtn.style.display = 'none';
+    return;
+  }
+
+  box.innerHTML = entries.map(e=>`
+    <div style="padding:10px 4px;border-bottom:1px dashed #E5D9C7">
+      <div style="font-weight:800;font-size:15px;color:#1A1410">${e.line1}</div>
+      ${e.line2?`<div style="font-size:13px;color:#8B7355;margin-top:2px">${e.line2}</div>`:''}
+    </div>`).join('');
+  copyBtn.style.display = 'block';
+  printBtn.style.display = 'block';
+}
+
+function copyNamesList(){
+  if(!namesListEntries.length) return;
+  const text = namesListEntries.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
+  navigator.clipboard.writeText(text)
+    .then(()=>toast('✅ انتسخت القائمة — جاهزة للصق'))
+    .catch(()=>toast('❌ تعذّر النسخ — جربي تحديد النص يدوياً'));
+}
+
+function printNamesList(){
+  if(!namesListEntries.length) return;
+  const html = namesListEntries.map(e=>`
+    <div class="names-print-item">
+      <div class="names-print-l1">${e.line1}</div>
+      ${e.line2?`<div class="names-print-l2">${e.line2}</div>`:''}
+    </div>`).join('');
+  document.getElementById('print-container').innerHTML = ''; // تفضية حاوية الكاردات لتفادي التداخل
+  document.getElementById('names-print-container').innerHTML = html;
+  setTimeout(()=>window.print(), 100);
+}
+
 function doPrint(){
   // Get selected dates
   const selectedDates = new Set(
@@ -3134,6 +3333,7 @@ function doPrint(){
     html+='</div></div>';
   });
 
+  document.getElementById('names-print-container').innerHTML=''; // تفضية حاوية الأسماء لتفادي التداخل
   document.getElementById('print-container').innerHTML='';
   if(!html){toast('❌ ما في أوردرات للطباعة');return;}
   document.getElementById('print-container').innerHTML=html;
@@ -3183,7 +3383,14 @@ function printCard(o){
     if(o['Occasion Date']) oItems.push(['التاريخ',o['Occasion Date']]);
     if(model) oItems.push(['الموديل',model]);
     if(o['Color']) oItems.push(['الستراس',o['Color']]);
-    if(['Tray','Guest Book','Package'].includes(type)) oItems.push(['الآية','✅']);
+    if(type==='Package'&&o['PkgType']){
+      const pkgLbl2 = {basic:'أساسي (كتاب)', full:'شامل', frame:'برواز'}[o['PkgType']]||o['PkgType'];
+      oItems.push(['نوع البكج', pkgLbl2]);
+    }
+    if(['Tray','Guest Book','Package'].includes(type)){
+      const verseVal2 = String(o['Verse']||'').toLowerCase();
+      oItems.push(['الآية', verseVal2==='no' ? 'بدون آية ❌' : '✅']);
+    }
     if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
     if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
     if(o['Additions']) oItems.push([type==='Package'?'البكج':'إضافات', o['Additions']]);
@@ -3217,7 +3424,7 @@ function printCard(o){
   const location = [prov, o['Area']].filter(Boolean).join(' — ');
   const dRows=
     dRow('المستلم', o['Recipient']) +
-    dRow('الهاتف',  o['Phone']) +
+    dRow('الهاتف',  normalizePhone(o['Phone'])) +
     dRow('العنوان', location) +
     dRow('التسليم', delDate) +
     dRow('ملاحظات', o['Delivery Notes']) +
@@ -3951,10 +4158,10 @@ function getFormData(){
     gradname:  document.getElementById('f-gradname').value.trim(),
     major:     document.getElementById('f-major').value.trim(),
     date:      document.getElementById('f-date').value,
-    model:     document.getElementById('f-model').value,
+    model:     type==='Bouquet' ? document.getElementById('f-bouquet-model').value.trim() : document.getElementById('f-model').value,
     modelOther:document.getElementById('f-model-other').value.trim(),
     phrase:    document.getElementById('f-phrase').value.trim(),
-    notes:     document.getElementById('f-notes').value.trim(),
+    notes:     type==='Bouquet' ? document.getElementById('f-bouquet-notes').value.trim() : document.getElementById('f-notes').value.trim(),
     additions: getAdditionsJoined(),
     // هيكل صفوف الإضافات الفعلي (نوع + تفاصيل) — يحفظ القدرة على التعديل والحذف لاحقاً بدل نص مسطّح فقط
     additionsRows: [...document.querySelectorAll('#additions-list > [data-kind]')].map(row=>({
@@ -4014,10 +4221,15 @@ function loadDraft(draftId){
     set('f-gradname', d.gradname);
     set('f-major', d.major);
     set('f-date', d.date);
-    set('f-model', d.model);
+    if(d.type==='Bouquet'){
+      set('f-bouquet-model', d.model);
+      set('f-bouquet-notes', d.notes);
+    } else {
+      set('f-model', d.model);
+      set('f-notes', d.notes);
+    }
     set('f-model-other', d.modelOther);
     set('f-phrase', d.phrase);
-    set('f-notes', d.notes);
     // استعادة صفوف الإضافات الفعلية (قابلة للتعديل والحذف) لو المسودة محفوظة بالنظام الجديد
     if(d.additionsRows && d.additionsRows.length){
       d.additionsRows.forEach(r=>{
