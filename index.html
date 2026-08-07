@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>هدايا سلمى — الإدارة</title>
+<!-- أيقونة الاختصار على الشاشة الرئيسية (آيفون/آيباد) وأيقونة التبويب -->
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="هدايا سلمى">
+<meta name="theme-color" content="#1A1410">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -742,7 +750,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v35</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v36</span>
     </div>
   </div>
 </div>
@@ -1417,7 +1425,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v35<br>
+       <strong>الإصدار:</strong> v36<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1440,7 +1448,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v35 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v36 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
