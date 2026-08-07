@@ -103,6 +103,16 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .stat-active{border-color:#4CAF50;background:#F0FBF0}
 .stat-week{border-color:#2196F3;background:#F0F7FF}
 .stat-done{border-color:#9C27B0;background:#FAF5FF}
+.phrase-chip{background:#FAF5EC;border:1.5px solid #E8D5B0;color:#8A6030;border-radius:99px;padding:5px 11px;font-family:'Tajawal',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.phrase-chip:hover{background:#F3E9D8;border-color:#C9A96E}
+.phrase-chip:active{transform:scale(.96)}
+.phrase-chip.clear{background:#FFF0F0;border-color:#FFCDD2;color:#C0392B}
+.stat-late{border-color:#E57373;background:#FFF5F5}
+.stat-late .stat-n{color:#C0392B}
+.stat-late .stat-l{color:#C0392B}
+.stat-late.zero{border-color:#A8C88A;background:#F4FAF0}
+.stat-late.zero .stat-n{color:#3B6D11}
+.stat-late.zero .stat-l{color:#3B6D11}
 .stat-n{font-size:28px;font-weight:900;color:#1A1410;line-height:1.1}
 .stat-active .stat-n{color:var(--green-text)}
 .stat-week .stat-n{color:var(--blue-text)}
@@ -750,7 +760,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v36</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v46</span>
     </div>
   </div>
 </div>
@@ -769,9 +779,9 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
   <div class="stats">
     <div class="stat stat-all"><div class="stat-n" id="st-all">—</div><div class="stat-l" id="st-all-label">أقرب يوم تسليم</div></div>
-    <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🔥 نشطة</div></div>
-    <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">📅 الأيام الظاهرة</div></div>
-    <div class="stat stat-done"><div class="stat-n" id="st-done">—</div><div class="stat-l">✅ تم التسليم</div></div>
+    <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🛠️ لسا للتجهيز</div></div>
+    <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">🚚 مع التوصيل</div></div>
+    <div class="stat stat-late" onclick="showLateOrders()" style="cursor:pointer" title="اضغطي لعرض الطلبات المتأخرة"><div class="stat-n" id="st-late">—</div><div class="stat-l">⚠️ متأخرة</div></div>
   </div>
 
   <!-- SEARCH -->
@@ -879,6 +889,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
           <option value="Tray">صينية</option>
           <option value="Guest Book">كتاب</option>
           <option value="Package">بكج</option>
+          <option value="Frame">برواز</option>
           <option value="Graduation">تخرج</option>
           <option value="Bouquet">مسكة عروس</option>
         </select>
@@ -893,14 +904,40 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       </div>
     </div>
 
+    <!-- نوع البكج — أول سؤال بعد اختيار "بكج"، وباقي الحقول تظهر بناءً عليه -->
+    <div id="pkgtype-section" style="display:none">
+      <div class="sec-lbl">نوع البكج <span class="req">*</span></div>
+      <div class="fg">
+        <select id="f-pkg" onchange="onPkgTypeChange()">
+          <option value="">اختر نوع البكج أولاً...</option>
+          <option value="basic">البكج الأساسي (صينية + كتاب) — 22 د.أ</option>
+          <option value="full">البكج الشامل (صينية + كتاب + فناجين + قصاصات) — 30 د.أ</option>
+          <option value="frame">بكج البرواز (صينية + برواز) — 20 د.أ</option>
+        </select>
+        <div id="pkg-full-reminder" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:8px;padding:9px 12px;margin-top:6px;font-size:12px;color:#7A4A00;font-weight:700">
+          ⚠️ البكج الشامل يتضمّن قصاصات وفناجين — لا تنسي إضافتهم يدوياً بقسم "الإضافات" تحت، وإلا ما ينحسبوا بالمستودع
+        </div>
+      </div>
+    </div>
+
     <div id="eng-fields" style="display:none">
       <div class="sec-lbl">بيانات العروسين</div>
       <div class="form-grid">
         <div class="fg"><label>اسم العريس <span class="req">*</span></label><input type="text" id="f-groom" placeholder="أحمد"></div>
         <div class="fg"><label>اسم العروس <span class="req">*</span></label><input type="text" id="f-bride" placeholder="سلمى"></div>
         <div class="fg"><label>تاريخ المناسبة</label><input type="date" id="f-date"></div>
-        <div class="fg bookdate-f" style="display:none"><label>تاريخ الكتاب <span class="opt">(إذا اختلف)</span></label><input type="date" id="f-bookdate"></div>
       </div>
+    </div>
+
+    <!-- قسم تفاصيل الكتاب / البرواز — يظهر حسب النوع، ويُعبَّأ تلقائياً من بيانات الصينية وقابل للتعديل -->
+    <div id="bookframe-section" style="display:none;background:#F3E9D8;border:1.5px solid #D9C4A0;border-radius:12px;padding:14px;margin:14px 0">
+      <div id="bookframe-title" style="font-size:14px;font-weight:900;color:#6B4A1F;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid #D9C4A0">تفاصيل الكتاب</div>
+      <div class="form-grid">
+        <div class="fg"><label>اسم العريس <span class="opt">(معبّأ من الصينية)</span></label><input type="text" id="f-bf-groom" style="background:#FFFDF8"></div>
+        <div class="fg"><label>اسم العروس <span class="opt">(معبّأ من الصينية)</span></label><input type="text" id="f-bf-bride" style="background:#FFFDF8"></div>
+        <div class="fg bookdate-f"><label>التاريخ <span class="opt">(معبّأ من الصينية)</span></label><input type="date" id="f-bookdate" style="background:#FFFDF8"></div>
+      </div>
+      <div class="fg"><label>ملاحظات خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-bf-notes" placeholder="مثال: بدون وردة حمراء، خط أصغر..." style="background:#FFFDF8"></div>
     </div>
 
     <div id="model-fields" style="display:none">
@@ -921,17 +958,6 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         <div class="fg model-other-f" style="display:none"><label>اسم الموديل</label><input type="text" id="f-model-other"></div>
         <div class="fg"><label>لون الستراس</label>
           <select id="f-color"><option value="">—</option><option value="فضي">فضي</option><option value="ذهبي">ذهبي</option></select>
-        </div>
-        <div class="fg pkg-f" style="display:none"><label>نوع البكج</label>
-          <select id="f-pkg" onchange="onPkgTypeChange()">
-            <option value="">اختر...</option>
-            <option value="basic">البكج الأساسي (صينية + كتاب) — 22 د.أ</option>
-            <option value="full">البكج الشامل (صينية + كتاب + فناجين + قصاصات) — 30 د.أ</option>
-            <option value="frame">بكج البرواز (صينية + برواز) — 20 د.أ</option>
-          </select>
-          <div id="pkg-full-reminder" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:8px;padding:9px 12px;margin-top:6px;font-size:12px;color:#7A4A00;font-weight:700">
-            ⚠️ البكج الشامل يتضمّن قصاصات وفناجين — لا تنسي إضافتهم يدوياً بقسم "الإضافات" تحت، وإلا ما ينحسبوا بالمستودع
-          </div>
         </div>
       </div>
     </div>
@@ -961,7 +987,20 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
     <div id="generic-phrase-section">
       <div class="sec-lbl">العبارة والملاحظات</div>
-      <div class="fg"><label>عبارة خاصة <span class="opt">(اختياري)</span></label><input type="text" id="f-phrase"></div>
+      <div class="fg">
+        <label>عبارة خاصة <span class="opt">(اختياري)</span></label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          <button type="button" onclick="insertPhrase('آية: وجعل بينكم مودة ورحمة')" class="phrase-chip">آية: وجعل بينكم مودة ورحمة</button>
+          <button type="button" onclick="insertPhrase('وأصبح عهدنا ختاما')" class="phrase-chip">وأصبح عهدنا ختاما</button>
+          <button type="button" onclick="insertPhrase('بسم خالق الحب نبدأ')" class="phrase-chip">بسم خالق الحب نبدأ</button>
+          <button type="button" onclick="insertPhrase('بوركت فاتحة العمر')" class="phrase-chip">بوركت فاتحة العمر</button>
+          <button type="button" onclick="insertPhrase('وانعقد العهد بين قلبي وقلبه')" class="phrase-chip">وانعقد العهد بين قلبي وقلبه</button>
+          <button type="button" onclick="insertPhrase('اللهم اجعله عقداً تنعقد به سعادتنا')" class="phrase-chip">اللهم اجعله عقداً تنعقد به سعادتنا</button>
+          <button type="button" onclick="insertPhrase('من دون عبارة')" class="phrase-chip">من دون عبارة</button>
+          <button type="button" onclick="clearPhrase()" class="phrase-chip clear">✕ مسح</button>
+        </div>
+        <input type="text" id="f-phrase">
+      </div>
       <div class="fg"><label>ملاحظات التصميم <span class="opt">(اختياري)</span></label><textarea id="f-notes" placeholder="مثال: علب الدبل فوق، بدون أحرف..."></textarea></div>
     </div>
 
@@ -1097,7 +1136,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <div id="diag-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:16px">
   <div style="background:#FFF;border-radius:14px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;border-top:3px solid #C9A96E">
     <div style="padding:14px 18px;border-bottom:1px solid #E5D9C7;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#FFF">
-      <strong style="color:#1A1410;font-size:15px">🔎 تشخيص النظام</strong>
+      <strong id="diag-title" style="color:#1A1410;font-size:15px">🔎 تشخيص النظام</strong>
       <button onclick="document.getElementById('diag-bg').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8B7355">✕</button>
     </div>
     <div id="diag-body" style="padding:16px 18px;font-size:13px;color:#2C2218;line-height:1.9"></div>
@@ -1189,16 +1228,35 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div style="border-top:1px solid var(--border);margin:20px 0 16px;padding-top:16px">
       <div class="form-ttl" style="font-size:15px">🏷️ طباعة الأسماء</div>
       <div style="font-size:11px;color:#8B7355;margin-bottom:10px">قائمة مختصرة (أسماء + تاريخ فقط) لإرسالها للمصمّم — تستخدم نفس الأيام المحدّدة فوق</div>
-      <select id="names-mode" style="width:100%;background:#F5F0E8;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:14px;color:#2C2218;margin-bottom:10px">
+      <select id="names-mode" onchange="onNamesModeChange()" style="width:100%;background:#F5F0E8;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:14px;color:#2C2218;margin-bottom:8px">
         <option value="taliqa">تعليقات (أسماء + تاريخ من المسكات)</option>
         <option value="trays">صواني (صينية / بكج / تخرج)</option>
+        <option value="books">كتب (كتاب منفصل / بكج فيه كتاب)</option>
+      </select>
+      <select id="names-printed-filter" onchange="generateNamesList()" style="width:100%;background:#F5F0E8;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:14px;color:#2C2218;margin-bottom:10px">
+        <option value="all">الكل</option>
+        <option value="unprinted">غير المطبوع فقط</option>
+        <option value="printed">المطبوع فقط 🖨️</option>
       </select>
       <button class="btn btn-gold" onclick="generateNamesList()" style="margin-bottom:12px">📝 توليد القائمة</button>
 
-      <div id="names-list-result" style="display:none;background:#FFFBF4;border:1.5px solid #E5D9C7;border-radius:10px;padding:14px;margin-bottom:10px;max-height:400px;overflow-y:auto"></div>
-      <div style="display:flex;gap:8px">
-        <button id="copy-names-btn" onclick="copyNamesList()" style="display:none;flex:1;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">📋 نسخ الكل</button>
+      <div id="names-toolbar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <button onclick="selectAllNames(true)" style="background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:5px 12px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;cursor:pointer">تحديد الكل</button>
+        <button onclick="selectUnprintedNames()" style="background:none;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:6px;padding:5px 12px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;cursor:pointer">تحديد غير المطبوع</button>
+        <button onclick="selectAllNames(false)" style="background:none;border:1.5px solid #E5D9C7;color:#8B7355;border-radius:6px;padding:5px 12px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;cursor:pointer">إلغاء التحديد</button>
+        <span id="names-sel-count" style="font-size:12px;color:#8B7355;font-weight:700;margin-right:auto"></span>
+      </div>
+
+      <div id="names-list-result" style="display:none;background:#FFFBF4;border:1.5px solid #E5D9C7;border-radius:10px;padding:14px;margin-bottom:10px;max-height:420px;overflow-y:auto"></div>
+
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button id="copy-names-btn" onclick="copyNamesList(false)" style="display:none;flex:1;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">📋 نسخ</button>
+        <button id="copy-mark-names-btn" onclick="copyNamesList(true)" style="display:none;flex:1;background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">📋 نسخ + تحديد كمطبوع</button>
         <button id="print-names-btn" onclick="printNamesList()" style="display:none;flex:1;background:#C9A96E;border:none;color:#1A1410;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ طباعة كورقة</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="mark-printed-btn" onclick="setNamesPrintedState(true)" style="display:none;flex:1;background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:8px;padding:11px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🖨️ تحديد كمطبوع</button>
+        <button id="unmark-printed-btn" onclick="setNamesPrintedState(false)" style="display:none;flex:1;background:#FFF0F0;border:1.5px solid #FFCDD2;color:#C0392B;border-radius:8px;padding:11px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">↩︎ إلغاء علامة الطباعة</button>
       </div>
     </div>
   </div>
@@ -1219,7 +1277,7 @@ function normStatus(o){
   return STATUS_CANON[String(raw).toLowerCase()] || 'New';
 }
 const MODEL_AR = {Turkish:'التركي',White:'الأبيض',Elegant:'الأنيق',Luxury:'الفاخر',Royal:'الملكي'};
-const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Graduation:'تخرج',Bouquet:'مسكة عروس'};
+const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Frame:'برواز',Graduation:'تخرج',Bouquet:'مسكة عروس'};
 const STATUSES = {
   New:      {lbl:'طلب جديد',           cls:'s-New'},
   Preparing:{lbl:'جاري التجهيز',          cls:'s-Preparing'},
@@ -1425,7 +1483,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v36<br>
+       <strong>الإصدار:</strong> v46<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1448,7 +1506,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v36 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v46 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1739,7 +1797,7 @@ async function applyBulk(){
   for(let i=0;i<ids.length;i++){
     showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+ids.length+')...');
     try{
-      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify({Status:status})});
+      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(statusPayload(status))});
       ok++;
     }catch(e){ failed.push(ids[i]); }
     await new Promise(r=>setTimeout(r,150));
@@ -1772,17 +1830,83 @@ function updateStats(){
     labelEl.textContent = 'لا يوجد طلبات قادمة';
     document.getElementById('st-all').textContent = '0';
   }
-  const active = allOrders.filter(o=>['new','preparing','shipped'].includes((o['Status']||'').toLowerCase())).length;
-  document.getElementById('st-active').textContent = active;
-  const days = getWeekDays(0);   // مصفوفة
-  const weekOrds = allOrders.filter(o=>{
+  // ٢) لسا للتجهيز — طلب جديد + جاري التجهيز (الشغل الفعلي المتبقي)
+  const toPrep = allOrders.filter(o=>['new','preparing'].includes((o['Status']||'').toLowerCase())).length;
+  document.getElementById('st-active').textContent = toPrep;
+
+  // ٣) مع التوصيل — خرجت من عندنا وبانتظار تأكيد وصولها
+  const shipped = allOrders.filter(o=>(o['Status']||'').toLowerCase()==='shipped').length;
+  document.getElementById('st-week').textContent = shipped;
+
+  // ٤) متأخرة — تاريخ تسليمها فات وما زالت غير مُسلَّمة (أهم رقم: يمسك الطلبات المنسية)
+  const lateOrders = allOrders.filter(o=>{
+    const st=(o['Status']||'').toLowerCase();
+    if(['done','cancelled'].includes(st)) return false;
     const dd=parseDate(o['Delivery Date']);
     if(!dd) return false;
-    return days.some(d=>isSameDay(dd,d));
+    const d0=new Date(dd); d0.setHours(0,0,0,0);
+    return d0 < todayMid0();
   }).length;
-  document.getElementById('st-week').textContent = weekOrds;
-  const done = allOrders.filter(o=>(o['Status']||'').toLowerCase()==='done').length;
-  document.getElementById('st-done').textContent = done;
+  const lateEl = document.getElementById('st-late');
+  if(lateEl){
+    lateEl.textContent = lateOrders;
+    const card = lateEl.closest ? lateEl.closest('.stat') : null;
+    if(card && card.classList) card.classList.toggle('zero', lateOrders === 0);
+  }
+  // ملاحظة: لا تُعرض أي مجاميع تراكمية أو إيرادات على الشاشة الرئيسية — هذه بالداشبورد المحمية فقط
+}
+
+// نافذة عامة لعرض أي محتوى (تعيد استخدام نافذة التشخيص الموجودة)
+function showDiagBox(title, html){
+  document.getElementById('diag-title').textContent = title;
+  document.getElementById('diag-body').innerHTML = html;
+  document.getElementById('diag-bg').style.display = 'flex';
+}
+function closeDiag(){
+  document.getElementById('diag-bg').style.display = 'none';
+  document.getElementById('diag-title').textContent = '🔎 تشخيص النظام';
+}
+
+// عرض الطلبات المتأخرة بنافذة سريعة — الرقم يصير قابلاً للتصرف مش مجرد معلومة
+function showLateOrders(){
+  const late = allOrders.filter(o=>{
+    const st=(o['Status']||'').toLowerCase();
+    if(['done','cancelled'].includes(st)) return false;
+    const dd=parseDate(o['Delivery Date']);
+    if(!dd) return false;
+    const d0=new Date(dd); d0.setHours(0,0,0,0);
+    return d0 < todayMid0();
+  }).sort((a,b)=>parseDate(a['Delivery Date'])-parseDate(b['Delivery Date']));
+
+  if(!late.length){ toast('✅ ما في ولا طلب متأخر'); return; }
+
+  const rows = late.map(o=>{
+    const dd = parseDate(o['Delivery Date']);
+    const daysLate = Math.round((todayMid0()-dd)/86400000);
+    const st = STATUSES[normStatus(o)] || STATUSES.New;
+    return `<div onclick="closeDiag();openPanel('${o['Order ID']}')" style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px dashed #E5D9C7;cursor:pointer">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-size:14px;color:#1A1410">${getOrderNames(o)}</div>
+        <div style="font-size:12px;color:#8B7355;margin-top:2px">${o['Order ID']} · ${o['Delivery Date']} · ${st.lbl}</div>
+      </div>
+      <span style="font-size:11px;font-weight:900;color:#C0392B;background:#FFF0F0;border:1px solid #FFCDD2;border-radius:99px;padding:3px 9px;white-space:nowrap">متأخر ${daysLate} يوم</span>
+    </div>`;
+  }).join('');
+
+  showDiagBox('⚠️ طلبات متأخرة ('+late.length+')', rows);
+}
+
+// حمولة تغيير الحالة — تسجّل وقت التحويل لـ"مع التوصيل" لتفعيل التسليم التلقائي بعد ٢٤ ساعة
+function statusPayload(status){
+  const p = {Status: status};
+  if(status === 'Shipped') p.ShippedAt = nowStamp();
+  else if(status === 'New' || status === 'Preparing') p.ShippedAt = ''; // رجوع للخلف يلغي المؤقّت
+  return p;
+}
+
+// منتصف ليل اليوم الحالي — مرجع ثابت لمقارنات التأخير
+function todayMid0(){
+  const t = new Date(); t.setHours(0,0,0,0); return t;
 }
 
 // ── SEARCH ──
@@ -2172,7 +2296,7 @@ document.getElementById('panel').addEventListener('click',function(e){if(e.targe
 async function changeStatus(id,status){
   showFullscreenLoading('⏳ جاري تحديث الحالة...');
   try{
-    await writeToSheet({action:'updateOrder',id,data:JSON.stringify({Status:status})});
+    await writeToSheet({action:'updateOrder',id,data:JSON.stringify(statusPayload(status))});
     await loadOrders(true);
     const panel=document.getElementById('panel');
     if(panel.classList.contains('open')) openPanel(id);
@@ -2198,7 +2322,7 @@ function openEdit(id, overrideType){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
   const type=overrideType || o['Product Type']||'';
-  const isEng=['Tray','Guest Book','Package'].includes(type);
+  const isEng=['Tray','Guest Book','Package','Frame'].includes(type);
   const isGrad=type==='Graduation';
   const isBouquet=type==='Bouquet';
   const hasTray=['Tray','Package'].includes(type);
@@ -2349,6 +2473,14 @@ async function applyEdit(id){
   const getVal = (id) => { const el=document.getElementById(id); return el ? el.value.trim() : ''; };
   const data={
     Status:         getVal('e-status'),
+    ShippedAt:      (()=>{
+      const ns = getVal('e-status');
+      const prev = (allOrders.find(x=>x['Order ID']===id)||{})['Status']||'';
+      // نسجّل الوقت فقط عند التحوّل الفعلي لـ"مع التوصيل" — التعديل العادي لا يعيد ضبط المؤقّت
+      if(ns==='Shipped') return prev==='Shipped' ? undefined : nowStamp();
+      if(['New','Preparing'].includes(ns)) return '';   // الرجوع للخلف يلغي المؤقّت
+      return undefined;                                  // تم التسليم/ملغي — لا نلمس القيمة
+    })(),
     'Product Type': getVal('e-type'),
     'Delivery Date': newDeliveryDate,
     'Delivery Day':  newDeliveryDay,
@@ -2545,7 +2677,7 @@ let lastFType = '';
 
 function toggleFields(){
   const t=document.getElementById('f-type').value;
-  const isEng=['Tray','Guest Book','Package'].includes(t);
+  const isEng=['Tray','Guest Book','Package','Frame'].includes(t);
   const hasTray=['Tray','Package'].includes(t);
   const isBouquet=t==='Bouquet';
   const isGrad=t==='Graduation';
@@ -2572,15 +2704,22 @@ function toggleFields(){
     lastFType = t;
   }
 
-  document.getElementById('eng-fields').style.display=isEng?'block':'none';
+  // البكج: نوع البكج أول سؤال — باقي الحقول تظهر فقط بعد اختياره (تسلسل منطقي)
+  const pkgSel = document.getElementById('f-pkg');
+  const pkgVal = pkgSel ? pkgSel.value : '';
+  const pkgSec = document.getElementById('pkgtype-section');
+  if(pkgSec) pkgSec.style.display = (t==='Package') ? 'block' : 'none';
+  const pkgReady = (t!=='Package') || !!pkgVal;   // لغير البكج جاهز دائماً
+
+  document.getElementById('eng-fields').style.display=(isEng && pkgReady)?'block':'none';
   document.getElementById('grad-fields').style.display=t==='Graduation'?'block':'none';
-  document.getElementById('model-fields').style.display=hasTray?'block':'none';
+  document.getElementById('model-fields').style.display=(hasTray && pkgReady)?'block':'none';
   document.getElementById('bouquet-fields').style.display=isBouquet?'block':'none';
   // للمسكات: قسم الصور المختصر يغني عن القسم العام بأسفل الفورم
   const genericPhoto = document.getElementById('generic-photo-section');
-  if(genericPhoto) genericPhoto.style.display = isBouquet ? 'none' : 'block';
+  if(genericPhoto) genericPhoto.style.display = (isBouquet || !pkgReady) ? 'none' : 'block';
   const genericPhrase = document.getElementById('generic-phrase-section');
-  if(genericPhrase) genericPhrase.style.display = isBouquet ? 'none' : 'block';
+  if(genericPhrase) genericPhrase.style.display = (isBouquet || !pkgReady) ? 'none' : 'block';
 
   // أزرار الإضافات — تظهر بحسب النوع
   const btnVis = (id, show) => { const el=document.getElementById(id); if(el) el.style.display = show ? 'inline-flex' : 'none'; };
@@ -2590,19 +2729,50 @@ function toggleFields(){
   btnVis('ap-fanajin-btn',  t && t!=='Graduation');
   btnVis('ap-qalam-btn',    t && t!=='Graduation');
   btnVis('ap-taliqa-btn',   isBouquet);
-  document.querySelectorAll('.bookdate-f').forEach(el=>el.style.display=['Guest Book','Package'].includes(t)?'block':'none');
-  document.querySelectorAll('.pkg-f').forEach(el=>el.style.display=t==='Package'?'block':'none');
-  const prices={Tray:15,'Guest Book':9,Package:22,Graduation:13,Bouquet:18};
+  refreshBookFrameFields();
+  const prices={Tray:15,'Guest Book':9,Package:22,Frame:7,Graduation:13,Bouquet:18};
   if(t!=='Package' && prices[t]) document.getElementById('f-price').value=prices[t];
   if(t==='Package'){ document.getElementById('f-pkg').value=''; document.getElementById('f-price').value=''; }
   updatePriceHint();
 }
 
 // عند اختيار نوع البكج — يملأ السعر الأساسي تلقائياً (بدون توصيل)
+// يُظهر حقل تاريخ الكتاب أو تنبيه البرواز حسب النوع ونوع البكج المختار
+function refreshBookFrameFields(){
+  const t = document.getElementById('f-type').value;
+  const pkg = (document.getElementById('f-pkg')||{}).value || '';
+  // كتاب: كتاب منفصل، أو بكج أساسي/شامل
+  const hasBook  = (t==='Guest Book') || (t==='Package' && (pkg==='basic'||pkg==='full'));
+  // برواز: نوع البرواز المستقل، أو بكج البرواز
+  const hasFrame = (t==='Frame') || (t==='Package' && pkg==='frame');
+
+  const sec = document.getElementById('bookframe-section');
+  if(!sec) return;
+  sec.style.display = (hasBook || hasFrame) ? 'block' : 'none';
+  if(!hasBook && !hasFrame) return;
+
+  document.getElementById('bookframe-title').textContent = hasFrame ? '🖼️ تفاصيل البرواز' : '📖 تفاصيل الكتاب';
+  // التاريخ يخص الكتاب فقط — البرواز ياخد تاريخ المناسبة دائماً
+  document.querySelectorAll('.bookdate-f').forEach(el=>el.style.display = hasBook ? 'block' : 'none');
+
+  autoFillBookFrameNames();
+}
+
+// يعبّئ أسماء وتاريخ الكتاب/البرواز من بيانات الصينية تلقائياً — بدون ما يمسح أي تعديل يدوي سبق
+function autoFillBookFrameNames(){
+  const g = document.getElementById('f-groom'), b = document.getElementById('f-bride'), d = document.getElementById('f-date');
+  const bg = document.getElementById('f-bf-groom'), bb = document.getElementById('f-bf-bride'), bd = document.getElementById('f-bookdate');
+  if(bg && g && !bg.dataset.touched) bg.value = g.value;
+  if(bb && b && !bb.dataset.touched) bb.value = b.value;
+  if(bd && d && !bd.dataset.touched) bd.value = d.value;
+}
+
 function onPkgTypeChange(){
   const prices = {basic:22, full:30, frame:20};
   const v = document.getElementById('f-pkg').value;
   if(prices[v]) document.getElementById('f-price').value = prices[v];
+  toggleFields();   // إظهار باقي الحقول بعد اختيار نوع البكج
+  refreshBookFrameFields();
   updatePriceHint();
   // تذكير واضح: البكج الشامل يحتاج إضافة قصاصات/فناجين يدوياً حتى تُحسَب بالمستودع
   const reminder = document.getElementById('pkg-full-reminder');
@@ -2832,6 +3002,8 @@ function computeInventoryDeductions(data){
     add('box', 1);
   } else if(type === 'Guest Book'){
     applyBookMaterials(); // بدون كرتونة — كتاب منفصل لا يحتاجها
+  } else if(type === 'Frame'){
+    applyFrameMaterials();   // برواز مستقل — حبر + برواز، بلا كرتونة (مثل الكتاب المنفصل)
   } else if(type === 'Graduation'){
     add('gradCap', 1);
     add('box', 1);
@@ -2849,6 +3021,19 @@ function computeInventoryDeductions(data){
   return d;
 }
 
+// إدراج عبارة جاهزة — تُضاف للموجود بفاصل بدل ما تمسحه
+function insertPhrase(txt){
+  const el = document.getElementById('f-phrase');
+  const cur = el.value.trim();
+  if(cur.indexOf(txt) !== -1){ toast('مضافة أصلاً'); return; }
+  el.value = cur ? cur + ' / ' + txt : txt;
+  el.focus();
+}
+function clearPhrase(){
+  document.getElementById('f-phrase').value = '';
+  toast('تم مسح العبارة');
+}
+
 function toggleModelOther(){
   const isO=document.getElementById('f-model').value==='Other';
   document.querySelectorAll('.model-other-f').forEach(el=>el.style.display=isO?'block':'none');
@@ -2862,6 +3047,21 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('f-prov').addEventListener('change',updatePriceHint);
   document.getElementById('f-price').addEventListener('input',updatePriceHint);
   buildDelDateOptions();
+
+  // تزامن حي: الكتابة بأسماء الصينية تنعكس على أسماء الكتاب/البرواز ما لم تُعدَّل يدوياً
+  ['f-groom','f-bride'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', autoFillBookFrameNames);
+  });
+  const fDateEl = document.getElementById('f-date');
+  if(fDateEl) fDateEl.addEventListener('change', autoFillBookFrameNames);
+  // بمجرد ما يعدّل المستخدم حقل الكتاب/البرواز يدوياً، نتوقف عن الكتابة فوقه
+  ['f-bf-groom','f-bf-bride'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', function(){ this.dataset.touched = '1'; });
+  });
+  const bdEl = document.getElementById('f-bookdate');
+  if(bdEl) bdEl.addEventListener('change', function(){ this.dataset.touched = '1'; });
 
   const fPhotos = document.getElementById('f-photos');
   if(fPhotos) fPhotos.addEventListener('change', function(){
@@ -2941,7 +3141,7 @@ async function saveOrder(){
   }
   const price=parseFloat(document.getElementById('f-price').value);
   if(!price){toast('❌ أدخلي الحساب');return;}
-  const isEng=['Tray','Guest Book','Package'].includes(type);
+  const isEng=['Tray','Guest Book','Package','Frame'].includes(type);
   const hasTray=['Tray','Package'].includes(type);
   const isBouquet=type==='Bouquet';
   if(isEng){
@@ -2971,12 +3171,27 @@ async function saveOrder(){
     verse:true,
     notes:(()=>{
       if(isBouquet) return document.getElementById('f-bouquet-notes').value.trim();
-      const baseNotes = document.getElementById('f-notes').value.trim();
+      const parts = [];
+      // تاريخ الكتاب — يُحفظ فقط لو اختلف فعلياً عن تاريخ المناسبة (تفادي حشو الملاحظات)
       const bookdateRaw = document.getElementById('f-bookdate').value;
-      if(!bookdateRaw) return baseNotes;
-      const bookDateStr = fmtFull(new Date(bookdateRaw+'T00:00:00'));
-      const bookLine = 'تاريخ الكتاب: '+bookDateStr;
-      return baseNotes ? bookLine+' | '+baseNotes : bookLine;
+      const occRaw = document.getElementById('f-date').value;
+      if(bookdateRaw && bookdateRaw !== occRaw) parts.push('تاريخ الكتاب: '+fmtFull(new Date(bookdateRaw+'T00:00:00')));
+      // أسماء الكتاب/البرواز إذا اختلفت عن أسماء الصينية
+      const bfSec = document.getElementById('bookframe-section');
+      if(bfSec && bfSec.style.display !== 'none'){
+        const isFrameOut = document.getElementById('bookframe-title').textContent.indexOf('البرواز') !== -1;
+        const lbl = isFrameOut ? 'البرواز' : 'الكتاب';
+        const bg = document.getElementById('f-bf-groom').value.trim();
+        const bb = document.getElementById('f-bf-bride').value.trim();
+        const g  = document.getElementById('f-groom').value.trim();
+        const b  = document.getElementById('f-bride').value.trim();
+        if((bg && bg!==g) || (bb && bb!==b)) parts.push('أسماء '+lbl+': '+[bg,bb].filter(Boolean).join(' & '));
+        const bfNotes = document.getElementById('f-bf-notes').value.trim();
+        if(bfNotes) parts.push('ملاحظات '+lbl+': '+bfNotes);
+      }
+      const baseNotes = document.getElementById('f-notes').value.trim();
+      if(baseNotes) parts.push(baseNotes);
+      return parts.join(' | ');
     })(),
     additions:getAdditionsJoined(),
     color:hasTray?document.getElementById('f-color').value:'',
@@ -3039,12 +3254,14 @@ function clearForm(){
   ['f-type','f-groom','f-bride','f-date','f-bookdate','f-model','f-model-other',
    'f-color','f-pkg','f-gradname','f-major','f-phrase','f-notes',
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link',
-   'f-bouquet-notes','f-bouquet-model'
+   'f-bouquet-notes','f-bouquet-model','f-bf-groom','f-bf-bride','f-bf-notes'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   // Reset hidden sections
-  ['eng-fields','grad-fields','model-fields','bouquet-fields','model-other-f'].forEach(id=>{
+  ['eng-fields','grad-fields','model-fields','bouquet-fields','model-other-f','bookframe-section'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
+  // إعادة السماح بالتعبئة التلقائية لأسماء الكتاب/البرواز
+  ['f-bf-groom','f-bf-bride','f-bookdate'].forEach(id=>{ const el=document.getElementById(id); if(el) delete el.dataset.touched; });
   document.querySelectorAll('.model-other-f').forEach(el=>el.style.display='none');
   // Reset phone duplicate warning
   const dupWarn=document.getElementById('phone-dup-warn'); if(dupWarn) dupWarn.style.display='none';
@@ -3227,61 +3444,225 @@ function generateNamesList(){
       if(!m) return;
       const names = m[1].split(/[,،]/).map(s=>s.trim()).filter(Boolean).join(' ');
       const dateStr = m[2] ? toDashDate(m[2]) : '';
-      if(names) entries.push({line1:names, line2:dateStr});
+      if(names) entries.push({id:o['Order ID'], line1:names, line2:dateStr, printed:isNamePrinted(o), label:'مسكة'});
+    });
+  } else if(mode==='books'){
+    // الكتب — كتاب منفصل، أو بكج يحتوي كتاب فعلياً (حسب PkgType أو الملاحظات للأوردرات القديمة)
+    matched.filter(o=>orderHasBook(o)).forEach(o=>{
+      const names = [o['Groom'],o['Bride']].filter(Boolean).join(' ');
+      if(!names) return;
+      // تاريخ الكتاب إن وُجد، وإلا تاريخ المناسبة، وإلا "بدون تاريخ"
+      const bookDate = extractBookDate(o['Notes']);
+      const dateStr = bookDate || toDashDate(o['Occasion Date']) || 'بدون تاريخ';
+      const kind = bookOutputKind(o);
+      // الليبل حقل منفصل — يظهر بالشاشة فقط ولا يدخل بالنسخ أو الطباعة
+      entries.push({id:o['Order ID'], line1:names, line2:dateStr, printed:isBookPrinted(o), label:(kind==='frame'?'برواز':'كتاب')});
     });
   } else {
     // صواني/بكج/تخرج — يستثني الكتاب المنفصل والمسكة
     matched.filter(o=>['Tray','Package','Graduation'].includes(o['Product Type'])).forEach(o=>{
       if(o['Product Type']==='Graduation'){
         const major = o['Model'] ? ' ('+o['Model']+')' : '';
-        entries.push({line1:(o['Bride']||'—')+major+' (تخرج)', line2:''});
+        entries.push({id:o['Order ID'], line1:(o['Bride']||'—')+major+' (تخرج)', line2:'', printed:isNamePrinted(o), label:'تخرج'});
       } else {
         const names = [o['Groom'],o['Bride']].filter(Boolean).join(' ');
-        const dateStr = toDashDate(o['Occasion Date']);
-        if(names) entries.push({line1:names, line2:dateStr});
+        const dateStr = toDashDate(o['Occasion Date']) || 'بدون تاريخ';
+        if(names) entries.push({id:o['Order ID'], line1:names, line2:dateStr, printed:isNamePrinted(o), label:TYPE_AR[o['Product Type']]||o['Product Type']});
       }
     });
   }
 
+  // فلتر ثلاثي: الكل / غير المطبوع فقط / المطبوع فقط
+  const showMode = document.getElementById('names-printed-filter').value;
+  if(showMode === 'unprinted') entries = entries.filter(e=>!e.printed);
+  else if(showMode === 'printed') entries = entries.filter(e=>e.printed);
+
   renderNamesList(entries);
 }
 
+// هل سبق طباعة اسم هذا الأوردر؟ (مخزّن على الشيت بعمود NamePrinted)
+function isNamePrinted(o){
+  return String(o['NamePrinted']||'').trim() !== '';
+}
+
+// تتبّع منفصل لطباعة الكتب — لأن أوردر البكج يظهر بوضعَي "صواني" و"كتب" معاً
+function isBookPrinted(o){
+  return String(o['BookPrinted']||'').trim() !== '';
+}
+
+// يحدّد نوع المطبوعة المطلوبة لهذا الأوردر: 'book' (كتاب + رسالة العمر) أو 'frame' (برواز) أو '' (لا شيء)
+function bookOutputKind(o){
+  const type = o['Product Type']||'';
+  if(type === 'Guest Book') return 'book';        // كتاب منفصل
+  if(type === 'Frame')      return 'frame';       // برواز مستقل
+  if(type !== 'Package')    return '';            // صينية/تخرج/مسكة — لا مطبوعة
+  const pkg = String(o['PkgType']||'').trim();
+  if(pkg === 'frame') return 'frame';             // بكج البرواز
+  if(pkg === 'basic' || pkg === 'full') return 'book';
+  // أوردرات قديمة قبل إضافة حقل PkgType — نستدل من الملاحظات
+  return String(o['Notes']||'').indexOf('برواز') === -1 ? 'book' : 'frame';
+}
+
+// هل يحتاج هذا الأوردر مطبوعة (كتاب أو برواز)؟
+function orderHasBook(o){
+  return bookOutputKind(o) !== '';
+}
+
+// يستخرج تاريخ الكتاب المخزّن ضمن الملاحظات بصيغة "تاريخ الكتاب: dd/mm/yyyy"
+// يستخرج أسماء الكتاب/البرواز المخصصة من الملاحظات (إن سُجّلت مختلفة عن أسماء الصينية)
+function extractBookFrameNames(notes){
+  const m = String(notes||'').match(/أسماء (?:الكتاب|البرواز):\s*([^|]+)/);
+  return m ? m[1].trim().replace(/\s*&\s*/g,' ') : '';
+}
+
+function extractBookDate(notes){
+  const m = String(notes||'').match(/تاريخ الكتاب:\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+  return m ? toDashDate(m[1]) : '';
+}
+
 let namesListEntries = [];
+let selectedNameIds = new Set();
 
 function renderNamesList(entries){
   namesListEntries = entries;
+  selectedNameIds.clear();
   const box = document.getElementById('names-list-result');
-  const copyBtn = document.getElementById('copy-names-btn');
-  const printBtn = document.getElementById('print-names-btn');
+  const toolbar = document.getElementById('names-toolbar');
   box.style.display = 'block';
 
   if(!entries.length){
-    box.innerHTML = '<div style="text-align:center;color:#B8A898;font-size:13px;padding:10px 0">ما في نتائج مطابقة بهذه الأيام</div>';
-    copyBtn.style.display = 'none';
-    printBtn.style.display = 'none';
+    box.innerHTML = '<div style="text-align:center;color:#B8A898;font-size:13px;padding:10px 0">ما في نتائج مطابقة</div>';
+    toolbar.style.display = 'none';
+    ['copy-names-btn','print-names-btn','mark-printed-btn','unmark-printed-btn'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display='none';
+    });
     return;
   }
 
-  box.innerHTML = entries.map(e=>`
-    <div style="padding:10px 4px;border-bottom:1px dashed #E5D9C7">
-      <div style="font-weight:800;font-size:15px;color:#1A1410">${e.line1}</div>
-      ${e.line2?`<div style="font-size:13px;color:#8B7355;margin-top:2px">${e.line2}</div>`:''}
+  const printedCount = entries.filter(e=>e.printed).length;
+  box.innerHTML =
+    `<div style="font-size:12px;color:#8B7355;margin-bottom:10px;font-weight:700">${entries.length} اسم — ${printedCount} مطبوع · ${entries.length-printedCount} غير مطبوع</div>` +
+    entries.map((e,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px dashed #E5D9C7">
+      <input type="checkbox" class="name-cb" id="ncb-${i}" data-idx="${i}" onchange="toggleNameSel(${i},this.checked)" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:#C9A96E;cursor:pointer">
+      <label for="ncb-${i}" style="flex:1;min-width:0;cursor:pointer">
+        <div style="font-weight:800;font-size:15px;color:#1A1410">${e.line1}</div>
+        ${e.line2?`<div style="font-size:13px;color:#8B7355;margin-top:2px">${e.line2}</div>`:''}
+      </label>
+      ${e.label?`<span style="font-size:10px;font-weight:800;color:#8A6030;background:#FAF5EC;border:1px solid #E8D5B0;border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0;align-self:center">${e.label}</span>`:''}
+      ${e.printed?'<span title="تمت طباعته" style="font-size:16px;flex-shrink:0;align-self:center">🖨️</span>':''}
+      <button onclick="event.stopPropagation();openPanel('${e.id}')" title="عرض تفاصيل الطلب" style="background:none;border:1.5px solid #E5D9C7;border-radius:6px;padding:4px 8px;font-size:13px;cursor:pointer;flex-shrink:0;align-self:center;line-height:1">👁️</button>
     </div>`).join('');
-  copyBtn.style.display = 'block';
-  printBtn.style.display = 'block';
+
+  toolbar.style.display = 'flex';
+  updateNamesSelUI();
 }
 
-function copyNamesList(){
-  if(!namesListEntries.length) return;
-  const text = namesListEntries.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
-  navigator.clipboard.writeText(text)
-    .then(()=>toast('✅ انتسخت القائمة — جاهزة للصق'))
-    .catch(()=>toast('❌ تعذّر النسخ — جربي تحديد النص يدوياً'));
+// تبديل نوع القائمة (تعليقات/صواني/كتب) يعيد التوليد فوراً بدل ما تبقى نتيجة النوع السابق معروضة
+function onNamesModeChange(){
+  const box = document.getElementById('names-list-result');
+  if(box && box.style.display === 'block') generateNamesList();
+}
+
+function toggleNameSel(idx, checked){
+  if(checked) selectedNameIds.add(idx); else selectedNameIds.delete(idx);
+  updateNamesSelUI();
+}
+
+// تحديد الأسماء غير المطبوعة فقط من القائمة المعروضة
+function selectUnprintedNames(){
+  selectedNameIds.clear();
+  document.querySelectorAll('.name-cb').forEach(cb=>{
+    const idx = parseInt(cb.dataset.idx,10);
+    const isUnprinted = namesListEntries[idx] && !namesListEntries[idx].printed;
+    cb.checked = isUnprinted;
+    if(isUnprinted) selectedNameIds.add(idx);
+  });
+  updateNamesSelUI();
+  const n = selectedNameIds.size;
+  toast(n ? ('✔ اتحدد '+n+' اسم غير مطبوع') : 'كل الأسماء المعروضة مطبوعة أصلاً');
+}
+
+function selectAllNames(on){
+  selectedNameIds.clear();
+  document.querySelectorAll('.name-cb').forEach((cb,i)=>{
+    cb.checked = on;
+    if(on) selectedNameIds.add(parseInt(cb.dataset.idx,10));
+  });
+  updateNamesSelUI();
+}
+
+// تُظهر/تُخفي الأزرار حسب ما هو محدد فعلياً — الأزرار تعمل على المحدد فقط
+function updateNamesSelUI(){
+  const n = selectedNameIds.size;
+  const cnt = document.getElementById('names-sel-count');
+  if(cnt) cnt.textContent = n ? ('✔ محدد: '+n) : 'ما في شي محدد';
+
+  const sel = [...selectedNameIds].map(i=>namesListEntries[i]).filter(Boolean);
+  const anyUnprinted = sel.some(e=>!e.printed);
+  const anyPrinted   = sel.some(e=>e.printed);
+
+  const show = (id, on)=>{ const el=document.getElementById(id); if(el) el.style.display = on ? 'block' : 'none'; };
+  show('copy-names-btn',  n>0);
+  show('copy-mark-names-btn', anyUnprinted);   // النسخ مع التحديد يظهر فقط لو في غير مطبوع بالمحدد
+  show('print-names-btn', n>0);
+  show('mark-printed-btn',   anyUnprinted);
+  show('unmark-printed-btn', anyPrinted);
+}
+
+function getSelectedNameEntries(){
+  return [...selectedNameIds].sort((a,b)=>a-b).map(i=>namesListEntries[i]).filter(Boolean);
+}
+
+// تحديد/إلغاء علامة الطباعة للأسماء المحددة فقط — يُحفظ على الشيت ليظهر من أي جهاز
+async function setNamesPrintedState(markAsPrinted, skipConfirm){
+  const sel = getSelectedNameEntries();
+  const targets = sel.filter(e => markAsPrinted ? !e.printed : e.printed);
+  if(!targets.length){ toast('ما في أسماء محددة تحتاج هذا التغيير'); return; }
+
+  const verb = markAsPrinted ? 'تحديد' : 'إلغاء علامة الطباعة عن';
+  if(!skipConfirm && !confirm(verb+' '+targets.length+' اسم؟')) return;
+
+  const stamp = markAsPrinted ? nowStamp() : '';
+  // وضع الكتب له عمود تتبّع منفصل — البكج يظهر بوضعَي صواني وكتب معاً ولا يصح خلطهما
+  const col = document.getElementById('names-mode').value === 'books' ? 'BookPrinted' : 'NamePrinted';
+  showFullscreenLoading('⏳ جاري التحديث...');
+  let ok=0, failed=[];
+  for(let i=0;i<targets.length;i++){
+    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+targets.length+')...');
+    try{
+      const payload = {}; payload[col] = stamp;
+      await writeToSheet({action:'updateOrder', id:targets[i].id, data:JSON.stringify(payload)});
+      ok++;
+    }catch(e){ failed.push(targets[i].id); }
+  }
+  await loadOrders(true);
+  generateNamesList();
+  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
+  else showFullscreenSuccess((markAsPrinted?'تم تحديد ':'تم إلغاء العلامة عن ')+ok+' اسم ✅');
+}
+
+async function copyNamesList(alsoMarkPrinted){
+  const sel = getSelectedNameEntries();
+  if(!sel.length){ toast('❌ حددي أسماء أولاً'); return; }
+  const text = sel.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
+
+  let copied = true;
+  try{ await navigator.clipboard.writeText(text); }
+  catch(e){ copied = false; toast('❌ تعذّر النسخ — جربي تحديد النص يدوياً'); }
+
+  if(!alsoMarkPrinted){
+    if(copied) toast('✅ انتسخ '+sel.length+' اسم — جاهزين للصق');
+    return;
+  }
+  if(!copied) return; // لا نحدّد كمطبوع إذا فشل النسخ أصلاً
+  await setNamesPrintedState(true, true); // true الثانية = بدون سؤال تأكيد (النسخ نفسه هو التأكيد)
 }
 
 function printNamesList(){
-  if(!namesListEntries.length) return;
-  const html = namesListEntries.map(e=>`
+  const sel = getSelectedNameEntries();
+  if(!sel.length){ toast('❌ حددي أسماء أولاً'); return; }
+  const html = sel.map(e=>`
     <div class="names-print-item">
       <div class="names-print-l1">${e.line1}</div>
       ${e.line2?`<div class="names-print-l2">${e.line2}</div>`:''}
@@ -4470,6 +4851,7 @@ function toast(msg){
             <option value="Tray">صينية</option>
             <option value="Guest Book">كتاب</option>
             <option value="Package">بكج</option>
+            <option value="Frame">برواز</option>
             <option value="Graduation">تخرج</option>
             <option value="Bouquet">مسكة عروس</option>
           </select>
