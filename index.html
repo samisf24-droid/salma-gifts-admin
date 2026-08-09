@@ -760,7 +760,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v48</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v49</span>
     </div>
   </div>
 </div>
@@ -1482,7 +1482,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v48<br>
+       <strong>الإصدار:</strong> v49<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1505,7 +1505,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v48 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v49 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2076,7 +2076,7 @@ function openPanel(id){
     if(type==='Package'&&o['Additions']) oF+=pr('البكج',o['Additions']);
   }
   if(o['Phrase']&&type!=='Bouquet') oF+=pr('العبارة',o['Phrase']);
-  if(['Tray','Guest Book','Package'].includes(type)){
+  if(['Tray','Guest Book','Package','Frame'].includes(type)){
     const verseVal = String(o['Verse']||'').toLowerCase();
     oF += verseVal==='no' ? pr('الآية','بدون آية ❌') : pr('الآية','موجودة ✅');
   }
@@ -3762,18 +3762,12 @@ function printCard(o){
 
   // ── قسم التجهيز — كل حقل فيه قيمة فعلية يظهر كاملاً بدون أي اقتطاع
   const oItems=[];
+  // ── حقول خاصة بكل نوع ──
   if(type==='Graduation'){
     if(bride) oItems.push(['الخريج',bride]);
     if(o['Model']) oItems.push(['التخصص',o['Model']]);
   } else if(type==='Bouquet'){
     if(o['Model']) oItems.push(['الموديل',o['Model']]);
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
-    // تُفصل تفاصيل التعليقة عن باقي الإضافات وتظهر بشكل مستقل وواضح
-    const rawAdd = String(o['Additions']||'');
-    const taliqaMatch = rawAdd.match(/تعليقة[^|]*/);
-    if(taliqaMatch) oItems.push(['التعليقة', taliqaMatch[0].trim()]);
-    const restAdd = rawAdd.replace(/تعليقة[^|]*\|?/,'').split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
-    if(restAdd) oItems.push(['إضافات', restAdd]);
   } else {
     if(groom) oItems.push(['العريس',groom]);
     if(bride) oItems.push(['العروس',bride]);
@@ -3784,13 +3778,27 @@ function printCard(o){
       const pkgLbl2 = {basic:'أساسي (كتاب)', full:'شامل', frame:'برواز'}[o['PkgType']]||o['PkgType'];
       oItems.push(['نوع البكج', pkgLbl2]);
     }
-    if(['Tray','Guest Book','Package'].includes(type)){
+    if(['Tray','Guest Book','Package','Frame'].includes(type)){
       const verseVal2 = String(o['Verse']||'').toLowerCase();
       oItems.push(['الآية', verseVal2==='no' ? 'بدون آية ❌' : '✅']);
     }
-    if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
-    if(o['Notes']) oItems.push(['ملاحظات',o['Notes']]);
-    if(o['Additions']) oItems.push([type==='Package'?'البكج':'إضافات', o['Additions']]);
+  }
+
+  // ── حقول مشتركة تُطبع لكل الأنواع بلا استثناء (أي حقل فيه قيمة يظهر) ──
+  if(o['Phrase']) oItems.push(['العبارة',o['Phrase']]);
+  if(o['Notes'])  oItems.push(['ملاحظات',o['Notes']]);
+
+  const rawAdd = String(o['Additions']||'');
+  if(rawAdd){
+    if(type==='Bouquet'){
+      // تُفصل تفاصيل التعليقة عن باقي الإضافات وتظهر بشكل مستقل وواضح
+      const taliqaMatch = rawAdd.match(/تعليقة[^|]*/);
+      if(taliqaMatch) oItems.push(['التعليقة', taliqaMatch[0].trim()]);
+      const restAdd = rawAdd.replace(/تعليقة[^|]*\|?/,'').split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+      if(restAdd) oItems.push(['إضافات', restAdd]);
+    } else {
+      oItems.push([type==='Package'?'البكج':'إضافات', rawAdd]);
+    }
   }
   // حجم خط ديناميكي بالاتجاهين: قليل التفاصيل → خط أكبر يملأ المساحة، كثير التفاصيل → خط أصغر ليتسع الكل
   const totalChars = oItems.reduce((s,[k,v])=>s+String(v).length+String(k).length,0);
