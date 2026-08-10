@@ -345,12 +345,15 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
   .hdr,.tabs,.main,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
-  #print-container{display:block!important;padding:5mm}
+  #print-container{display:block!important}
   #names-print-container{display:block!important;padding:10mm}
   .names-print-item{margin-bottom:9mm;text-align:center;break-inside:avoid;padding-bottom:6mm;border-bottom:1px dashed #999}
   .names-print-l1{font-size:18pt;font-weight:900;color:#000}
   .names-print-l2{font-size:13pt;color:#333;margin-top:2mm}
-  @page{size:A4 portrait;margin:6mm}
+  /* margin:0 يخفي رأس وتذييل المتصفح (الرابط والتاريخ ورقم الصفحة) — الهوامش تُعوَّض بالحاوية */
+  @page{size:A4 portrait;margin:0}
+  #print-container{padding:8mm 6mm!important}
+  #names-print-container{padding:10mm!important}
 
   /* ── DAY HEADER ── */
   .pc-day-hdr{
@@ -404,6 +407,12 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
   }
   .pc-sec-o{background:#FFFBF4!important;border-left:1.5px solid #CCC}
   .pc-sec-d{background:#F0F7FF!important}
+  /* ألوان هادئة تميّز نوع الطلب بلمحة — قسم التوصيل يبقى بلون موحّد للجميع */
+  .pc-t-tray{background:#F2F7FC!important}      /* صينية — أزرق فاتح جداً */
+  .pc-t-package{background:#F7F3FA!important}   /* بكج — بنفسجي فاتح جداً */
+  .pc-t-bouquet{background:#FDF2F5!important}   /* مسكة — وردي فاتح جداً */
+  .pc-t-grad{background:#FFF6EE!important}      /* تخرج — برتقالي فاتح جداً */
+  .pc-t-book{background:#F2FAF4!important}      /* كتاب/برواز — أخضر فاتح جداً */
 
   .pc-sec-ttl{
     font-size:8px;font-weight:900;text-transform:uppercase;
@@ -418,8 +427,8 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
     display:flex;gap:3px;align-items:baseline;
     margin-bottom:1.5px;
   }
-  .pc-del-k{font-size:6.8px;color:#666!important;flex-shrink:0;min-width:11mm}
-  .pc-del-v{font-size:7.6px;font-weight:700;color:#1A1410!important;white-space:normal;word-break:break-word;line-height:1.25}
+  .pc-del-k{font-size:8px;color:#666!important;flex-shrink:0;min-width:12mm}
+  .pc-del-v{font-size:9.2px;font-weight:700;color:#1A1410!important;white-space:normal;word-break:break-word;line-height:1.3}
   .pc-del-total{
     display:flex;justify-content:space-between;align-items:center;
     border-top:1px solid #BFDBFE;padding-top:3px;margin-top:3px;
@@ -760,7 +769,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v49</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v50</span>
     </div>
   </div>
 </div>
@@ -1482,7 +1491,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v49<br>
+       <strong>الإصدار:</strong> v50<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1505,7 +1514,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v49 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v50 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2317,6 +2326,80 @@ function handleEditTypeSwitch(id, newType){
   openEdit(id, newType);
 }
 
+// يفكّك نص التعليقة المخزّن لحقوله الأصلية (عريس، عروس، تاريخ، ملاحظات)
+function parseTaliqaText(additions){
+  const raw = String(additions||'');
+  const m = raw.match(/تعليقة\s*\(([^)]*)\)([^|]*)/);
+  if(!m) return null;
+  const names = m[1].split(/[,،&]/).map(s=>s.trim()).filter(Boolean);
+  const rest  = (m[2]||'').trim();
+  const dm    = rest.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+  let notes   = rest.replace(/(\d{1,2}\/\d{1,2}\/\d{4})/,'').replace(/^[\s\-–—]+/,'').trim();
+  return {
+    groom: names[0]||'', bride: names[1]||'',
+    date : dm ? dm[1] : '',
+    notes: notes,
+    fullText: m[0].trim()
+  };
+}
+
+// يبني صندوق تعديل التعليقة داخل نافذة التعديل — بنفس حقول الإضافة الأصلية
+function renderEditTaliqaBox(o){
+  const t = parseTaliqaText(o['Additions']);
+  const has = !!t;
+  const iso = d => { const m=String(d||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m? m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0') : ''; };
+  return `
+  <div style="background:#F3E9D8;border:1.5px solid #D9C4A0;border-radius:12px;padding:14px;margin:14px 0">
+    <div style="font-size:14px;font-weight:900;color:#6B4A1F;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid #D9C4A0">
+      🏷️ ${has ? 'تعديل التعليقة' : 'إضافة تعليقة'}
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم العريس</label><input type="text" id="e-t-groom" value="${(t?t.groom:'').replace(/"/g,'&quot;')}" style="background:#FFFDF8"></div>
+      <div class="fg"><label>اسم العروس</label><input type="text" id="e-t-bride" value="${(t?t.bride:'').replace(/"/g,'&quot;')}" style="background:#FFFDF8"></div>
+      <div class="fg"><label>التاريخ</label><input type="date" id="e-t-date" value="${t?iso(t.date):''}" style="background:#FFFDF8"></div>
+      <div class="fg"><label>ملاحظات التعليقة</label><input type="text" id="e-t-notes" value="${(t?t.notes:'').replace(/"/g,'&quot;')}" style="background:#FFFDF8"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button type="button" onclick="applyTaliqaEdit()" style="flex:1;background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">✅ ${has?'تحديث التعليقة':'إضافة التعليقة'}</button>
+      ${has?`<button type="button" onclick="removeTaliqaFromEdit()" style="flex:1;background:#FFF0F0;border:1.5px solid #FFCDD2;color:#C0392B;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🗑️ حذف التعليقة</button>`:''}
+    </div>
+    <div style="font-size:11px;color:#8A6030;margin-top:8px">التغييرات تنعكس على حقل "إضافات" فوق، واحفظي بزر "حفظ التعديل" بالأسفل</div>
+  </div>`;
+}
+
+// يبني نص التعليقة من الحقول ويحدّث حقل الإضافات (بدون لمس باقي الإضافات)
+function applyTaliqaEdit(){
+  const g = document.getElementById('e-t-groom').value.trim();
+  const b = document.getElementById('e-t-bride').value.trim();
+  const dRaw = document.getElementById('e-t-date').value;
+  const n = document.getElementById('e-t-notes').value.trim();
+  if(!g && !b){ toast('❌ أدخلي اسم العريس أو العروس على الأقل'); return; }
+
+  const dateStr = dRaw ? fmtFull(new Date(dRaw+'T00:00:00')) : '';
+  const names = [g,b].filter(Boolean).join(' ، ');
+  const newText = 'تعليقة ('+names+')'+(dateStr?' '+dateStr:'')+(n?' - '+n:'');
+
+  const addEl = document.getElementById('e-add');
+  const cur = String(addEl.value||'');
+  // استبدال التعليقة القديمة إن وُجدت، وإلا إضافتها لباقي الإضافات
+  addEl.value = /تعليقة\s*\(/.test(cur)
+    ? cur.replace(/تعليقة\s*\([^)]*\)[^|]*/, newText).trim()
+    : (cur.trim() ? cur.trim()+' | '+newText : newText);
+
+  toast('✅ تحدّثت التعليقة — اضغطي "حفظ التعديل" للحفظ');
+}
+
+// يحذف التعليقة من حقل الإضافات مع الحفاظ على باقي الإضافات
+function removeTaliqaFromEdit(){
+  if(!confirm('حذف التعليقة من هذا الأوردر؟')) return;
+  const addEl = document.getElementById('e-add');
+  addEl.value = String(addEl.value||'')
+    .replace(/تعليقة\s*\([^)]*\)[^|]*\|?/, '')
+    .split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+  ['e-t-groom','e-t-bride','e-t-date','e-t-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  toast('🗑️ حُذفت التعليقة — اضغطي "حفظ التعديل" للحفظ');
+}
+
 function openEdit(id, overrideType){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
@@ -2371,6 +2454,7 @@ function openEdit(id, overrideType){
     <div class="fg"><label>العبارة</label><input type="text" id="e-phrase" value="${(o['Phrase']||'').replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:70px;width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;resize:none">${o['Notes']||''}</textarea></div>
     <div class="fg"><label>إضافات</label><input type="text" id="e-add" value="${(o['Additions']||'').replace(/"/g,'&quot;')}"></div>
+    ${type==='Bouquet' ? renderEditTaliqaBox(o) : ''}
 
     <div class="sec-lbl">بيانات التوصيل</div>
     <div class="form-grid">
@@ -3748,6 +3832,14 @@ function nextDateStr(dayName){
   return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
 }
 
+// كلاس اللون حسب نوع الطلب — يميّز الكارد بلمحة عند الطباعة
+function printTypeClass(type){
+  return {
+    'Tray':'pc-t-tray', 'Package':'pc-t-package', 'Bouquet':'pc-t-bouquet',
+    'Graduation':'pc-t-grad', 'Guest Book':'pc-t-book', 'Frame':'pc-t-book'
+  }[type] || '';
+}
+
 function printCard(o){
   const id=o['Order ID']||'';
   const type=o['Product Type']||'';
@@ -3847,7 +3939,7 @@ function printCard(o){
       <span class="pc-price">${grandTotal} د.أ</span>
     </div>
     <div class="pc-secs">
-      <div class="pc-sec pc-sec-o" style="--pv-size:${pvSize}px">
+      <div class="pc-sec pc-sec-o ${printTypeClass(type)}" style="--pv-size:${pvSize}px">
         <div class="pc-sec-ttl">📋 التجهيز</div>
         ${oRows}
       </div>
