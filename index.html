@@ -93,6 +93,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stats.stats-5{grid-template-columns:repeat(5,1fr)}
 @media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
 .stat{
   border-radius:var(--radius-lg);padding:14px 12px;text-align:center;
@@ -762,14 +763,29 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 </head>
 <body>
 
+<!-- ══ شاشة تسجيل الدخول ══ -->
+<div id="login-screen" style="position:fixed;inset:0;background:#1A1410;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:360px;background:#FFFFFF;border-radius:16px;padding:28px 24px;text-align:center">
+    <div style="font-size:22px;font-weight:900;color:#1A1410;margin-bottom:4px">هدايا سلمى ✦</div>
+    <div style="font-size:13px;color:#8B7355;margin-bottom:22px">تسجيل الدخول للنظام</div>
+    <div style="display:flex;flex-direction:column;gap:12px;text-align:right">
+      <div class="fg" style="margin-bottom:0"><label>اسم المستخدم</label><input type="text" id="login-username" autocomplete="username" autofocus style="text-align:right" onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()"></div>
+      <div class="fg" style="margin-bottom:0"><label>كلمة المرور</label><input type="password" id="login-password" autocomplete="current-password" style="text-align:right" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    </div>
+    <div id="login-error" style="color:#C0392B;font-size:12px;font-weight:700;margin-top:10px;display:none"></div>
+    <button class="btn btn-gold" style="margin-top:16px" onclick="doLogin()" id="login-btn">دخول</button>
+  </div>
+</div>
+
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
   <div style="display:flex;align-items:center;gap:10px">
+    <span id="hdr-user" onclick="doLogout()" title="اضغطي لتسجيل الخروج" style="cursor:pointer;font-size:12px;font-weight:700;color:var(--gold-l);opacity:.85;white-space:nowrap"></span>
     <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 10px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:118px;height:34px;flex-shrink:0">↻ تحديث</button>
     <div class="hdr-status">
       <div class="hdr-dot" id="conn-dot"></div>
       <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v51</span>
+      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v56</span>
     </div>
   </div>
 </div>
@@ -778,7 +794,8 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <button class="tab"     onclick="switchTab('add')">➕ أوردر جديد</button>
   <button class="tab no-print" onclick="switchTab('print')">🖨️ طباعة</button>
   <button class="tab no-print" onclick="switchTab('drafts')" id="tab-drafts">📝 المسودات</button>
-  <button class="tab no-print" onclick="openDashboard()">📊 الداشبورد</button>
+  <button class="tab no-print" onclick="switchTab('employees')" id="tab-employees" style="display:none">👥 الموظفين</button>
+  <button class="tab no-print" id="tab-dashboard-btn" onclick="openDashboard()">📊 الداشبورد</button>
 </div>
 
 <div class="main">
@@ -786,11 +803,12 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <!-- ══ CALENDAR TAB ══ -->
 <div class="view on" id="view-cal">
 
-  <div class="stats">
+  <div class="stats" id="stats-grid">
     <div class="stat stat-all"><div class="stat-n" id="st-all">—</div><div class="stat-l" id="st-all-label">أقرب يوم تسليم</div></div>
     <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🛠️ لسا للتجهيز</div></div>
     <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">🚚 مع التوصيل</div></div>
     <div class="stat stat-late" onclick="showLateOrders()" style="cursor:pointer" title="اضغطي لعرض الطلبات المتأخرة"><div class="stat-n" id="st-late">—</div><div class="stat-l">⚠️ متأخرة</div></div>
+    <div class="stat" id="stat-commission" style="display:none;background:#FAF5EC;border-color:#E8D5B0"><div class="stat-n" id="st-commission" style="color:#8B6D2F">—</div><div class="stat-l">💰 عمولتي</div></div>
   </div>
 
   <!-- SEARCH -->
@@ -1115,6 +1133,23 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   </div>
 </div>
 
+<!-- ══ EMPLOYEES TAB (owner only) ══ -->
+<div class="view" id="view-employees">
+  <div class="form-card">
+    <div class="form-ttl">👥 إدارة الموظفين والعمولات</div>
+    <div id="employees-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px"></div>
+
+    <div class="sec-lbl">➕ إضافة موظف جديد</div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم المستخدم (بالإنجليزي، بدون مسافات) <span class="req">*</span></label><input type="text" id="emp-username" dir="ltr" style="text-align:right" placeholder="samah"></div>
+      <div class="fg"><label>الاسم الظاهر <span class="req">*</span></label><input type="text" id="emp-displayname" placeholder="سماح"></div>
+      <div class="fg"><label>كلمة المرور <span class="req">*</span></label><input type="text" id="emp-password" dir="ltr" style="text-align:right"></div>
+      <div class="fg"><label>العمولة لكل أوردر (د.أ) <span class="req">*</span></label><input type="number" id="emp-rate" step="0.1" min="0" placeholder="0.5"></div>
+    </div>
+    <button class="btn btn-gold" onclick="addEmployeeSubmit()" id="emp-add-btn">💾 إضافة الموظف</button>
+  </div>
+</div>
+
 
 </div><!-- /main -->
 
@@ -1301,12 +1336,103 @@ let weekOffset = 0;
 let filterStatus = 'all';
 let selectedIds = new Set();
 
+// ── تسجيل الدخول والجلسة ──
+let currentUser = null; // {username, token, role, displayName, commissionRate}
+
+function loadSession(){
+  try{
+    const raw = localStorage.getItem('sg_session');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveSession(u){ localStorage.setItem('sg_session', JSON.stringify(u)); }
+function clearSession(){ localStorage.removeItem('sg_session'); }
+
+async function doLogin(){
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if(!username || !password){ errEl.textContent = 'أدخلي اسم المستخدم وكلمة المرور'; errEl.style.display='block'; return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'جاري الدخول...';
+  try{
+    const res = await apiPost({action:'login', username, password});
+    if(!res || res.error){ throw new Error((res&&res.error)||'خطأ غير معروف'); }
+    currentUser = { username: res.username, token: res.token, role: res.role, displayName: res.displayName, commissionRate: res.commissionRate };
+    saveSession(currentUser);
+    document.getElementById('login-screen').style.display = 'none';
+    startApp();
+  }catch(e){
+    errEl.textContent = e.message || 'تعذّر تسجيل الدخول';
+    errEl.style.display = 'block';
+  }finally{
+    btn.disabled = false; btn.textContent = 'دخول';
+  }
+}
+
+function doLogout(){
+  clearSession();
+  currentUser = null;
+  location.reload();
+}
+
+function applyRoleUI(){
+  const isOwner = currentUser && currentUser.role === 'owner';
+  const empTab = document.getElementById('tab-employees');
+  if(empTab) empTab.style.display = isOwner ? '' : 'none';
+  const dashTab = document.getElementById('tab-dashboard-btn');
+  if(dashTab) dashTab.style.display = isOwner ? '' : 'none';
+  const commStat = document.getElementById('stat-commission');
+  if(commStat) commStat.style.display = isOwner ? 'none' : '';
+  const statsGrid = document.getElementById('stats-grid');
+  if(statsGrid) statsGrid.classList.toggle('stats-5', !isOwner);
+  const hdrUser = document.getElementById('hdr-user');
+  if(hdrUser) hdrUser.textContent = (currentUser && currentUser.displayName) ? currentUser.displayName : '';
+  if(!isOwner) refreshMyCommission();
+}
+
+async function refreshMyCommission(){
+  if(!currentUser || currentUser.role !== 'staff') return;
+  try{
+    const res = await apiPost({action:'getMyCommission', username: currentUser.username, token: currentUser.token});
+    if(res && res.success){
+      const el = document.getElementById('st-commission');
+      if(el) el.textContent = res.balance.toFixed(2)+' د.أ';
+    }
+  }catch(e){ /* صامت — مش حرج */ }
+}
+
+// هل يُسمح للمستخدم الحالي بتعديل/حذف هذا الأوردر؟
+function canEditOrder(o){
+  if(!currentUser) return false;
+  if(currentUser.role === 'owner') return true;
+  return o && String(o['CreatedBy']||'') === currentUser.username;
+}
+
+function startApp(){
+  applyRoleUI();
+  loadOrders(true);
+  fetchDraftsFromServer();
+}
+
 // ── INIT ──
-window.addEventListener('DOMContentLoaded', ()=>{ loadOrders(true); fetchDraftsFromServer(); });
+window.addEventListener('DOMContentLoaded', ()=>{
+  currentUser = loadSession();
+  if(currentUser && currentUser.username && currentUser.token){
+    document.getElementById('login-screen').style.display = 'none';
+    startApp();
+  }
+  // وإلا: شاشة الدخول تضل ظاهرة (هي الافتراضي بالـ HTML) لحد ما يسجّل دخول
+});
 
 // كل كتابة تمر من هنا: تتحقق من نجاح الشيت فعلياً وترمي خطأ واضح إن فشلت
+// العمليات الحساسة (إضافة/تعديل/حذف أوردر) ترسل POST دائماً (مش GET) عشان توكن الجلسة
+// ما يظهر برابط واضح — هوية المستخدم تُرفَق تلقائياً عبر withAuth داخل apiPost نفسها.
 async function writeToSheet(params, usePost){
-  const res = usePost ? await apiPost(params) : await apiCall(params);
+  const isAuthRequired = AUTH_REQUIRED_ACTIONS.includes(params.action);
+  const res = (usePost || isAuthRequired) ? await apiPost(params) : await apiCall(params);
   if(!res || res.success !== true) throw new Error((res && res.error) || 'الشيت لم يؤكد العملية');
   return res;
 }
@@ -1321,7 +1447,7 @@ async function loadOrders(silent){
   // مرحلة ١: الاتصال الفعلي بالشيت — أي فشل هنا هو خطأ اتصال حقيقي
   let data;
   try {
-    data = await apiCall({action:'getOrders'});
+    data = await apiPost({action:'getOrders'});
   } catch(e){
     setConn(false);
     toast('❌ تعذّر الاتصال بالشيت — البيانات المعروضة قد تكون قديمة');
@@ -1335,6 +1461,7 @@ async function loadOrders(silent){
   try {
     renderCal();
     updateStats();
+    if(currentUser && currentUser.role === 'staff') refreshMyCommission();
     if(typeof updateTypeFilterBanner === 'function') updateTypeFilterBanner();
     checkUnparsedDates();
     logDiag();
@@ -1374,7 +1501,18 @@ async function fetchWithRetry(doFetch, maxAttempts){
   throw lastErr;
 }
 
+// أكشنز لازم لها جلسة صحيحة — تُرفَق هوية المستخدم الحالي تلقائياً بأي طلب منها
+const AUTH_REQUIRED_ACTIONS = ['getOrders','getDrafts','addOrder','updateOrder','deleteOrder',
+  'uploadPhoto','deletePhoto','getInventory','addInventoryPurchase','saveDraft','deleteDraft','clearAllDrafts'];
+function withAuth(params){
+  if(currentUser && AUTH_REQUIRED_ACTIONS.includes(params.action)){
+    return Object.assign({}, params, {authUsername: currentUser.username, authToken: currentUser.token});
+  }
+  return params;
+}
+
 async function apiCall(params){
+  params = withAuth(params);
   // منع الكاش — كل طلب فريد
   const p = Object.assign({}, params, {_t: Date.now()});
   const url = API + '?' + new URLSearchParams(p);
@@ -1515,7 +1653,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v51<br>
+       <strong>الإصدار:</strong> v56<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1538,7 +1676,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v51 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v56 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2128,13 +2266,16 @@ function openPanel(id){
   dF+=`<div class="pr"><span class="prk">الحساب الكامل</span><span class="prv prv-total">${grandTotal} د.أ</span></div>`;
   // سطر التوثيق: متى أُضيف الأوردر
   const created = o['Created At']||'';
+  const createdBy = o['CreatedBy']||'';
+  const byTxt = createdBy ? ' — بواسطة <strong style="color:#4A3728">'+createdBy+'</strong>' : '';
   const createdRow = created
     ? `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E5D9C7;font-size:11px;color:#8B7355">
-         🕐 أُضيف بتاريخ <strong style="color:#4A3728">${created}</strong>
+         🕐 أُضيف بتاريخ <strong style="color:#4A3728">${created}</strong>${byTxt}
        </div>`
     : `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #E5D9C7;font-size:11px;color:#B8A898">
-         🕐 وقت الإضافة غير مسجّل (أوردر قديم)
+         🕐 وقت الإضافة غير مسجّل (أوردر قديم)${byTxt}
        </div>`;
+  const canEdit = canEditOrder(o);
 
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${status===k?'selected':''}>${v.lbl}</option>`).join('');
   const linkHTML=o['Link']?`<a href="${o['Link']}" target="_blank" class="btn btn-ghost btn-sm" style="width:auto;text-decoration:none">🔗 المحادثة</a>`:'';
@@ -2169,14 +2310,14 @@ function openPanel(id){
     ${createdRow}
     <div class="panel-acts">
       <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
-      <button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>
-      <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>
+      ${canEdit?`<button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>
+      <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>`:''}
       ${linkHTML}
     </div>
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;display:flex;gap:8px;flex-wrap:wrap">
+    ${canEdit?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;display:flex;gap:8px;flex-wrap:wrap">
       <button onclick="confirmFreezeToDraft('${id}')" style="background:#EFF6FF;color:#1E40AF;border:1.5px solid #BFDBFE;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🧊 تجميد (نقل للمسودة)</button>
       <button onclick="confirmDelete('${id}')" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🗑️ حذف الأوردر</button>
-    </div>`;
+    </div>`:`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;font-size:12px;color:#B8A898">🔒 التعديل والحذف مسموح فقط لصاحب الأوردر الأصلي</div>`}`;
 
   document.getElementById('panel').classList.add('open');
 }
@@ -2235,6 +2376,7 @@ const STANDARD_MODELS = ['Turkish','White','Elegant','Luxury','Royal'];
 function confirmFreezeToDraft(id){
   const o = allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
+  if(!canEditOrder(o)){ toast('🔒 التجميد مسموح فقط لصاحب الأوردر الأصلي'); return; }
   const names = getOrderNames(o);
   if(!confirm('🧊 تجميد "'+names+'" ('+id+')؟\n\nبيختفي فوراً من كل الحسابات والتقويم والبحث تماماً كأنه لم يكن، ويضيع رقمه للأبد.\nبترجعي تلاقيه بس بتاب المسودات، ولو حفظتيه من جديد بياخد رقم جديد بالكامل.')) return;
   freezeOrderToDraft(id, o);
@@ -2294,6 +2436,7 @@ async function freezeOrderToDraft(id, o){
 
 function confirmDelete(id){
   const o = allOrders.find(o=>o['Order ID']===id);
+  if(!canEditOrder(o)){ toast('🔒 الحذف مسموح فقط لصاحب الأوردر الأصلي'); return; }
   const type = o ? o['Product Type']||'' : '';
   const name = o ? (type==='Graduation' ? o['Bride'] : [o['Bride'],o['Groom']].filter(Boolean).join(' & ')) : id;
   const confirmed = window.confirm('حذف الأوردر ' + id + '\n' + name + '\n\nاختر طريقة الحذف في النافذة التالية.');
@@ -2427,6 +2570,7 @@ function removeTaliqaFromEdit(){
 function openEdit(id, overrideType){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
+  if(!canEditOrder(o)){ toast('🔒 التعديل مسموح فقط لصاحب الأوردر الأصلي'); return; }
   const type=overrideType || o['Product Type']||'';
   const isEng=['Tray','Guest Book','Package','Frame'].includes(type);
   const isGrad=type==='Graduation';
@@ -2626,6 +2770,7 @@ async function applyEdit(id){
 function openReschedule(id){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
+  if(!canEditOrder(o)){ toast('🔒 تغيير الموعد مسموح فقط لصاحب الأوردر الأصلي'); return; }
   const names = o['Product Type']==='Graduation' ? o['Bride'] : [o['Bride'],o['Groom']].filter(Boolean).join(' ❤️ ');
   document.getElementById('edit-ttl').textContent='📅 تغيير موعد — '+id;
   document.getElementById('edit-body').innerHTML=`
@@ -3400,7 +3545,7 @@ function printOrders(){
 
 // ── TABS ──
 function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print','drafts'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print','drafts','employees'][i]===t));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   const viewEl = document.getElementById('view-'+t);
   if(viewEl) viewEl.classList.add('on');
@@ -3408,6 +3553,7 @@ function switchTab(t){
   if(t==='drafts') renderDraftsList();
   if(t==='print') buildPrintDayOptions();
   if(t==='add') buildDelDateOptions();
+  if(t==='employees') loadEmployees();
 }
 
 // ── PRINT ──
@@ -3986,9 +4132,155 @@ function prow(k,v){
 
 
 // ══════════════════════════════════
+// الموظفين والعمولات (owner فقط)
+// ══════════════════════════════════
+async function loadEmployees(){
+  const box = document.getElementById('employees-list');
+  if(!currentUser || currentUser.role !== 'owner'){ box.innerHTML = '<div style="color:#B8A898;font-size:13px">غير مصرّح</div>'; return; }
+  box.innerHTML = '<div style="color:#B8A898;font-size:13px">جاري التحميل...</div>';
+  try{
+    const res = await apiPost({action:'getEmployees', username: currentUser.username, token: currentUser.token});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    renderEmployees(res.employees || []);
+  }catch(e){
+    box.innerHTML = '<div style="color:#C0392B;font-size:13px">❌ '+e.message+'</div>';
+  }
+}
+
+function renderEmployees(list){
+  const box = document.getElementById('employees-list');
+  if(!list.length){ box.innerHTML = '<div style="color:#B8A898;font-size:13px">ما في موظفين مضافين بعد</div>'; return; }
+  box.innerHTML = list.map(emp=>{
+    const balColor = emp.balance > 0 ? '#8B6D2F' : '#8B7355';
+    return `<div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:800;color:#1A1410;font-size:14px">${emp.displayName} <span style="font-weight:400;color:#8B7355;font-size:12px">(${emp.username})</span> ${emp.active?'':'<span style="color:#C0392B;font-size:11px">— موقوف</span>'}</div>
+          <div style="font-size:12px;color:#8B7355;margin-top:2px">العمولة: ${emp.commissionRate} د.أ / أوردر</div>
+        </div>
+        <div style="font-weight:900;font-size:18px;color:${balColor}">${emp.balance.toFixed(2)} د.أ</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn btn-sm btn-gold" style="width:auto" onclick="recordPaymentPrompt('${emp.username}','${emp.displayName}',${emp.balance})">💵 تسجيل دفعة</button>
+        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="showCommissionHistory('${emp.username}','${emp.displayName}')">📋 كشف الحساب</button>
+        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="editEmployeeRate('${emp.username}',${emp.commissionRate})">✏️ تعديل العمولة</button>
+        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="editEmployeePassword('${emp.username}')">🔑 تغيير الباسورد</button>
+        <button class="btn btn-sm btn-ghost" style="width:auto;color:${emp.active?'#C0392B':'#3B6D11'}" onclick="toggleEmployeeActive('${emp.username}',${emp.active},${emp.balance})">${emp.active?'⏸️ إيقاف الحساب':'▶️ تفعيل الحساب'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function showCommissionHistory(username, displayName){
+  document.getElementById('edit-ttl').textContent = '📋 كشف حساب — '+displayName;
+  document.getElementById('edit-body').innerHTML = '<div style="color:#B8A898;font-size:13px;padding:20px;text-align:center">جاري التحميل...</div>';
+  document.getElementById('edit-panel').classList.add('open');
+  try{
+    const res = await apiPost({action:'getCommissionHistory', username: currentUser.username, token: currentUser.token, targetUsername: username});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    const entries = (res.entries||[]).slice().reverse(); // الأحدث فوق
+    const typeLbl = {order:'✅ أوردر جديد', reversal:'↩️ عكس (حذف أوردر)', payment:'💵 دفعة مدفوعة'};
+    const typeColor = {order:'#3B6D11', reversal:'#C0392B', payment:'#1E40AF'};
+    const rows = entries.length ? entries.map(e=>{
+      const amt = parseFloat(e.Amount)||0;
+      const sign = amt>=0?'+':'';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #EDE0CC;gap:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${typeColor[e.Type]||'#1A1410'}">${typeLbl[e.Type]||e.Type}${e.OrderID?' — '+e.OrderID:''}</div>
+          <div style="font-size:11px;color:#8B7355;margin-top:2px">${e.Date||''}${e.Note?' — '+e.Note:''}</div>
+        </div>
+        <div style="font-weight:900;font-size:14px;color:${amt>=0?'#3B6D11':'#C0392B'};white-space:nowrap">${sign}${amt.toFixed(2)} د.أ</div>
+      </div>`;
+    }).join('') : '<div style="color:#B8A898;font-size:13px;text-align:center;padding:20px">ما في حركات مسجّلة بعد</div>';
+    const total = entries.reduce((s,e)=>s+(parseFloat(e.Amount)||0),0);
+    document.getElementById('edit-body').innerHTML = `
+      <div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;color:#8B7355">الرصيد الحالي</span>
+        <span style="font-weight:900;font-size:18px;color:#8B6D2F">${total.toFixed(2)} د.أ</span>
+      </div>
+      <div>${rows}</div>`;
+  }catch(e){
+    document.getElementById('edit-body').innerHTML = '<div style="color:#C0392B;font-size:13px;padding:20px;text-align:center">❌ '+e.message+'</div>';
+  }
+}
+
+async function addEmployeeSubmit(){
+  const username = document.getElementById('emp-username').value.trim();
+  const displayName = document.getElementById('emp-displayname').value.trim();
+  const password = document.getElementById('emp-password').value;
+  const rate = parseFloat(document.getElementById('emp-rate').value);
+  if(!username||!displayName||!password){ toast('❌ عبّي كل الحقول الإلزامية'); return; }
+  if(isNaN(rate)||rate<0){ toast('❌ أدخلي عمولة صحيحة'); return; }
+  const btn = document.getElementById('emp-add-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الإضافة...';
+  try{
+    const res = await apiPost({action:'addEmployee', username: currentUser.username, token: currentUser.token,
+      data: JSON.stringify({username, displayName, password, commissionRate: rate})});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تمت إضافة الموظف');
+    ['emp-username','emp-displayname','emp-password','emp-rate'].forEach(id=>document.getElementById(id).value='');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+  btn.disabled = false; btn.textContent = '💾 إضافة الموظف';
+}
+
+async function recordPaymentPrompt(username, displayName, currentBalance){
+  const amountStr = prompt('الرصيد الحالي لـ '+displayName+': '+currentBalance.toFixed(2)+' د.أ\n\nكم المبلغ المدفوع الآن؟', currentBalance>0?currentBalance.toFixed(2):'');
+  if(amountStr === null) return;
+  const amount = parseFloat(amountStr);
+  if(isNaN(amount) || amount <= 0){ toast('❌ مبلغ غير صالح'); return; }
+  if(amount > currentBalance && !confirm('⚠️ المبلغ ('+amount.toFixed(2)+' د.أ) أكبر من الرصيد المستحق ('+currentBalance.toFixed(2)+' د.أ) — رح يصير الرصيد بالسالب (سلفة). أكملي؟')) return;
+  const note = prompt('ملاحظة (اختياري):') || '';
+  try{
+    const res = await apiPost({action:'recordPayment', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, amount, note});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم تسجيل الدفعة — الرصيد الجديد: '+res.newBalance.toFixed(2)+' د.أ');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+async function editEmployeeRate(username, currentRate){
+  const rateStr = prompt('العمولة الجديدة لكل أوردر (د.أ):', currentRate);
+  if(rateStr === null) return;
+  const rate = parseFloat(rateStr);
+  if(isNaN(rate) || rate < 0){ toast('❌ قيمة غير صالحة'); return; }
+  try{
+    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, data: JSON.stringify({commissionRate: rate})});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم تحديث العمولة');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+async function editEmployeePassword(username){
+  const pass = prompt('كلمة المرور الجديدة لـ '+username+':');
+  if(!pass) return;
+  try{
+    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, data: JSON.stringify({password: pass})});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم تغيير كلمة المرور');
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+async function toggleEmployeeActive(username, isActive, currentBalance){
+  let msg = isActive ? 'إيقاف حساب '+username+'؟ لن يقدر يسجّل دخول بعدها.' : 'تفعيل حساب '+username+' من جديد؟';
+  if(isActive && currentBalance > 0) msg += '\n\n⚠️ تنبيه: لسا إله رصيد مستحق '+currentBalance.toFixed(2)+' د.أ لحد الآن — الإيقاف ما بيمسحه، بس تأكدي إنك ما نسيتيه.';
+  if(!confirm(msg)) return;
+  try{
+    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, data: JSON.stringify({active: !isActive})});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم التحديث');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+// ══════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════
-const DASH_PASSWORD = 'salma2026';
 let dashFiltered = [];
 let dashDateFrom = null;
 let dashDateTo = null;
@@ -4001,33 +4293,22 @@ const STATUS_COLORS_D = {
 };
 
 function openDashboard(){
+  // الداشبورد فيها أرقام مبيعات وإيرادات — ممنوعة تماماً عن أي حساب مش owner،
+  // حتى لو حدا عرف كلمة السر أو استدعى الدالة مباشرة من الكونسول
+  if(!currentUser || currentUser.role !== 'owner'){
+    toast('🔒 هذا القسم لصاحبة العمل فقط');
+    return;
+  }
   document.getElementById('dash-overlay').style.display='block';
   document.body.style.overflow='hidden';
-  if(sessionStorage.getItem('dash_auth')==='1'){
-    document.getElementById('dash-login').style.display='none';
-    document.getElementById('dash-app').style.display='block';
-    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
-    loadDashData();
-  }
+  document.getElementById('dash-app').style.display='block';
+  setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
+  loadDashData();
 }
 
 function closeDashboard(){
   document.getElementById('dash-overlay').style.display='none';
   document.body.style.overflow='';
-}
-
-function doDashLogin(){
-  const pw=document.getElementById('dash-pw').value;
-  if(pw===DASH_PASSWORD){
-    sessionStorage.setItem('dash_auth','1');
-    document.getElementById('dash-login').style.display='none';
-    document.getElementById('dash-app').style.display='block';
-    setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
-    loadDashData();
-  } else {
-    document.getElementById('dash-pw-err').classList.add('show');
-    document.getElementById('dash-pw').value='';
-  }
 }
 
 function padD(n){return String(n).padStart(2,'0')}
@@ -4073,7 +4354,7 @@ function applyDashCustomDate(){
 async function loadDashData(){
   document.getElementById('dash-conn-lbl').textContent='جاري التحميل...';
   try{
-    const data=await apiCall({action:'getOrders'});
+    const data=await apiPost({action:'getOrders'});
     allOrders=data.orders||[];
     document.getElementById('dash-conn-dot').style.background='#4CAF50';
     document.getElementById('dash-conn-lbl').textContent='متصل';
@@ -4093,7 +4374,7 @@ let inventoryData = {};
 
 async function loadInventoryData(){
   try{
-    const res = await apiCall({action:'getInventory'});
+    const res = await apiPost({action:'getInventory'});
     inventoryData = {};
     (res.items||[]).forEach(it=>{ inventoryData[it.key] = it; });
     renderInventory();
@@ -4150,7 +4431,7 @@ async function addInventoryPurchase(key){
   const qty = parseFloat(input.value);
   if(!qty || qty<=0){ toast('❌ أدخلي كمية صحيحة'); return; }
   try{
-    await apiCall({action:'addInventoryPurchase', key, qty});
+    await apiPost({action:'addInventoryPurchase', key, qty});
     input.value='';
     toast('✅ أُضيف '+qty+' '+INV_UNITS[key]+' لـ'+INV_LABELS[key]);
     await loadInventoryData();
@@ -4596,6 +4877,7 @@ function resizeImageFile(file, maxDim, quality){
 
 // رفع عبر POST (لا نستخدم GET لأن الصور المضغوطة أكبر من حد رابط URL)
 async function apiPost(params){
+  params = withAuth(params);
   const body = new URLSearchParams(params);
   const r = await fetchWithRetry(()=>fetch(API, {method:'POST', body, cache:'no-store'}));
   const text = await r.text();
@@ -4647,7 +4929,7 @@ let cachedDrafts = [];
 
 async function fetchDraftsFromServer(){
   try{
-    const res = await apiCall({action:'getDrafts'});
+    const res = await apiPost({action:'getDrafts'});
     cachedDrafts = (res.drafts||[]).map(d=>{
       let parsed = {};
       try{ parsed = JSON.parse(d.data); }catch(e){}
@@ -4887,18 +5169,6 @@ function toast(msg){
 
 <!-- DASHBOARD MODAL -->
 <div id="dash-overlay" style="display:none;position:fixed;inset:0;background:#0F0C08;z-index:800;overflow-y:auto">
-
-  <!-- DASH LOGIN -->
-  <div id="dash-login" style="position:fixed;inset:0;background:#0F0C08;display:flex;align-items:center;justify-content:center;z-index:900">
-    <div class="login-box">
-      <div class="login-logo">📊 هدايا سلمى</div>
-      <div class="login-sub">لوحة التحكم — محمية بكلمة سر</div>
-      <input class="login-inp" type="password" id="dash-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doDashLogin()">
-      <button class="login-btn" onclick="doDashLogin()">دخول</button>
-      <div class="login-err" id="dash-pw-err">كلمة السر غلط</div>
-      <button onclick="closeDashboard()" style="margin-top:14px;background:none;border:none;color:#8B7355;font-family:Tajawal,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">رجوع للسيستم</button>
-    </div>
-  </div>
 
   <!-- DASH APP -->
   <div id="dash-app" style="display:none">
