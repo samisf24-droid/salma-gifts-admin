@@ -94,7 +94,11 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 /* ── STATS ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .stats.stats-5{grid-template-columns:repeat(5,1fr)}
-@media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stats.stats-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:500px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats.stats-3{grid-template-columns:repeat(3,1fr)}
+}
 .stat{
   border-radius:var(--radius-lg);padding:14px 12px;text-align:center;
   border:1.5px solid #E5D9C7;background:#FFFFFF;
@@ -263,6 +267,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .mc-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .mc-type{font-size:10px;font-weight:700;color:#6B5240;background:#F0E8DC;border-radius:4px;padding:2px 6px}
 .mc-price{font-size:11px;font-weight:900;color:#8A6030;margin-right:auto}
+.mc-by{display:block;font-size:9.5px;color:#B8A898;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-st{font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
 .mc-st.s-New{background:#EAF3DE;color:#3B6D11}
 .mc-st.s-Preparing{background:#FFF3CD;color:#856404}
@@ -779,23 +784,26 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span id="hdr-user" onclick="doLogout()" title="اضغطي لتسجيل الخروج" style="cursor:pointer;font-size:12px;font-weight:700;color:var(--gold-l);opacity:.85;white-space:nowrap"></span>
-    <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 10px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:118px;height:34px;flex-shrink:0">↻ تحديث</button>
-    <div class="hdr-status">
-      <div class="hdr-dot" id="conn-dot"></div>
-      <span id="conn-lbl">جاري التحميل...</span>
-      <span onclick="showDiag()" style="margin-right:6px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer">v56</span>
-    </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="hdr-dash-btn" onclick="openDashboard()" title="الداشبورد" style="display:none;background:none;border:1px solid rgba(201,169,110,.35);border-radius:8px;width:34px;height:34px;color:var(--gold-l);font-size:15px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0">📊</button>
+    <button onclick="doLogout()" title="تسجيل الخروج" style="background:none;border:1px solid rgba(201,169,110,.35);border-radius:8px;padding:0 10px;height:34px;color:var(--gold-l);font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0">🚪 خروج</button>
+    <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 12px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;height:34px;flex-shrink:0">↻ تحديث</button>
+  </div>
+</div>
+<div style="background:#241A10;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:60px;z-index:290;border-bottom:1px solid rgba(201,169,110,.1)">
+  <span id="welcome-msg" style="font-size:13px;font-weight:800;color:var(--gold-l)"></span>
+  <div class="hdr-status" style="opacity:.65">
+    <div class="hdr-dot" id="conn-dot"></div>
+    <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v59</span>
   </div>
 </div>
 <div class="tabs">
   <button class="tab on"  onclick="switchTab('cal')">📅 التقويم</button>
   <button class="tab"     onclick="switchTab('add')">➕ أوردر جديد</button>
-  <button class="tab no-print" onclick="switchTab('print')">🖨️ طباعة</button>
+  <button class="tab no-print" id="tab-print-btn" onclick="switchTab('print')">🖨️ طباعة</button>
   <button class="tab no-print" onclick="switchTab('drafts')" id="tab-drafts">📝 المسودات</button>
   <button class="tab no-print" onclick="switchTab('employees')" id="tab-employees" style="display:none">👥 الموظفين</button>
-  <button class="tab no-print" id="tab-dashboard-btn" onclick="openDashboard()">📊 الداشبورد</button>
 </div>
 
 <div class="main">
@@ -805,9 +813,9 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
   <div class="stats" id="stats-grid">
     <div class="stat stat-all"><div class="stat-n" id="st-all">—</div><div class="stat-l" id="st-all-label">أقرب يوم تسليم</div></div>
-    <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🛠️ لسا للتجهيز</div></div>
+    <div class="stat stat-active"><div class="stat-n" id="st-active">—</div><div class="stat-l">🛠️ بانتظار التجهيز</div></div>
     <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">🚚 مع التوصيل</div></div>
-    <div class="stat stat-late" onclick="showLateOrders()" style="cursor:pointer" title="اضغطي لعرض الطلبات المتأخرة"><div class="stat-n" id="st-late">—</div><div class="stat-l">⚠️ متأخرة</div></div>
+    <div class="stat stat-comm-owed" onclick="showCommissionOwedBreakdown()" style="cursor:pointer;border-color:#C9A96E;background:#FAF5EC" title="اضغطي لعرض تفاصيل كل موظف"><div class="stat-n" id="st-comm-owed" style="color:#8B6D2F">—</div><div class="stat-l">💰 عمولات مستحقة</div></div>
     <div class="stat" id="stat-commission" style="display:none;background:#FAF5EC;border-color:#E8D5B0"><div class="stat-n" id="st-commission" style="color:#8B6D2F">—</div><div class="stat-l">💰 عمولتي</div></div>
   </div>
 
@@ -870,21 +878,6 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <!-- شريط تنبيه: أوردرات بتاريخ غير مقروء -->
   <div id="date-warn" style="display:none;background:#FFF4E5;border:1.5px solid #F0A030;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7A4A00"></div>
   <div id="type-filter-banner" style="display:none;background:#FAF5EC;border:1.5px solid #C9A96E;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#4A3728"></div>
-
-  <!-- MOBILE TOOLBAR + LEGEND -->
-  <div class="cal-mobile-bar">
-    <div class="legend">
-      <span class="lg"><i class="dot t-tray"></i>صينية</span>
-      <span class="lg"><i class="dot t-package"></i>بكج</span>
-      <span class="lg"><i class="dot t-book"></i>كتاب</span>
-      <span class="lg"><i class="dot t-grad"></i>تخرج</span>
-      <span class="lg"><i class="dot t-bouquet"></i>مسكة عروس</span>
-    </div>
-    <div class="exp-btns">
-      <button onclick="expandAllDays(true)">توسيع الكل</button>
-      <button onclick="expandAllDays(false)">طي الكل</button>
-    </div>
-  </div>
 
   <!-- أوردرات بلا تاريخ صالح -->
   <div id="orphan-sec" style="display:none;margin-top:16px">
@@ -1332,6 +1325,7 @@ const STATUSES = {
 };
 
 let allOrders = [];
+let cachedEmployees = [];
 let weekOffset = 0;
 let filterStatus = 'all';
 let selectedIds = new Set();
@@ -1382,14 +1376,19 @@ function applyRoleUI(){
   const isOwner = currentUser && currentUser.role === 'owner';
   const empTab = document.getElementById('tab-employees');
   if(empTab) empTab.style.display = isOwner ? '' : 'none';
-  const dashTab = document.getElementById('tab-dashboard-btn');
-  if(dashTab) dashTab.style.display = isOwner ? '' : 'none';
+  const dashTab = document.getElementById('hdr-dash-btn');
+  if(dashTab) dashTab.style.display = isOwner ? 'flex' : 'none';
+  const printTab = document.getElementById('tab-print-btn');
+  if(printTab) printTab.style.display = isOwner ? '' : 'none';
   const commStat = document.getElementById('stat-commission');
   if(commStat) commStat.style.display = isOwner ? 'none' : '';
+  // الموظفة مش مسؤولة عن متابعة "بانتظار التجهيز" ولا مجموع عمولات كل الموظفين
+  document.querySelectorAll('.stat-active, .stat-comm-owed').forEach(el=>{ el.style.display = isOwner ? '' : 'none'; });
   const statsGrid = document.getElementById('stats-grid');
-  if(statsGrid) statsGrid.classList.toggle('stats-5', !isOwner);
-  const hdrUser = document.getElementById('hdr-user');
-  if(hdrUser) hdrUser.textContent = (currentUser && currentUser.displayName) ? currentUser.displayName : '';
+  if(statsGrid) statsGrid.classList.toggle('stats-3', !isOwner);
+  // ترحيب بسيط باسم المستخدم الحالي
+  const welcomeEl = document.getElementById('welcome-msg');
+  if(welcomeEl) welcomeEl.textContent = currentUser ? ('أهلاً '+(currentUser.displayName||currentUser.username)+' 👋') : '';
   if(!isOwner) refreshMyCommission();
 }
 
@@ -1653,7 +1652,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v56<br>
+       <strong>الإصدار:</strong> v59<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1676,7 +1675,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v56 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v59 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1880,6 +1879,8 @@ function miniCard(o){
   const typeAr = TYPE_AR[type]||type;
   const tc = typeClass(type);
   const sel = selectedIds.has(id);
+  const createdBy = o['CreatedBy']||'';
+  const byTag = createdBy ? `<span class="mc-by">👤 ${createdBy}</span>` : '';
   return `<div class="mc ${st.cls} ${tc} ${sel?'selected':''}" id="mc-${id}" onclick="handleMC('${id}')">
     <div class="mc-names">${names||id}</div>
     <div class="mc-row">
@@ -1887,6 +1888,7 @@ function miniCard(o){
       <span class="mc-st ${st.cls}">${st.lbl}</span>
       <span class="mc-price">${grandTotal}د.أ</span>
     </div>
+    ${byTag}
   </div>`;
 }
 
@@ -2000,30 +2002,16 @@ function updateStats(){
     labelEl.textContent = 'لا يوجد طلبات قادمة';
     document.getElementById('st-all').textContent = '0';
   }
-  // ٢) لسا للتجهيز — طلب جديد + جاري التجهيز (الشغل الفعلي المتبقي)
-  const toPrep = allOrders.filter(o=>['new','preparing'].includes((o['Status']||'').toLowerCase())).length;
+  // ٢) بانتظار التجهيز — طلبات "طلب جديد" فقط (نفس منطق توحيد الحالة المستخدم بكل مكان تاني بالنظام)
+  const toPrep = allOrders.filter(o=>normStatus(o)==='New').length;
   document.getElementById('st-active').textContent = toPrep;
 
   // ٣) مع التوصيل — خرجت من عندنا وبانتظار تأكيد وصولها
-  const shipped = allOrders.filter(o=>(o['Status']||'').toLowerCase()==='shipped').length;
+  const shipped = allOrders.filter(o=>normStatus(o)==='Shipped').length;
   document.getElementById('st-week').textContent = shipped;
 
-  // ٤) متأخرة — تاريخ تسليمها فات وما زالت غير مُسلَّمة (أهم رقم: يمسك الطلبات المنسية)
-  const lateOrders = allOrders.filter(o=>{
-    const st=(o['Status']||'').toLowerCase();
-    if(['done','cancelled'].includes(st)) return false;
-    const dd=parseDate(o['Delivery Date']);
-    if(!dd) return false;
-    const d0=new Date(dd); d0.setHours(0,0,0,0);
-    return d0 < todayMid0();
-  }).length;
-  const lateEl = document.getElementById('st-late');
-  if(lateEl){
-    lateEl.textContent = lateOrders;
-    const card = lateEl.closest ? lateEl.closest('.stat') : null;
-    if(card && card.classList) card.classList.toggle('zero', lateOrders === 0);
-  }
   // ملاحظة: لا تُعرض أي مجاميع تراكمية أو إيرادات على الشاشة الرئيسية — هذه بالداشبورد المحمية فقط
+  if(currentUser && currentUser.role === 'owner') loadCommissionOwedKPI();
 }
 
 // نافذة عامة لعرض أي محتوى (تعيد استخدام نافذة التشخيص الموجودة)
@@ -3545,6 +3533,10 @@ function printOrders(){
 
 // ── TABS ──
 function switchTab(t){
+  if(t==='print' && !(currentUser && currentUser.role==='owner')){
+    toast('🔒 الطباعة متاحة لصاحبة العمل فقط');
+    t = 'cal';
+  }
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['cal','add','print','drafts','employees'][i]===t));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   const viewEl = document.getElementById('view-'+t);
@@ -4134,6 +4126,45 @@ function prow(k,v){
 // ══════════════════════════════════
 // الموظفين والعمولات (owner فقط)
 // ══════════════════════════════════
+// إجمالي العمولات المستحقة لكل الموظفين — بطاقة KPI لصاحبة العمل فقط
+async function loadCommissionOwedKPI(){
+  const el = document.getElementById('st-comm-owed');
+  if(!el || !currentUser || currentUser.role !== 'owner') return;
+  try{
+    const res = await apiPost({action:'getEmployees', username: currentUser.username, token: currentUser.token});
+    if(!res || res.error) throw new Error();
+    const total = (res.employees||[]).reduce((s,e)=> s + Math.max(0, e.balance), 0);
+    el.textContent = total.toFixed(2)+' د.أ';
+  }catch(e){ el.textContent = '—'; }
+}
+
+async function showCommissionOwedBreakdown(){
+  document.getElementById('edit-ttl').textContent = '💰 العمولات المستحقة — تفصيل';
+  document.getElementById('edit-body').innerHTML = '<div style="color:#B8A898;font-size:13px;padding:20px;text-align:center">جاري التحميل...</div>';
+  document.getElementById('edit-panel').classList.add('open');
+  try{
+    const res = await apiPost({action:'getEmployees', username: currentUser.username, token: currentUser.token});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    const list = (res.employees||[]).slice().sort((a,b)=>b.balance-a.balance);
+    const total = list.reduce((s,e)=>s+Math.max(0,e.balance),0);
+    const rows = list.length ? list.map(e=>{
+      const color = e.balance>0 ? '#8B6D2F' : e.balance<0 ? '#C0392B' : '#8B7355';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #EDE0CC">
+        <span style="font-size:13px;font-weight:700;color:#1A1410">${e.displayName}${e.active?'':' <span style=\"color:#C0392B;font-size:11px\">(موقوف)</span>'}</span>
+        <span style="font-weight:900;font-size:15px;color:${color}">${e.balance.toFixed(2)} د.أ</span>
+      </div>`;
+    }).join('') : '<div style="color:#B8A898;font-size:13px;text-align:center;padding:20px">ما في موظفين بعد</div>';
+    document.getElementById('edit-body').innerHTML = `
+      <div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;color:#8B7355">إجمالي المستحق (بدون احتساب أي رصيد سالب)</span>
+        <span style="font-weight:900;font-size:18px;color:#8B6D2F">${total.toFixed(2)} د.أ</span>
+      </div>
+      <div>${rows}</div>`;
+  }catch(e){
+    document.getElementById('edit-body').innerHTML = '<div style="color:#C0392B;font-size:13px;padding:20px;text-align:center">❌ '+e.message+'</div>';
+  }
+}
+
 async function loadEmployees(){
   const box = document.getElementById('employees-list');
   if(!currentUser || currentUser.role !== 'owner'){ box.innerHTML = '<div style="color:#B8A898;font-size:13px">غير مصرّح</div>'; return; }
@@ -4150,25 +4181,100 @@ async function loadEmployees(){
 function renderEmployees(list){
   const box = document.getElementById('employees-list');
   if(!list.length){ box.innerHTML = '<div style="color:#B8A898;font-size:13px">ما في موظفين مضافين بعد</div>'; return; }
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
   box.innerHTML = list.map(emp=>{
     const balColor = emp.balance > 0 ? '#8B6D2F' : '#8B7355';
-    return `<div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:12px 14px">
+    const uArg = esc(emp.username).replace(/"/g,'&quot;');
+    const nArg = esc(emp.displayName).replace(/"/g,'&quot;');
+    return `<div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:12px 14px;position:relative">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div>
-          <div style="font-weight:800;color:#1A1410;font-size:14px">${emp.displayName} <span style="font-weight:400;color:#8B7355;font-size:12px">(${emp.username})</span> ${emp.active?'':'<span style="color:#C0392B;font-size:11px">— موقوف</span>'}</div>
+          <div style="font-weight:800;color:#1A1410;font-size:14px">${esc(emp.displayName)} <span style="font-weight:400;color:#8B7355;font-size:12px">(${esc(emp.username)})</span> ${emp.active?'':'<span style="color:#C0392B;font-size:11px">— موقوف</span>'}</div>
           <div style="font-size:12px;color:#8B7355;margin-top:2px">العمولة: ${emp.commissionRate} د.أ / أوردر</div>
         </div>
-        <div style="font-weight:900;font-size:18px;color:${balColor}">${emp.balance.toFixed(2)} د.أ</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-weight:900;font-size:18px;color:${balColor}">${emp.balance.toFixed(2)} د.أ</div>
+          <button type="button" onclick="toggleEmployeeMenu('${uArg}')" style="background:none;border:1px solid #E8D5B0;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;color:#4A3728;flex-shrink:0">⋮</button>
+        </div>
+      </div>
+      <div id="emp-menu-${uArg}" style="display:none;position:absolute;left:14px;top:44px;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:10px;box-shadow:0 6px 20px rgba(60,40,20,.15);z-index:20;overflow:hidden;min-width:190px">
+        <button type="button" onclick="closeEmployeeMenus();openEmployeeFullEdit('${uArg}')" style="display:block;width:100%;text-align:right;padding:11px 14px;background:none;border:none;border-bottom:1px solid #F0E8DA;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#1A1410;cursor:pointer">✏️ تعديل كامل بيانات الموظف</button>
+        <button type="button" onclick="closeEmployeeMenus();toggleEmployeeActive('${uArg}',${emp.active},${emp.balance})" style="display:block;width:100%;text-align:right;padding:11px 14px;background:none;border:none;border-bottom:1px solid #F0E8DA;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:${emp.active?'#C0392B':'#3B6D11'};cursor:pointer">${emp.active?'⏸️ إيقاف الحساب مؤقتاً':'▶️ تفعيل الحساب'}</button>
+        <button type="button" onclick="closeEmployeeMenus();deleteEmployeeConfirm('${uArg}','${nArg}')" style="display:block;width:100%;text-align:right;padding:11px 14px;background:none;border:none;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#C0392B;cursor:pointer">🗑️ حذف الموظف نهائياً</button>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-        <button class="btn btn-sm btn-gold" style="width:auto" onclick="recordPaymentPrompt('${emp.username}','${emp.displayName}',${emp.balance})">💵 تسجيل دفعة</button>
-        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="showCommissionHistory('${emp.username}','${emp.displayName}')">📋 كشف الحساب</button>
-        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="editEmployeeRate('${emp.username}',${emp.commissionRate})">✏️ تعديل العمولة</button>
-        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="editEmployeePassword('${emp.username}')">🔑 تغيير الباسورد</button>
-        <button class="btn btn-sm btn-ghost" style="width:auto;color:${emp.active?'#C0392B':'#3B6D11'}" onclick="toggleEmployeeActive('${emp.username}',${emp.active},${emp.balance})">${emp.active?'⏸️ إيقاف الحساب':'▶️ تفعيل الحساب'}</button>
+        <button class="btn btn-sm btn-gold" style="width:auto" onclick="recordPaymentPrompt('${uArg}','${nArg}',${emp.balance})">💵 تسجيل دفعة</button>
+        <button class="btn btn-sm btn-ghost" style="width:auto" onclick="showCommissionHistory('${uArg}','${nArg}')">📋 كشف الحساب</button>
       </div>
     </div>`;
   }).join('');
+}
+
+function closeEmployeeMenus(){
+  document.querySelectorAll('[id^="emp-menu-"]').forEach(el=>el.style.display='none');
+}
+function toggleEmployeeMenu(username){
+  const el = document.getElementById('emp-menu-'+username);
+  const wasOpen = el && el.style.display==='block';
+  closeEmployeeMenus();
+  if(el) el.style.display = wasOpen ? 'none' : 'block';
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('[id^="emp-menu-"]') && !e.target.closest('button[onclick^="toggleEmployeeMenu"]')) closeEmployeeMenus();
+});
+
+// تعديل كامل بيانات موظف — نفس شكل شاشة "إضافة موظف" الأولى، بس معبّية بقيمه الحالية
+async function openEmployeeFullEdit(username){
+  const res = await apiPost({action:'getEmployees', username: currentUser.username, token: currentUser.token});
+  if(!res || res.error){ toast('❌ '+((res&&res.error)||'تعذّر الجلب')); return; }
+  const emp = (res.employees||[]).find(e=>e.username===username);
+  if(!emp){ toast('❌ ما تم العثور على الموظف'); return; }
+  document.getElementById('edit-ttl').textContent = '✏️ تعديل بيانات — '+emp.displayName;
+  document.getElementById('edit-body').innerHTML = `
+    <div class="fg"><label>الاسم الظاهر</label><input type="text" id="fe-name" value="${emp.displayName.replace(/"/g,'&quot;')}"></div>
+    <div class="fg"><label>العمولة لكل أوردر (د.أ)</label><input type="number" id="fe-rate" step="0.1" min="0" value="${emp.commissionRate}"></div>
+    <div class="fg"><label>كلمة المرور <span class="opt">(اتركيها فاضية لو ما بدك تغيّريها)</span></label><input type="text" id="fe-pass" dir="ltr" style="text-align:right" placeholder="${emp.password?('الحالية: '+emp.password):''}"></div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="fe-active" ${emp.active?'checked':''} style="width:auto">
+        <span>الحساب مفعّل (يقدر يسجّل دخول)</span>
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeEdit()">إلغاء</button>
+      <button class="btn btn-gold" onclick="submitEmployeeFullEdit('${username}')">💾 حفظ التعديلات</button>
+    </div>`;
+  document.getElementById('edit-panel').classList.add('open');
+}
+
+async function submitEmployeeFullEdit(username){
+  const name = document.getElementById('fe-name').value.trim();
+  const rate = parseFloat(document.getElementById('fe-rate').value);
+  const pass = document.getElementById('fe-pass').value;
+  const active = document.getElementById('fe-active').checked;
+  if(!name){ toast('❌ الاسم ما يقدر يكون فاضي'); return; }
+  if(isNaN(rate) || rate<0){ toast('❌ قيمة عمولة غير صالحة'); return; }
+  const data = {displayName:name, commissionRate:rate, active};
+  if(pass) data.password = pass;
+  try{
+    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, data: JSON.stringify(data)});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم حفظ التعديلات');
+    closeEdit();
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
+async function deleteEmployeeConfirm(username, displayName){
+  if(!confirm('⚠️ حذف '+displayName+' نهائياً؟ ما رح يقدر يسجّل دخول بعدها، وما رح تقدري تسترجعي حسابه. سجل عمولاته وكشف حسابه القديم رح يضل محفوظ.')) return;
+  if(!confirm('تأكيد أخير: متأكدة تريدي تحذفي '+displayName+' نهائياً؟')) return;
+  try{
+    const res = await apiPost({action:'deleteEmployee', username: currentUser.username, token: currentUser.token, targetUsername: username});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم حذف الموظف');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
 }
 
 async function showCommissionHistory(username, displayName){
@@ -4240,6 +4346,20 @@ async function recordPaymentPrompt(username, displayName, currentBalance){
   }catch(e){ toast('❌ '+e.message); }
 }
 
+async function editEmployeeName(username, currentName){
+  const name = prompt('الاسم الظاهر الجديد لـ '+username+':', currentName);
+  if(name === null) return;
+  const clean = name.trim();
+  if(!clean){ toast('❌ الاسم ما يقدر يكون فاضي'); return; }
+  try{
+    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
+      targetUsername: username, data: JSON.stringify({displayName: clean})});
+    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
+    toast('✅ تم تحديث الاسم');
+    loadEmployees();
+  }catch(e){ toast('❌ '+e.message); }
+}
+
 async function editEmployeeRate(username, currentRate){
   const rateStr = prompt('العمولة الجديدة لكل أوردر (د.أ):', currentRate);
   if(rateStr === null) return;
@@ -4254,14 +4374,15 @@ async function editEmployeeRate(username, currentRate){
   }catch(e){ toast('❌ '+e.message); }
 }
 
-async function editEmployeePassword(username){
-  const pass = prompt('كلمة المرور الجديدة لـ '+username+':');
+async function editEmployeePassword(username, currentPassword){
+  const pass = prompt('كلمة المرور الجديدة لـ '+username+':', currentPassword||'');
   if(!pass) return;
   try{
     const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
       targetUsername: username, data: JSON.stringify({password: pass})});
     if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
     toast('✅ تم تغيير كلمة المرور');
+    loadEmployees();
   }catch(e){ toast('❌ '+e.message); }
 }
 
