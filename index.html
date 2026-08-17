@@ -798,7 +798,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v60</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v63</span>
   </div>
 </div>
 <div class="tabs">
@@ -1036,7 +1036,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
       <button type="button" id="ap-letters-btn" onclick="addOrEditAddition('letters')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ أحرف على العلب</button>
       <button type="button" id="ap-stand-btn" onclick="addOrEditAddition('stand')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة ستاند (٢ د.أ)</button>
-      <button type="button" id="ap-qassasat-btn" onclick="addOrEditAddition('qassasat')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصات (٣ د.أ)</button>
+      <button type="button" id="ap-qassasat-btn" onclick="addOrEditAddition('qassasat')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة قصاصات</button>
       <button type="button" id="ap-fanajin-btn" onclick="addOrEditAddition('fanajin')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ فناجين (٥ د.أ)</button>
       <button type="button" id="ap-qalam-btn" onclick="addOrEditAddition('qalam')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصة التقويم / رسالة العمر (٢ د.أ)</button>
       <button type="button" id="ap-taliqa-btn" onclick="addOrEditAddition('taliqa')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة تعليقة (٢ د.أ)</button>
@@ -1044,8 +1044,10 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
     <!-- النماذج المصغّرة المشتركة — تُملأ ديناميكياً بحسب إضافة/تعديل -->
     <div id="qassasat-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
-      <div class="fg"><label>تفاصيل القصاصات</label><textarea id="qs-details" placeholder="مثال: قصاصات ٧ + قصاصة التقويم..." style="min-height:60px"></textarea></div>
-      <button type="button" onclick="confirmQassasat()" class="btn btn-gold" style="margin-top:6px">✅ حفظ القصاصات</button>
+      <div style="font-size:12px;color:#8A6030;margin-bottom:8px">سعرها مرن حسب الاتفاق مع الزبون (عادةً ٧ قصاصات = ٣ د.أ) — عدّلي "الحساب الشامل" فوق يدوياً حسب الاتفاق</div>
+      <div id="qs-items-list"></div>
+      <button type="button" onclick="addQassasaItem()" style="background:none;border:1.5px dashed #C9A96E;color:#8A6030;border-radius:6px;padding:7px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;cursor:pointer;width:100%;margin-top:4px">+ إضافة قصاصة أخرى</button>
+      <button type="button" onclick="confirmQassasat()" class="btn btn-gold" style="margin-top:10px">✅ حفظ القصاصات</button>
     </div>
     <div id="fanajin-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
       <div class="form-grid">
@@ -1113,7 +1115,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearForm()">مسح</button>
       <button class="btn btn-ghost" onclick="saveDraft()" style="border-color:#C9A96E;color:#8A6030">📝 حفظ كمسودة</button>
-      <button class="btn btn-gold" onclick="saveOrder()" id="save-btn">💾 حفظ في الشيت</button>
+      <button class="btn btn-gold" onclick="saveOrder()" id="save-btn">💾 حفظ الطلب</button>
     </div>
   </div>
 </div>
@@ -1271,6 +1273,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
         <option value="taliqa">تعليقات (أسماء + تاريخ من المسكات)</option>
         <option value="trays">صواني (صينية / بكج / تخرج)</option>
         <option value="books">كتب (كتاب منفصل / بكج فيه كتاب)</option>
+        <option value="qassasat">قصاصات (نسخ جاهز للصق على Canva)</option>
       </select>
       <select id="names-printed-filter" onchange="generateNamesList()" style="width:100%;background:#F5F0E8;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 13px;font-family:'Tajawal',sans-serif;font-size:14px;color:#2C2218;margin-bottom:10px">
         <option value="all">الكل</option>
@@ -1437,7 +1440,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 async function writeToSheet(params, usePost){
   const isAuthRequired = AUTH_REQUIRED_ACTIONS.includes(params.action);
   const res = (usePost || isAuthRequired) ? await apiPost(params) : await apiCall(params);
-  if(!res || res.success !== true) throw new Error((res && res.error) || 'الشيت لم يؤكد العملية');
+  if(!res || res.success !== true) throw new Error((res && res.error) || 'تعذّر تأكيد العملية من قاعدة البيانات');
   return res;
 }
 
@@ -1454,7 +1457,7 @@ async function loadOrders(silent){
     data = await apiPost({action:'getOrders'});
   } catch(e){
     setConn(false);
-    toast('❌ تعذّر الاتصال بالشيت — البيانات المعروضة قد تكون قديمة');
+    toast('❌ تعذّر الاتصال بقاعدة البيانات — البيانات المعروضة قد تكون قديمة');
     if(btn){ btn.disabled = false; btn.textContent = '↻ تحديث'; }
     return;
   }
@@ -1471,7 +1474,7 @@ async function loadOrders(silent){
     logDiag();
     const dashApp = document.getElementById('dash-app');
     if(dashApp && dashApp.style.display === 'block') applyDashFilters();
-    if(!silent) toast('✅ تم التحديث — '+allOrders.length+' أوردر');
+    if(!silent) toast(currentUser && currentUser.role==='owner' ? ('✅ تم التحديث — '+allOrders.length+' أوردر') : '✅ تم التحديث');
   } catch(e){
     console.error('خطأ برمجي بعد نجاح الاتصال (مو مشكلة شيت):', e);
     toast('⚠️ وصلت البيانات لكن صار خطأ بعرضها: '+e.message);
@@ -1532,7 +1535,7 @@ async function apiCall(params){
 
 function setConn(ok){
   document.getElementById('conn-dot').style.background = ok ? '#4CAF50' : '#FF5252';
-  document.getElementById('conn-lbl').textContent = ok ? 'متصل بالشيت' : 'غير متصل';
+  document.getElementById('conn-lbl').textContent = ok ? 'متصل' : 'غير متصل';
 }
 
 // ── DATE UTILS ──
@@ -1604,9 +1607,9 @@ function isSameDay(a,b){
 }
 
 // نطاق التقويم: يومين قبل اليوم + اليوم نفسه + ٣ أيام بعده = ٦ أيام بلا تقسيم أسابيع
-const DAYS_BACK = 2;
-const DAYS_FORWARD = 3;
-const WINDOW_SIZE = DAYS_BACK + 1 + DAYS_FORWARD; // 6
+const DAYS_BACK = 1;
+const DAYS_FORWARD = 5;
+const WINDOW_SIZE = DAYS_BACK + 1 + DAYS_FORWARD; // 7
 const WEEKS_SHOWN = 1; // نافذة واحدة بس، لا تكديس أسابيع
 function getWeekDays(offset){
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1640,6 +1643,8 @@ function getExtendedSearchDays(totalDays){
 // ضمان: أي أوردر لا يُقرأ تاريخه يظهر هنا بدل أن يختفي من النظام
 // لوحة تشخيص تُفتح بالنقر على رقم الإصدار
 function showDiag(){
+  // بيانات إجمالية حساسة — لصاحبة العمل بس
+  if(!currentUser || currentUser.role !== 'owner'){ toast('🔒 غير متاح'); return; }
   const active = allOrders.filter(o=>!['done','cancelled'].includes((o['Status']||'').toLowerCase()));
   const byDate = {}; const bad = [];
   active.forEach(o=>{
@@ -1657,8 +1662,8 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v60<br>
-       <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
+       <strong>الإصدار:</strong> v63<br>
+       <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
     + (bad.length ? `<div style="background:#FFF4E5;border:1px solid #F0A030;border-radius:8px;padding:10px 12px;margin-bottom:12px;color:#7A4A00">
@@ -1671,8 +1676,9 @@ function showDiag(){
   document.getElementById('diag-bg').style.display='flex';
 }
 
-// ملخص تشخيصي — يظهر في كونسول المتصفح
+// ملخص تشخيصي — يظهر في كونسول المتصفح (لصاحبة العمل بس، تفادياً لتسريب أرقام إجمالية)
 function logDiag(){
+  if(!currentUser || currentUser.role !== 'owner') return;
   const active = allOrders.filter(o=>!['done','cancelled'].includes((o['Status']||'').toLowerCase()));
   const byDate = {};
   active.forEach(o=>{
@@ -1680,7 +1686,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v60 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v63 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2303,14 +2309,14 @@ function openPanel(id){
     ${createdRow}
     <div class="panel-acts">
       <select class="st-sel" onchange="changeStatus('${id}',this.value)">${stOpts}</select>
-      ${canEdit?`<button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>
-      <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>`:''}
+      <button class="btn btn-ghost btn-sm" style="width:auto;border-color:#C9A96E;color:#1A1410;background:#FAF5EC" onclick="closePanel();openReschedule('${id}')">📅 تغيير الموعد</button>
+      ${canEdit?`<button class="btn btn-ghost btn-sm" style="width:auto" onclick="closePanel();openEdit('${id}')">✏️ تعديل</button>`:''}
       ${linkHTML}
     </div>
     ${canEdit?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;display:flex;gap:8px;flex-wrap:wrap">
       <button onclick="confirmFreezeToDraft('${id}')" style="background:#EFF6FF;color:#1E40AF;border:1.5px solid #BFDBFE;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🧊 تجميد (نقل للمسودة)</button>
       <button onclick="confirmDelete('${id}')" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:8px;padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🗑️ حذف الأوردر</button>
-    </div>`:`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;font-size:12px;color:#B8A898">🔒 التعديل والحذف مسموح فقط لصاحب الأوردر الأصلي</div>`}`;
+    </div>`:`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #EDE0CC;font-size:12px;color:#B8A898">🔒 التعديل الكامل والحذف مسموح فقط لصاحب الأوردر الأصلي — بس تغيير الحالة والموعد متاحين للكل</div>`}`;
 
   document.getElementById('panel').classList.add('open');
 }
@@ -2439,8 +2445,8 @@ function confirmDelete(id){
 async function deleteOrder(id){
   const o = allOrders.find(o=>o['Order ID']===id);
   const choice = window.confirm(
-    'كيف بدك تحذف الأوردر ' + id + '؟\n\n' +
-    'موافق (OK) = حذف نهائي من الشيت\n' +
+    'كيف ترغبين بحذف الأوردر ' + id + '؟\n\n' +
+    'موافق (OK) = حذف نهائي\n' +
     'إلغاء (Cancel) = وضع الأوردر كـ "ملغي" فقط'
   );
   showFullscreenLoading('⏳ جاري حذف الطلب...');
@@ -2527,6 +2533,52 @@ function renderEditTaliqaBox(o){
   </div>`;
 }
 
+// يبني صندوق تعديل/إضافة القصاصات داخل نافذة التعديل — قائمة متحركة قابلة للتوسّع بلا حد أقصى
+function renderEditQassasatBox(o){
+  const q = parseQassasatText(o['Additions']);
+  const has = !!q;
+  const items = has ? q.items : [''];
+  const itemsHTML = items.map((v,i)=>qassasaItemRowHTML(i, v)).join('');
+  return `
+  <div style="background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:12px;padding:14px;margin:14px 0">
+    <div style="font-size:14px;font-weight:900;color:#6B4A1F;margin-bottom:8px;padding-bottom:8px;border-bottom:1.5px solid #E5D9C7">
+      📎 ${has ? 'تعديل القصاصات' : 'إضافة قصاصات'}
+    </div>
+    <div style="font-size:11px;color:#8A6030;margin-bottom:8px">سعرها مرن حسب الاتفاق — عدّلي "الحساب الشامل" يدوياً لو لزم</div>
+    <div id="e-qs-items-list">${itemsHTML}</div>
+    <button type="button" onclick="addQassasaItem('e-qs-items-list')" style="background:none;border:1.5px dashed #C9A96E;color:#8A6030;border-radius:6px;padding:7px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;cursor:pointer;width:100%;margin-top:4px">+ إضافة قصاصة أخرى</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button type="button" onclick="applyQassasatEdit()" style="flex:1;background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">✅ ${has?'تحديث القصاصات':'إضافة القصاصات'}</button>
+      ${has?`<button type="button" onclick="removeQassasatFromEdit()" style="flex:1;background:#FFF0F0;border:1.5px solid #FFCDD2;color:#C0392B;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🗑️ حذف القصاصات</button>`:''}
+    </div>
+    <div style="font-size:11px;color:#8A6030;margin-top:8px">التغييرات تنعكس على حقل "إضافات" فوق، واحفظي بزر "حفظ التعديل" بالأسفل</div>
+  </div>`;
+}
+
+// يحدّث حقل الإضافات بنص القصاصات الجديد (بدون أي تأثير على الحساب — سعرها مرن يدوي)
+function applyQassasatEdit(){
+  const items = collectQassasaItems('e-qs-items-list');
+  if(!items.length){ toast('❌ أدخلي قصاصة وحدة عالأقل'); return; }
+  const newText = buildQassasatText(items);
+  const addEl = document.getElementById('e-add');
+  const cur = String(addEl.value||'');
+  addEl.value = /قصاصات\s*\(\d+\):/.test(cur)
+    ? cur.replace(/قصاصات\s*\(\d+\):\s*[^|]+/, newText).trim()
+    : (cur.trim() ? cur.trim()+' | '+newText : newText);
+  toast('✅ تم حفظ '+items.length+' قصاصة — اضغطي "حفظ التعديل" للحفظ النهائي');
+}
+
+function removeQassasatFromEdit(){
+  if(!confirm('حذف القصاصات من هذا الأوردر؟')) return;
+  const addEl = document.getElementById('e-add');
+  addEl.value = String(addEl.value||'')
+    .replace(/قصاصات\s*\(\d+\):\s*[^|]+\|?/, '')
+    .split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+  const list = document.getElementById('e-qs-items-list');
+  if(list){ list.innerHTML=''; addQassasaItem('e-qs-items-list'); }
+  toast('🗑️ حُذفت القصاصات — اضغطي "حفظ التعديل" للحفظ النهائي');
+}
+
 // يبني نص التعليقة من الحقول ويحدّث حقل الإضافات (بدون لمس باقي الإضافات)
 function applyTaliqaEdit(){
   const g = document.getElementById('e-t-groom').value.trim();
@@ -2541,23 +2593,37 @@ function applyTaliqaEdit(){
 
   const addEl = document.getElementById('e-add');
   const cur = String(addEl.value||'');
+  const hadTaliqaBefore = /تعليقة\s*\(/.test(cur);
   // استبدال التعليقة القديمة إن وُجدت، وإلا إضافتها لباقي الإضافات
-  addEl.value = /تعليقة\s*\(/.test(cur)
+  addEl.value = hadTaliqaBefore
     ? cur.replace(/تعليقة\s*\([^)]*\)[^|]*/, newText).trim()
     : (cur.trim() ? cur.trim()+' | '+newText : newText);
 
-  toast('✅ تحدّثت التعليقة — اضغطي "حفظ التعديل" للحفظ');
+  // تعليقة جديدة (مو تعديل واحدة موجودة أصلاً) → تضيف سعرها للحساب الشامل تلقائياً
+  const taliqaPrice = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 2;
+  if(!hadTaliqaBefore){
+    const priceEl = document.getElementById('e-price');
+    if(priceEl) priceEl.value = (parseFloat(priceEl.value)||0) + taliqaPrice;
+  }
+
+  toast(hadTaliqaBefore ? '✅ تحدّثت التعليقة — اضغطي "حفظ التعديل" للحفظ' : ('✅ أُضيفت التعليقة (+'+taliqaPrice+' د.أ) — اضغطي "حفظ التعديل" للحفظ'));
 }
 
 // يحذف التعليقة من حقل الإضافات مع الحفاظ على باقي الإضافات
 function removeTaliqaFromEdit(){
-  if(!confirm('حذف التعليقة من هذا الأوردر؟')) return;
+  if(!confirm('حذف التعليقة من هذا الأوردر؟ رح يُخصم سعرها من الحساب الشامل تلقائياً.')) return;
+  const taliqaPrice = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 2;
   const addEl = document.getElementById('e-add');
+  const hadTaliqa = /تعليقة\s*\(/.test(String(addEl.value||''));
   addEl.value = String(addEl.value||'')
     .replace(/تعليقة\s*\([^)]*\)[^|]*\|?/, '')
     .split('|').map(s=>s.trim()).filter(Boolean).join(' | ');
+  if(hadTaliqa){
+    const priceEl = document.getElementById('e-price');
+    if(priceEl) priceEl.value = Math.max(0, (parseFloat(priceEl.value)||0) - taliqaPrice);
+  }
   ['e-t-groom','e-t-bride','e-t-date','e-t-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  toast('🗑️ حُذفت التعليقة — اضغطي "حفظ التعديل" للحفظ');
+  toast('🗑️ حُذفت التعليقة وخُصم '+taliqaPrice+' د.أ — اضغطي "حفظ التعديل" للحفظ');
 }
 
 function openEdit(id, overrideType){
@@ -2616,6 +2682,7 @@ function openEdit(id, overrideType){
     <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:70px;width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;resize:none">${o['Notes']||''}</textarea></div>
     <div class="fg"><label>إضافات</label><input type="text" id="e-add" value="${(o['Additions']||'').replace(/"/g,'&quot;')}"></div>
     ${type==='Bouquet' ? renderEditTaliqaBox(o) : ''}
+    ${type!=='Graduation' ? renderEditQassasatBox(o) : ''}
 
     <div class="sec-lbl">بيانات التوصيل</div>
     <div class="form-grid">
@@ -2763,7 +2830,6 @@ async function applyEdit(id){
 function openReschedule(id){
   const o=allOrders.find(o=>o['Order ID']===id);
   if(!o) return;
-  if(!canEditOrder(o)){ toast('🔒 تغيير الموعد مسموح فقط لصاحب الأوردر الأصلي'); return; }
   const names = o['Product Type']==='Graduation' ? o['Bride'] : [o['Bride'],o['Groom']].filter(Boolean).join(' ❤️ ');
   document.getElementById('edit-ttl').textContent='📅 تغيير موعد — '+id;
   document.getElementById('edit-body').innerHTML=`
@@ -2803,20 +2869,23 @@ async function applyReschedule(id){
     'Delivery Date': fmtFull(deldateObj),
     'Delivery Day': dayNames[deldateObj.getDay()],
   };
-  // حفظ سبب التغيير (إن وُجد) ضمن الملاحظات — بدل ما يضيع
+  // سبب التغيير (اختياري) يُحفظ كطلب منفصل — بس لصاحب الأوردر أو صاحبة العمل (الملاحظات محتوى محمي)،
+  // عشان تغيير الموعد نفسه يضل متاح لأي موظفة دايماً بغض النظر عن السبب
+  const o = allOrders.find(o=>o['Order ID']===id);
   const reasonEl = document.getElementById('r-reason');
   const reason = reasonEl ? reasonEl.value.trim() : '';
-  if(reason){
-    const o = allOrders.find(o=>o['Order ID']===id);
+  let reasonData = null;
+  if(reason && canEditOrder(o)){
     const existingNotes = o ? (o['Notes']||'') : '';
     const reasonLine = 'سبب تغيير الموعد ('+fmtFull(new Date())+'): '+reason;
-    data['Notes'] = existingNotes ? reasonLine+' | '+existingNotes : reasonLine;
+    reasonData = {'Notes': existingNotes ? reasonLine+' | '+existingNotes : reasonLine};
   }
   const rBtn = document.getElementById('resched-save-btn');
   if(rBtn) rBtn.disabled=true;
   showFullscreenLoading('⏳ جاري تغيير الموعد...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
+    if(reasonData){ try{ await writeToSheet({action:'updateOrder',id,data:JSON.stringify(reasonData)}); }catch(e){} }
     closeEdit();
     await loadOrders(true);
     if(rBtn) rBtn.disabled=false;
@@ -3039,17 +3108,31 @@ function onPkgTypeChange(){
 const ADDITION_META = {
   letters:  {price:0, fields:[]},
   stand:    {price:2, fields:[]},
-  qassasat: {price:3, fields:['details']},
+  qassasat: {price:0, fields:['items']}, // سعرها مرن (٣ د.أ لـ٧ قصاصات عادةً، بس ممكن يختلف) — ما تنعكس تلقائياً، تُضبط يدوياً بالحساب
   fanajin:  {price:5, fields:['cup1','cup2']},
   qalam:    {price:2, fields:['details']},
   taliqa:   {price:2, fields:['groom','bride','date','notes']},
 };
 
+// يبني نص القصاصات من مصفوفة (كل قصاصة نص حر) — الفاصل ؛؛ لتفادي تعارضه مع فاصل | بين الإضافات المختلفة
+function buildQassasatText(items){
+  const clean = (items||[]).map(s=>String(s||'').trim()).filter(Boolean);
+  return 'قصاصات ('+clean.length+'): '+clean.join('؛؛');
+}
+// يفكّك نص القصاصات المخزّن لمصفوفة نصوص — يُستخدم بالتعديل والطباعة
+function parseQassasatText(additions){
+  const raw = String(additions||'');
+  const m = raw.match(/قصاصات\s*\((\d+)\):\s*([^|]+)/);
+  if(!m) return null;
+  const items = m[2].split('؛؛').map(s=>s.trim()).filter(Boolean);
+  return { items: items, fullText: m[0].trim() };
+}
+
 function additionRowText(kind, d){
   d = d || {};
   if(kind==='letters')  return 'أحرف على العلب';
   if(kind==='stand')    return 'ستاند';
-  if(kind==='qassasat') return 'قصاصات: '+(d.details||'');
+  if(kind==='qassasat') return buildQassasatText(d.items);
   if(kind==='fanajin')  return 'فناجين (١: '+(d.cup1||'—')+' / ٢: '+(d.cup2||'—')+')';
   if(kind==='qalam')    return 'قصاصة التقويم/رسالة العمر: '+(d.details||'');
   if(kind==='taliqa'){
@@ -3128,6 +3211,28 @@ function closeAllAdditionForms(){
 }
 
 // زر "+ نوع الإضافة": لو موجودة أصلاً تفتح للتعديل، وإلا تفتح فورم فاضي أو تُضاف مباشرة (لو بلا تفاصيل)
+// ── قصاصات: قائمة متحركة قابلة للتوسّع (تُستخدم بفورم الأوردر الجديد وبنافذة التعديل معاً) ──
+function qassasaItemRowHTML(idx, value){
+  return `<div class="fg" style="margin-bottom:6px" data-qs-idx="${idx}">
+    <label>قصاصة ${idx+1}</label>
+    <div style="display:flex;gap:6px;align-items:flex-start">
+      <textarea class="qs-item-input" style="min-height:44px;flex:1" placeholder="مثال: اللهم اجعله بداية خير">${String(value||'').replace(/</g,'&lt;')}</textarea>
+      <button type="button" onclick="this.closest('[data-qs-idx]').remove()" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:13px;cursor:pointer">✕</button>
+    </div>
+  </div>`;
+}
+function addQassasaItem(listId, value){
+  listId = listId || 'qs-items-list';
+  const list = document.getElementById(listId);
+  if(!list) return;
+  const idx = list.children.length;
+  list.insertAdjacentHTML('beforeend', qassasaItemRowHTML(idx, value||''));
+}
+function collectQassasaItems(listId){
+  listId = listId || 'qs-items-list';
+  return [...document.querySelectorAll('#'+listId+' .qs-item-input')].map(t=>t.value.trim()).filter(Boolean);
+}
+
 function addOrEditAddition(kind){
   const meta = ADDITION_META[kind];
   const existing = findAdditionRow(kind);
@@ -3142,7 +3247,13 @@ function addOrEditAddition(kind){
   closeAllAdditionForms();
   const data = existing ? JSON.parse(existing.dataset.fields.replace(/&#39;/g,"'")||'{}') : {};
 
-  if(kind==='qassasat'){ document.getElementById('qs-details').value = data.details||''; document.getElementById('qassasat-form').style.display='block'; }
+  if(kind==='qassasat'){
+    const list = document.getElementById('qs-items-list');
+    list.innerHTML='';
+    const items = (data.items && data.items.length) ? data.items : [''];
+    items.forEach(v=>addQassasaItem('qs-items-list', v));
+    document.getElementById('qassasat-form').style.display='block';
+  }
   else if(kind==='fanajin'){ document.getElementById('fj-cup1').value=data.cup1||''; document.getElementById('fj-cup2').value=data.cup2||''; document.getElementById('fanajin-form').style.display='block'; }
   else if(kind==='qalam'){ document.getElementById('ql-details').value = data.details||''; document.getElementById('qalam-form').style.display='block'; }
   else if(kind==='taliqa'){
@@ -3164,10 +3275,11 @@ function saveAdditionFromForm(kind, data, requiredMsg){
 }
 
 function confirmQassasat(){
-  const details = document.getElementById('qs-details').value.trim();
-  if(saveAdditionFromForm('qassasat', {details}, '❌ أدخلي تفاصيل القصاصات')){
-    document.getElementById('qs-details').value='';
-    toast('✅ تم حفظ القصاصات');
+  const items = collectQassasaItems('qs-items-list');
+  if(saveAdditionFromForm('qassasat', {items}, '❌ أدخلي قصاصة وحدة عالأقل')){
+    document.getElementById('qs-items-list').innerHTML='';
+    addQassasaItem('qs-items-list'); // خانة فاضية جاهزة للمرة الجاية
+    toast('✅ تم حفظ '+items.length+' قصاصة');
   }
 }
 function confirmFanajin(){
@@ -3210,7 +3322,8 @@ function resetAdditions(){
   const list = document.getElementById('additions-list'); if(list) list.innerHTML='';
   const freeEl = document.getElementById('f-additions-free'); if(freeEl) freeEl.value='';
   closeAllAdditionForms();
-  ['qs-details','fj-cup1','fj-cup2','ql-details','bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>{
+  const qsList = document.getElementById('qs-items-list'); if(qsList) qsList.innerHTML='';
+  ['fj-cup1','fj-cup2','ql-details','bq-t-groom','bq-t-bride','bq-t-date','bq-t-notes'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
 }
@@ -3717,6 +3830,17 @@ function generateNamesList(){
       // الليبل حقل منفصل — يظهر بالشاشة فقط ولا يدخل بالنسخ أو الطباعة
       entries.push({id:o['Order ID'], line1:names, line2:dateStr, printed:isBookPrinted(o), label:(kind==='frame'?'برواز':'كتاب')});
     });
+  } else if(mode==='qassasat'){
+    // بس أوردرات فيها قصاصات فعلياً — كل واحدة بتحمل نص كل عناصرها جاهز للصق مباشرة بـCanva
+    matched.forEach(o=>{
+      const q = parseQassasatText(o['Additions']);
+      if(!q || !q.items.length) return;
+      const names = o['Product Type']==='Graduation' ? (o['Bride']||'—') : [o['Groom'],o['Bride']].filter(Boolean).join(' ❤️ ');
+      entries.push({
+        id:o['Order ID'], line1:(names||o['Order ID']), line2:q.items.length+' قصاصة',
+        qsItems:q.items, printed:false, label:TYPE_AR[o['Product Type']]||o['Product Type']
+      });
+    });
   } else {
     // صواني/بكج/تخرج — يستثني الكتاب المنفصل والمسكة
     matched.filter(o=>['Tray','Package','Graduation'].includes(o['Product Type'])).forEach(o=>{
@@ -3857,9 +3981,11 @@ function updateNamesSelUI(){
   const cnt = document.getElementById('names-sel-count');
   if(cnt) cnt.textContent = n ? ('✔ محدد: '+n) : 'ما في شي محدد';
 
+  const mode = document.getElementById('names-mode').value;
   const sel = [...selectedNameIds].map(i=>namesListEntries[i]).filter(Boolean);
-  const anyUnprinted = sel.some(e=>!e.printed);
-  const anyPrinted   = sel.some(e=>e.printed);
+  // وضع القصاصات ما إله تتبّع "مطبوع/غير مطبوع" حقيقي — نخفي أزرار التحديد كمطبوع تفادياً للتضليل
+  const anyUnprinted = mode==='qassasat' ? false : sel.some(e=>!e.printed);
+  const anyPrinted   = mode==='qassasat' ? false : sel.some(e=>e.printed);
 
   const show = (id, on)=>{ const el=document.getElementById(id); if(el) el.style.display = on ? 'block' : 'none'; };
   show('copy-names-btn',  n>0);
@@ -3904,7 +4030,11 @@ async function setNamesPrintedState(markAsPrinted, skipConfirm){
 async function copyNamesList(alsoMarkPrinted){
   const sel = getSelectedNameEntries();
   if(!sel.length){ toast('❌ حددي أسماء أولاً'); return; }
-  const text = sel.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
+  const mode = document.getElementById('names-mode').value;
+  // وضع القصاصات: النسخ يطلع نص القصاصات الصافي بس (بدون أسماء الزبون) — جاهز للصق مباشرة على Canva
+  const text = mode==='qassasat'
+    ? sel.map(e=>(e.qsItems||[]).join('\n')).join('\n\n')
+    : sel.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
 
   let copied = true;
   try{ await navigator.clipboard.writeText(text); }
@@ -3921,11 +4051,18 @@ async function copyNamesList(alsoMarkPrinted){
 function printNamesList(){
   const sel = getSelectedNameEntries();
   if(!sel.length){ toast('❌ حددي أسماء أولاً'); return; }
-  const html = sel.map(e=>`
-    <div class="names-print-item">
-      <div class="names-print-l1">${e.line1}</div>
-      ${e.line2?`<div class="names-print-l2">${e.line2}</div>`:''}
-    </div>`).join('');
+  const mode = document.getElementById('names-mode').value;
+  const html = mode==='qassasat'
+    ? sel.map(e=>`
+      <div class="names-print-item" style="text-align:right">
+        <div class="names-print-l2" style="margin-bottom:4px">${e.line1} — ${e.id}</div>
+        <div class="names-print-l1" style="font-size:13pt;white-space:pre-line">${(e.qsItems||[]).join('\n')}</div>
+      </div>`).join('')
+    : sel.map(e=>`
+      <div class="names-print-item">
+        <div class="names-print-l1">${e.line1}</div>
+        ${e.line2?`<div class="names-print-l2">${e.line2}</div>`:''}
+      </div>`).join('');
   document.getElementById('print-container').innerHTML = ''; // تفضية حاوية الكاردات لتفادي التداخل
   document.getElementById('names-print-container').innerHTML = html;
   setTimeout(()=>window.print(), 100);
@@ -4242,7 +4379,7 @@ async function openEmployeeFullEdit(username){
   document.getElementById('edit-body').innerHTML = `
     <div class="fg"><label>الاسم الظاهر</label><input type="text" id="fe-name" value="${emp.displayName.replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>العمولة لكل أوردر (د.أ)</label><input type="number" id="fe-rate" step="0.1" min="0" value="${emp.commissionRate}"></div>
-    <div class="fg"><label>كلمة المرور <span class="opt">(اتركيها فاضية لو ما بدك تغيّريها)</span></label><input type="text" id="fe-pass" dir="ltr" style="text-align:right" placeholder="${emp.password?('الحالية: '+emp.password):''}"></div>
+    <div class="fg"><label>كلمة المرور <span class="opt">(اتركي هذا الحقل فارغاً في حال عدم الرغبة بتغييره)</span></label><input type="text" id="fe-pass" dir="ltr" style="text-align:right" placeholder="${emp.password?('الحالية: '+emp.password):''}"></div>
     <div class="fg">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
         <input type="checkbox" id="fe-active" ${emp.active?'checked':''} style="width:auto">
@@ -4397,7 +4534,7 @@ async function editEmployeePassword(username, currentPassword){
 
 async function toggleEmployeeActive(username, isActive, currentBalance){
   let msg = isActive ? 'إيقاف حساب '+username+'؟ لن يقدر يسجّل دخول بعدها.' : 'تفعيل حساب '+username+' من جديد؟';
-  if(isActive && currentBalance > 0) msg += '\n\n⚠️ تنبيه: لسا إله رصيد مستحق '+currentBalance.toFixed(2)+' د.أ لحد الآن — الإيقاف ما بيمسحه، بس تأكدي إنك ما نسيتيه.';
+  if(isActive && currentBalance > 0) msg += '\n\n⚠️ تنبيه: لا يزال له رصيد مستحق '+currentBalance.toFixed(2)+' د.أ حتى الآن — الإيقاف لا يُلغيه، يرجى التأكد من عدم إغفاله.';
   if(!confirm(msg)) return;
   try{
     const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
@@ -4646,6 +4783,7 @@ function renderDashAll(){
   renderDashCharts();
   renderDashStatus();
   renderDashProds();
+  renderDashStaffPerf();
   renderDashTable();
   renderDashDays();
   renderDashGovs();
@@ -4661,6 +4799,41 @@ function renderDashAlerts(){
   if(tmrOrds>0) alerts.push({cls:'alert-info',msg:`📅 ${tmrOrds} أوردر للتسليم غداً لم تكتمل تجهيزها`});
   if(!alerts.length) alerts.push({cls:'alert-ok',msg:'✅ كل شي تمام — لا تنبيهات'});
   document.getElementById('dash-alerts').innerHTML=alerts.map(a=>`<div class="alert ${a.cls}">${a.msg}</div>`).join('');
+}
+
+function renderDashStaffPerf(){
+  const box = document.getElementById('dash-staff-perf');
+  if(!box) return;
+  const byUser = {};
+  dashFiltered.forEach(o=>{
+    const u = o['CreatedBy'];
+    if(!u) return;
+    if(!byUser[u]) byUser[u] = {count:0, total:0};
+    byUser[u].count++;
+    byUser[u].total += parseFloat(o['Total']||0);
+  });
+  const rows = Object.keys(byUser).sort((a,b)=>byUser[b].count-byUser[a].count).map(u=>{
+    const d = byUser[u];
+    return {username:u, count:d.count, total:d.total, avg: d.count ? d.total/d.count : 0};
+  });
+  if(!rows.length){
+    box.innerHTML = '<div style="color:#8B7355;font-size:13px;text-align:center;padding:16px 0">لا تتوفر بيانات لأداء الفريق ضمن النطاق الزمني المحدد</div>';
+    return;
+  }
+  box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid #C9A96E">
+      <th style="text-align:right;padding:6px 8px">الموظف</th>
+      <th style="text-align:right;padding:6px 8px">عدد الطلبات</th>
+      <th style="text-align:right;padding:6px 8px">إجمالي المبيعات</th>
+      <th style="text-align:right;padding:6px 8px">متوسط قيمة الطلب</th>
+    </tr></thead>
+    <tbody>${rows.map(r=>`<tr style="border-bottom:1px solid #F0E8DC">
+      <td style="padding:6px 8px;font-weight:800;color:#1A1410">${r.username}</td>
+      <td style="padding:6px 8px">${r.count}</td>
+      <td style="padding:6px 8px">${r.total.toFixed(2)} د.أ</td>
+      <td style="padding:6px 8px;font-weight:700;color:#8B6D2F">${r.avg.toFixed(2)} د.أ</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
 }
 
 function renderDashKPIs(){
@@ -5040,7 +5213,7 @@ async function uploadPhotosForOrder(orderId, fileList){
         mimeType: 'image/jpeg'
       }, true);
       if(res && res.success) uploaded++;
-      else { failed++; lastError = (res && res.error) || 'خطأ غير معروف من الشيت'; }
+      else { failed++; lastError = (res && res.error) || 'خطأ غير معروف من قاعدة البيانات'; }
     }catch(e){ failed++; lastError = e.message; }
   }
   return {uploaded, failed, lastError};
@@ -5363,6 +5536,11 @@ function toast(msg){
           <div class="section-ttl">🏆 أكثر المنتجات طلباً</div>
           <div class="prod-list" id="dash-prods"></div>
         </div>
+      </div>
+
+      <div class="section">
+        <div class="section-ttl">👥 أداء الفريق</div>
+        <div id="dash-staff-perf"></div>
       </div>
 
       <div class="section">
