@@ -95,9 +95,11 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .stats.stats-5{grid-template-columns:repeat(5,1fr)}
 .stats.stats-3{grid-template-columns:repeat(3,1fr)}
+.stats.stats-1{grid-template-columns:1fr}
 @media(max-width:500px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .stats.stats-3{grid-template-columns:repeat(3,1fr)}
+  .stats.stats-1{grid-template-columns:1fr}
 }
 .stat{
   border-radius:var(--radius-lg);padding:14px 12px;text-align:center;
@@ -200,6 +202,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .cal-day-block-name{font-size:14px;font-weight:900;color:#C9A96E;flex:1}
 .cal-day-block-date{font-size:12px;color:#E8D5B0;opacity:.85}
 .cal-day-block-cnt{background:#C9A96E;color:#1A1410;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;flex-shrink:0}
+body.staff-view .cal-day-block-cnt{display:none}
 .cal-day-block-cnt.zero{background:rgba(232,213,176,.2);color:#E8D5B0}
 .cal-arrow{color:#C9A96E;font-size:15px;flex-shrink:0;transition:transform 180ms ease;display:inline-block;width:14px;text-align:center}
 .cal-day-block.open .cal-arrow{transform:rotate(90deg)}
@@ -350,7 +353,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
-  .hdr,.tabs,.main,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
+  .hdr,.tabs,.main,#welcome-bar,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
   #print-container{display:block!important}
   #names-print-container{display:block!important;padding:10mm}
   .names-print-item{margin-bottom:9mm;text-align:center;break-inside:avoid;padding-bottom:6mm;border-bottom:1px dashed #999}
@@ -790,12 +793,12 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 12px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;height:34px;flex-shrink:0">↻ تحديث</button>
   </div>
 </div>
-<div style="background:#241A10;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:60px;z-index:290;border-bottom:1px solid rgba(201,169,110,.1)">
+<div id="welcome-bar" style="background:#241A10;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:60px;z-index:290;border-bottom:1px solid rgba(201,169,110,.1)">
   <span id="welcome-msg" style="font-size:13px;font-weight:800;color:var(--gold-l)"></span>
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v59</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v60</span>
   </div>
 </div>
 <div class="tabs">
@@ -1382,10 +1385,12 @@ function applyRoleUI(){
   if(printTab) printTab.style.display = isOwner ? '' : 'none';
   const commStat = document.getElementById('stat-commission');
   if(commStat) commStat.style.display = isOwner ? 'none' : '';
-  // الموظفة مش مسؤولة عن متابعة "بانتظار التجهيز" ولا مجموع عمولات كل الموظفين
-  document.querySelectorAll('.stat-active, .stat-comm-owed').forEach(el=>{ el.style.display = isOwner ? '' : 'none'; });
+  // الموظفة ما بدها تشوف أي رقم إجمالي (حساسية تجارية) — بس "عمولتي" الخاصة فيها ظاهرة
+  document.querySelectorAll('.stat-active, .stat-comm-owed, .stat-all, .stat-week').forEach(el=>{ el.style.display = isOwner ? '' : 'none'; });
   const statsGrid = document.getElementById('stats-grid');
-  if(statsGrid) statsGrid.classList.toggle('stats-3', !isOwner);
+  if(statsGrid){ statsGrid.classList.toggle('stats-3', false); statsGrid.classList.toggle('stats-1', !isOwner); }
+  // إخفاء عداد عدد الأوردرات فوق كل يوم بالتقويم عن الموظفة (نفس منطق "بدون أرقام إجمالية")
+  document.body.classList.toggle('staff-view', !isOwner);
   // ترحيب بسيط باسم المستخدم الحالي
   const welcomeEl = document.getElementById('welcome-msg');
   if(welcomeEl) welcomeEl.textContent = currentUser ? ('أهلاً '+(currentUser.displayName||currentUser.username)+' 👋') : '';
@@ -1652,7 +1657,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v59<br>
+       <strong>الإصدار:</strong> v60<br>
        <strong>محمّل من الشيت:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1675,7 +1680,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v59 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v60 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -4149,9 +4154,10 @@ async function showCommissionOwedBreakdown(){
     const total = list.reduce((s,e)=>s+Math.max(0,e.balance),0);
     const rows = list.length ? list.map(e=>{
       const color = e.balance>0 ? '#8B6D2F' : e.balance<0 ? '#C0392B' : '#8B7355';
+      const cntTxt = e.orderCount!==undefined ? ' <span style="font-weight:400;color:#8B7355;font-size:11px">('+e.orderCount+' أوردر)</span>' : '';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #EDE0CC">
         <span style="font-size:13px;font-weight:700;color:#1A1410">${e.displayName}${e.active?'':' <span style=\"color:#C0392B;font-size:11px\">(موقوف)</span>'}</span>
-        <span style="font-weight:900;font-size:15px;color:${color}">${e.balance.toFixed(2)} د.أ</span>
+        <span style="font-weight:900;font-size:15px;color:${color}">${e.balance.toFixed(2)} د.أ${cntTxt}</span>
       </div>`;
     }).join('') : '<div style="color:#B8A898;font-size:13px;text-align:center;padding:20px">ما في موظفين بعد</div>';
     document.getElementById('edit-body').innerHTML = `
@@ -4193,7 +4199,10 @@ function renderEmployees(list){
           <div style="font-size:12px;color:#8B7355;margin-top:2px">العمولة: ${emp.commissionRate} د.أ / أوردر</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-weight:900;font-size:18px;color:${balColor}">${emp.balance.toFixed(2)} د.أ</div>
+          <div style="text-align:left">
+            <div style="font-weight:900;font-size:18px;color:${balColor}">${emp.balance.toFixed(2)} د.أ</div>
+            <div style="font-size:10.5px;color:#8B7355">(${emp.orderCount!==undefined?emp.orderCount:'—'} أوردر)</div>
+          </div>
           <button type="button" onclick="toggleEmployeeMenu('${uArg}')" style="background:none;border:1px solid #E8D5B0;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;color:#4A3728;flex-shrink:0">⋮</button>
         </div>
       </div>
