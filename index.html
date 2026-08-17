@@ -671,6 +671,7 @@ body.staff-view .cal-day-block-cnt{display:none}
 /* ── SECTION ── */
 .section{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:14px;padding:18px;margin-bottom:16px}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
 
 /* ── CHARTS ── */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
@@ -798,7 +799,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v63</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v65</span>
   </div>
 </div>
 <div class="tabs">
@@ -1662,7 +1663,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v63<br>
+       <strong>الإصدار:</strong> v65<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1686,7 +1687,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v63 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v65 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2106,10 +2107,30 @@ function doSearch(q){
   showSearchPanel(results, q);
 }
 
+// تطبيع عربي: يوحّد أشكال الألف والهمزة والتاء المربوطة حتى البحث ما يتأثر باختلافات الكتابة الشائعة
+// (مثال: "احمد" بدون همزة لازم تلاقي "أحمد" المخزّنة بالهمزة)
+function normalizeArabicSearch(s){
+  return String(s||'')
+    .replace(/[أإآا]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[ؤئ]/g, 'ء')
+    .toLowerCase();
+}
+
+// وقت الإنشاء كرقم قابل للمقارنة — يدعم صيغة dd/MM/yyyy HH:mm أو dd/MM/yyyy بس
+function parseCreatedAtStamp(s){
+  if(!s) return 0;
+  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if(!m) return 0;
+  return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0)).getTime();
+}
+
 function searchOrders(q){
-  const raw = q.toLowerCase().trim();
-  return allOrders.filter(o=>{
-    const fields = [
+  const raw = normalizeArabicSearch(q.trim());
+  if(!raw) return [];
+  const matches = allOrders.filter(o=>{
+    const fields = normalizeArabicSearch([
       o['Order ID'],
       o['Bride'], o['Groom'],
       o['Phone'], o['Recipient'],
@@ -2117,9 +2138,21 @@ function searchOrders(q){
       o['Governorate'], o['Area'],
       o['Notes'], o['Additions'], o['Phrase'],
       o['Model'], o['Product Type']
-    ].join(' ').toLowerCase();
+    ].join(' '));
     return fields.includes(raw);
   });
+  // أولوية: مطابقة اسم العريس/العروس أولاً، وداخل كل مجموعة الأحدث تسجيلاً أولاً
+  return matches
+    .map(o=>({
+      o,
+      nameMatch: normalizeArabicSearch(o['Groom']).includes(raw) || normalizeArabicSearch(o['Bride']).includes(raw),
+      ts: parseCreatedAtStamp(o['Created At'])
+    }))
+    .sort((a,b)=>{
+      if(a.nameMatch !== b.nameMatch) return a.nameMatch ? -1 : 1;
+      return b.ts - a.ts;
+    })
+    .map(x=>x.o);
 }
 
 function searchItemHTML(o, q){
@@ -4553,11 +4586,24 @@ let dashDateFrom = null;
 let dashDateTo = null;
 let dashRevChart = null;
 let dashProdChart = null;
+let dashPeriodMode = 'week'; // 'day' | 'week' | 'month' | 'custom'
+let dashPeriodRef = new Date(); // التاريخ المرجعي — يتحرك بالسابق/التالي
 
 const STATUS_COLORS_D = {
   New:'#4CAF50',Preparing:'#FF9800',Shipped:'#2196F3',
   Done:'#888',Cancelled:'#F44336',Waiting:'#9C27B0',Other:'#666'
 };
+
+function toggleDashSection(sectionId){
+  const sec = document.getElementById(sectionId);
+  if(!sec) return;
+  const body = sec.querySelector('.dash-sec-body');
+  const arrow = sec.querySelector('.dash-sec-arrow');
+  if(!body) return;
+  const opening = body.style.display === 'none';
+  body.style.display = opening ? 'block' : 'none';
+  if(arrow) arrow.textContent = opening ? '▾' : '▸';
+}
 
 function openDashboard(){
   // الداشبورد فيها أرقام مبيعات وإيرادات — ممنوعة تماماً عن أي حساب مش owner،
@@ -4569,7 +4615,9 @@ function openDashboard(){
   document.getElementById('dash-overlay').style.display='block';
   document.body.style.overflow='hidden';
   document.getElementById('dash-app').style.display='block';
-  setDashPreset(document.querySelector('#dash-overlay .df-preset'),'all');
+  dashPeriodMode = 'week';
+  dashPeriodRef = new Date();
+  setDashMode('week');
   loadDashData();
 }
 
@@ -4590,33 +4638,74 @@ function parseDateD(str){
 function fmtDateInputD(d){return d.getFullYear()+'-'+padD(d.getMonth()+1)+'-'+padD(d.getDate())}
 function startOfDayD(d){const n=new Date(d);n.setHours(0,0,0,0);return n}
 function endOfDayD(d){const n=new Date(d);n.setHours(23,59,59,999);return n}
+function isSameDayD(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+const AR_MONTHS_D=['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
 
-function setDashPreset(el,preset){
-  document.querySelectorAll('#dash-overlay .df-preset').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-  const today=new Date();today.setHours(0,0,0,0);
-  switch(preset){
-    case 'today': dashDateFrom=startOfDayD(today);dashDateTo=endOfDayD(today);break;
-    case 'yesterday': const yd=new Date(today);yd.setDate(yd.getDate()-1);dashDateFrom=startOfDayD(yd);dashDateTo=endOfDayD(yd);break;
-    case 'week': const ws=new Date(today);ws.setDate(today.getDate()-today.getDay());dashDateFrom=startOfDayD(ws);dashDateTo=endOfDayD(today);break;
-    case 'lastweek': const lws=new Date(today);lws.setDate(today.getDate()-today.getDay()-7);const lwe=new Date(lws);lwe.setDate(lws.getDate()+6);dashDateFrom=startOfDayD(lws);dashDateTo=endOfDayD(lwe);break;
-    case 'month': dashDateFrom=new Date(today.getFullYear(),today.getMonth(),1);dashDateTo=endOfDayD(today);break;
-    case 'lastmonth': const lms=new Date(today.getFullYear(),today.getMonth()-1,1);const lme=new Date(today.getFullYear(),today.getMonth(),0);dashDateFrom=startOfDayD(lms);dashDateTo=endOfDayD(lme);break;
-    case 'all': dashDateFrom=null;dashDateTo=null;break;
+// السبت هو أول يوم بالأسبوع (متوافق مع أيام العمل بالأردن) — يرجع تاريخ أقرب سبت بنفس اليوم أو قبله
+function satOfWeekD(d){
+  const day=d.getDay(); // الأحد=0 ... السبت=6
+  const diff=(day+1)%7; // عدد الأيام منذ آخر سبت
+  const s=new Date(d); s.setHours(0,0,0,0); s.setDate(d.getDate()-diff);
+  return s;
+}
+
+// يحسب بداية/نهاية الفترة الحالية حسب الوضع المختار (يوم/أسبوع/شهر) + تسمية واضحة للعرض
+function computeDashPeriod(){
+  const today=startOfDayD(new Date());
+  const ref=startOfDayD(dashPeriodRef);
+  let from, to, label;
+  if(dashPeriodMode==='day'){
+    from=new Date(ref); to=new Date(ref);
+    label=padD(ref.getDate())+'/'+padD(ref.getMonth()+1)+'/'+ref.getFullYear()+(isSameDayD(ref,today)?' (اليوم)':'');
+  } else if(dashPeriodMode==='week'){
+    from=satOfWeekD(ref);
+    to=new Date(from); to.setDate(from.getDate()+6);
+    const isCur = ref>=from && ref<=to && isSameDayD(satOfWeekD(today),from);
+    label=padD(from.getDate())+'/'+padD(from.getMonth()+1)+' — '+padD(to.getDate())+'/'+padD(to.getMonth()+1)+(isCur?' (الحالي)':'');
+  } else { // month
+    const isCurMonth = ref.getFullYear()===today.getFullYear() && ref.getMonth()===today.getMonth();
+    from=new Date(ref.getFullYear(), ref.getMonth(), 1);
+    to = isCurMonth ? new Date(today) : new Date(ref.getFullYear(), ref.getMonth()+1, 0);
+    label=AR_MONTHS_D[ref.getMonth()]+' '+ref.getFullYear()+(isCurMonth?' (حتى اليوم)':'');
   }
-  document.getElementById('dash-date-from').value=dashDateFrom?fmtDateInputD(dashDateFrom):'';
-  document.getElementById('dash-date-to').value=dashDateTo?fmtDateInputD(dashDateTo):'';
+  return {from:startOfDayD(from), to:endOfDayD(to), label};
+}
+
+// يبدّل وضع الفلتر (يوم/أسبوع/شهر/مخصّص) ويعيد الضبط على "الحالي" بكل مرة
+function setDashMode(mode){
+  dashPeriodMode = mode;
+  dashPeriodRef = new Date();
+  document.querySelectorAll('.dp-mode-btn').forEach(b=>b.classList.toggle('on', b.dataset.mode===mode));
+  const navRow = document.getElementById('dp-nav-row');
+  const customRow = document.getElementById('dp-custom-row');
+  if(navRow) navRow.style.display = mode==='custom' ? 'none' : 'flex';
+  if(customRow) customRow.style.display = mode==='custom' ? 'flex' : 'none';
+  applyDashPeriod();
+}
+
+// سابق/تالي — بيوم كامل، أسبوع كامل، أو شهر كامل حسب الوضع الحالي
+function dashPeriodNav(dir){
+  if(dashPeriodMode==='day') dashPeriodRef.setDate(dashPeriodRef.getDate()+dir);
+  else if(dashPeriodMode==='week') dashPeriodRef.setDate(dashPeriodRef.getDate()+dir*7);
+  else if(dashPeriodMode==='month') dashPeriodRef.setMonth(dashPeriodRef.getMonth()+dir);
+  applyDashPeriod();
+}
+
+function applyDashPeriod(){
+  if(dashPeriodMode==='custom'){
+    const f=document.getElementById('dash-date-from').value;
+    const t=document.getElementById('dash-date-to').value;
+    dashDateFrom = f ? startOfDayD(new Date(f+'T00:00:00')) : null;
+    dashDateTo   = t ? endOfDayD(new Date(t+'T00:00:00')) : null;
+  } else {
+    const p = computeDashPeriod();
+    dashDateFrom = p.from; dashDateTo = p.to;
+    const lbl = document.getElementById('dp-period-label');
+    if(lbl) lbl.textContent = p.label;
+  }
   applyDashFilters();
 }
 
-function applyDashCustomDate(){
-  const f=document.getElementById('dash-date-from').value;
-  const t=document.getElementById('dash-date-to').value;
-  if(f) dashDateFrom=startOfDayD(new Date(f+'T00:00:00'));
-  if(t) dashDateTo=endOfDayD(new Date(t+'T00:00:00'));
-  document.querySelectorAll('#dash-overlay .df-preset').forEach(b=>b.classList.remove('on'));
-  applyDashFilters();
-}
 
 async function loadDashData(){
   document.getElementById('dash-conn-lbl').textContent='جاري التحميل...';
@@ -5485,27 +5574,36 @@ function toast(msg){
     </div>
     <div class="wrap">
 
-      <!-- DATE FILTER -->
-      <div class="date-filter">
-        <span class="df-label">الفترة:</span>
-        <button class="df-preset on" onclick="setDashPreset(this,'all')">الكل</button>
-        <button class="df-preset" onclick="setDashPreset(this,'today')">اليوم</button>
-        <button class="df-preset" onclick="setDashPreset(this,'yesterday')">أمس</button>
-        <button class="df-preset" onclick="setDashPreset(this,'week')">هذا الأسبوع</button>
-        <button class="df-preset" onclick="setDashPreset(this,'lastweek')">الأسبوع الماضي</button>
-        <button class="df-preset" onclick="setDashPreset(this,'month')">هذا الشهر</button>
-        <button class="df-preset" onclick="setDashPreset(this,'lastmonth')">الشهر الماضي</button>
-        <span class="df-sep">أو:</span>
-        <input type="date" class="df-date" id="dash-date-from">
-        <span class="df-sep">←</span>
-        <input type="date" class="df-date" id="dash-date-to">
-        <button class="df-apply" onclick="applyDashCustomDate()">تطبيق</button>
+      <!-- DATE FILTER: ذكي — يوم/أسبوع/شهر بالسابق والتالي، أو مخصّص -->
+      <div class="date-filter" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="df-preset dp-mode-btn on" data-mode="week" onclick="setDashMode('week')">أسبوع</button>
+          <button class="df-preset dp-mode-btn" data-mode="day" onclick="setDashMode('day')">يوم</button>
+          <button class="df-preset dp-mode-btn" data-mode="month" onclick="setDashMode('month')">شهر</button>
+          <button class="df-preset dp-mode-btn" data-mode="custom" onclick="setDashMode('custom')">مخصّص</button>
+        </div>
+        <div id="dp-nav-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:10px;padding:10px 14px">
+          <button onclick="dashPeriodNav(-1)" style="background:#1A1410;color:#C9A96E;border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;flex-shrink:0">◀</button>
+          <span id="dp-period-label" style="font-weight:900;font-size:14px;color:#1A1410;text-align:center;flex:1"></span>
+          <button onclick="dashPeriodNav(1)" style="background:#1A1410;color:#C9A96E;border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;flex-shrink:0">▶</button>
+        </div>
+        <div id="dp-custom-row" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="date" class="df-date" id="dash-date-from">
+          <span class="df-sep">←</span>
+          <input type="date" class="df-date" id="dash-date-to">
+          <button class="df-apply" onclick="applyDashPeriod()">تطبيق</button>
+        </div>
       </div>
 
       <div class="alerts" id="dash-alerts"></div>
 
-      <div class="section">
-        <div class="section-ttl">📦 إدارة المستودع (النواقص)</div>
+      <!-- قسم قابل للطي: مطوي افتراضياً لتوفير مساحة التمرير على الموبايل -->
+      <div class="section" id="dash-inv-section">
+        <div class="section-ttl" onclick="toggleDashSection('dash-inv-section')" style="cursor:pointer;user-select:none;justify-content:space-between">
+          <span>📦 إدارة المستودع (النواقص)</span>
+          <span class="dash-sec-arrow">▸</span>
+        </div>
+        <div class="dash-sec-body" style="display:none">
         <div id="inv-alert-banner" style="display:none;background:#FFF0F0;border:1.5px solid #FFCDD2;border-radius:8px;padding:11px 16px;margin-bottom:14px;font-size:13px;color:#C0392B;font-weight:700"></div>
         <div id="inv-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
 
@@ -5518,24 +5616,33 @@ function toast(msg){
           </div>
           <div id="inv-forecast-result" style="background:rgba(255,255,255,.03);border-radius:8px;padding:12px 14px"></div>
         </div>
-      </div>
+        </div><!-- /dash-sec-body -->
+      </div><!-- /dash-inv-section -->
 
       <div class="kpi-grid" id="dash-kpi"></div>
 
+      <!-- قسم قابل للطي: الرسم البياني الزمني وتوزيع الحالات — تفصيلي أكثر من اللازم للنظرة السريعة اليومية -->
+      <div class="section" id="dash-charts-section">
+        <div class="section-ttl" onclick="toggleDashSection('dash-charts-section')" style="cursor:pointer;user-select:none;justify-content:space-between">
+          <span>📈 الرسوم البيانية وتوزيع الحالات</span>
+          <span class="dash-sec-arrow">▸</span>
+        </div>
+        <div class="dash-sec-body" style="display:none">
       <div class="charts-row">
         <div class="chart-box"><div class="chart-ttl">📈 الإيرادات حسب التاريخ</div><canvas id="dash-chart-rev"></canvas></div>
         <div class="chart-box"><div class="chart-ttl">🍩 توزيع المنتجات</div><canvas id="dash-chart-prod"></canvas></div>
       </div>
+      <div class="section">
+        <div class="section-ttl">📊 الأوردرات حسب الحالة</div>
+        <div class="status-list" id="dash-status"></div>
+      </div>
+        </div><!-- /dash-sec-body -->
+      </div><!-- /dash-charts-section -->
 
-      <div class="charts-row">
-        <div class="section">
-          <div class="section-ttl">📊 الأوردرات حسب الحالة</div>
-          <div class="status-list" id="dash-status"></div>
-        </div>
-        <div class="section">
-          <div class="section-ttl">🏆 أكثر المنتجات طلباً</div>
-          <div class="prod-list" id="dash-prods"></div>
-        </div>
+      <!-- ظاهر دايماً: أهم إجابة — شو أكثر شي مطلوب هالفترة، بعدد الأوردرات والقيمة -->
+      <div class="section">
+        <div class="section-ttl">🏆 أكثر المنتجات طلباً</div>
+        <div class="prod-list" id="dash-prods"></div>
       </div>
 
       <div class="section">
@@ -5543,6 +5650,13 @@ function toast(msg){
         <div id="dash-staff-perf"></div>
       </div>
 
+      <!-- قسم قابل للطي: السجل الكامل والتفصيل حسب اليوم/المحافظة — للمراجعة العميقة، مو للنظرة اليومية السريعة -->
+      <div class="section" id="dash-table-section">
+        <div class="section-ttl" onclick="toggleDashSection('dash-table-section')" style="cursor:pointer;user-select:none;justify-content:space-between">
+          <span>📋 سجل الأوردرات الكامل والتفصيل الجغرافي</span>
+          <span class="dash-sec-arrow">▸</span>
+        </div>
+        <div class="dash-sec-body" style="display:none">
       <div class="section">
         <div class="section-ttl">📋 سجل الأوردرات</div>
         <div class="orders-filter">
@@ -5595,6 +5709,8 @@ function toast(msg){
         <div class="section-ttl">📍 الأوردرات حسب المحافظة</div>
         <div id="dash-govs"></div>
       </div>
+        </div><!-- /dash-sec-body -->
+      </div><!-- /dash-table-section -->
 
     </div>
   </div>
