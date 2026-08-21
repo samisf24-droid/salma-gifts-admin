@@ -673,6 +673,47 @@ body.staff-view .cal-day-block-cnt{display:none}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
 
+/* ── تحفيز الموظفات: أنيميشن العمولة ── */
+.coin-popup{
+  position:fixed; top:38%; left:50%; transform:translate(-50%,-50%);
+  background:linear-gradient(135deg,#F0D584,#C9A96E 60%,#B8975A);
+  color:#1A1410; font-weight:900; font-size:22px; text-align:center;
+  padding:16px 32px; border-radius:20px;
+  box-shadow:0 10px 40px rgba(180,140,60,.55), 0 0 0 3px rgba(255,255,255,.25) inset;
+  z-index:99999; pointer-events:none;
+  animation: coinFloat 2.2s cubic-bezier(.2,.8,.3,1) forwards;
+  white-space:nowrap;
+}
+.coin-popup-sub{font-size:13px;font-weight:700;margin-top:4px;opacity:.85}
+@keyframes coinFloat{
+  0%{ opacity:0; transform:translate(-50%,-40%) scale(.4) rotate(-6deg); }
+  12%{ opacity:1; transform:translate(-50%,-50%) scale(1.18) rotate(2deg); }
+  22%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  75%{ opacity:1; transform:translate(-50%,-75%) scale(1) rotate(0deg); }
+  100%{ opacity:0; transform:translate(-50%,-120%) scale(.85) rotate(0deg); }
+}
+.milestone-banner{
+  position:fixed; top:18%; left:50%; transform:translate(-50%,0);
+  background:#1A1410; color:#F0D584; font-weight:900; font-size:15px;
+  padding:12px 24px; border-radius:99px; border:1.5px solid #C9A96E;
+  box-shadow:0 8px 26px rgba(0,0,0,.35);
+  z-index:99998; pointer-events:none; white-space:nowrap;
+  animation: milestonePop 2.8s ease-out forwards;
+}
+@keyframes milestonePop{
+  0%{ opacity:0; transform:translate(-50%,-14px) scale(.85); }
+  15%{ opacity:1; transform:translate(-50%,0) scale(1.05); }
+  22%{ transform:translate(-50%,0) scale(1); }
+  85%{ opacity:1; }
+  100%{ opacity:0; transform:translate(-50%,-8px) scale(.96); }
+}
+.pulse-once{ animation: statPulse .9s ease-out; }
+@keyframes statPulse{
+  0%{ box-shadow:0 0 0 0 rgba(201,169,110,.6); }
+  60%{ box-shadow:0 0 0 14px rgba(201,169,110,0); }
+  100%{ box-shadow:0 0 0 0 rgba(201,169,110,0); }
+}
+
 /* ── CHARTS ── */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:600px){.charts-row{grid-template-columns:1fr}}
@@ -799,7 +840,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v65</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v66</span>
   </div>
 </div>
 <div class="tabs">
@@ -1663,7 +1704,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v65<br>
+       <strong>الإصدار:</strong> v66<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1687,7 +1728,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v65 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v66 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -3514,6 +3555,81 @@ function openAddForDate(dateStr){
   },100);
 }
 
+// ══════════════════════════════════════════
+// تحفيز الموظفات — أنيميشن + صوت عند كل أوردر يزيد الرصيد
+// ══════════════════════════════════════════
+const MOTIVATION_MSGS = ['ممتاز! 🎉','أحسنتِ! ⭐','استمري! 💪','رائع! 🌟','عمل رائع! 👏','برافو! 🔥'];
+function randomMotivation(){ return MOTIVATION_MSGS[Math.floor(Math.random()*MOTIVATION_MSGS.length)]; }
+
+// صوت "كوينز" قصير مولّد مباشرة (بدون ملف صوتي خارجي) — نغمتين متصاعدتين
+function playCoinSound(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const ctx = new Ctx();
+    const now = ctx.currentTime;
+    [880, 1318.5].forEach((freq, i)=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t0 = now + i*0.09;
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.18, t0+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0+0.28);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0+0.3);
+    });
+  }catch(e){ /* بعض المتصفحات ما بتدعم — نتجاهل بهدوء */ }
+}
+
+// عداد الأوردرات اليومي — محلي بالجهاز، يصفّر تلقائياً كل يوم جديد
+function bumpDailyOrderCount(){
+  if(!currentUser) return 0;
+  const key = 'sg_daily_'+currentUser.username+'_'+fmtDateInputD(new Date());
+  const cur = (parseInt(localStorage.getItem(key)||'0',10)) + 1;
+  try{ localStorage.setItem(key, String(cur)); }catch(e){}
+  return cur;
+}
+
+// أنيميشن "+٠.٤٠ د.أ" عائم في نص الشاشة — يظهر لثانيتين ونص ويختفي لحاله
+function showCommissionPopup(amount, milestone){
+  const el = document.createElement('div');
+  el.className = 'coin-popup';
+  el.innerHTML = '🪙 +'+amount.toFixed(2)+' د.أ<div class="coin-popup-sub">'+randomMotivation()+'</div>';
+  document.body.appendChild(el);
+  playCoinSound();
+  setTimeout(()=>el.remove(), 2200);
+
+  if(milestone){
+    setTimeout(()=>{
+      const m = document.createElement('div');
+      m.className = 'milestone-banner';
+      m.textContent = '🔥 '+milestone+' طلبات اليوم! استمري بنفس الحماس';
+      document.body.appendChild(m);
+      setTimeout(()=>m.remove(), 2800);
+    }, 500);
+  }
+
+  // نبضة خفيفة على بطاقة "عمولتي" لجذب الانتباه للرقم الجديد
+  const statEl = document.getElementById('stat-commission');
+  if(statEl){
+    statEl.classList.add('pulse-once');
+    setTimeout(()=>statEl.classList.remove('pulse-once'), 900);
+  }
+}
+
+// نقطة الدخول: تُستدعى بعد نجاح حفظ أوردر جديد لموظفة (مش صاحبة العمل — هي ما إلها عمولة)
+function celebrateNewOrderCommission(){
+  if(!currentUser || currentUser.role !== 'staff') return;
+  const amount = currentUser.commissionRate || 0;
+  if(amount <= 0) return;
+  const count = bumpDailyOrderCount();
+  const milestone = (count>0 && count%5===0) ? count : null;
+  showCommissionPopup(amount, milestone);
+  refreshMyCommission();
+}
+
 async function saveOrder(){
   const type=document.getElementById('f-type').value;
   if(!type){toast('❌ اختاري نوع المنتج');return;}
@@ -3630,7 +3746,7 @@ async function saveOrder(){
     await loadOrders(true);
     switchTab('cal');
     btn.disabled=false;
-    showFullscreenSuccess('تم حفظ الطلب الجديد ✅'+(newId?' — '+newId:''));
+    showFullscreenSuccess('تم حفظ الطلب الجديد ✅'+(newId?' — '+newId:''), celebrateNewOrderCommission);
   }catch(e){
     btn.disabled=false;
     showFullscreenError('لم يُحفظ الطلب ❌\n'+e.message);
