@@ -840,7 +840,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v66</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v67</span>
   </div>
 </div>
 <div class="tabs">
@@ -1303,6 +1303,28 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       </div>
     </div>
 
+    <div class="sec-lbl">النوع</div>
+    <div class="ms-dropdown" id="ms-type">
+      <button type="button" class="ms-trigger" onclick="toggleMsDropdown('type')">
+        <span id="ms-type-summary">كل الأنواع</span>
+        <span class="ms-arrow">▾</span>
+      </button>
+      <div class="ms-panel" id="ms-type-panel">
+        <div style="display:flex;justify-content:space-between;padding:4px 2px 8px">
+          <button type="button" onclick="selectAllPrintType(true)" style="background:none;border:none;font-size:11px;color:#C9A96E;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">تحديد الكل</button>
+          <button type="button" onclick="selectAllPrintType(false)" style="background:none;border:none;font-size:11px;color:#8B7355;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء الكل</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="print-type-checkboxes">
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Tray" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">صينية</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Package" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">بكج</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Guest Book" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">كتاب</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Frame" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">برواز</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Graduation" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">تخرج</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="Bouquet" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">مسكة عروس</div></div></label>
+        </div>
+      </div>
+    </div>
+
     <button class="popt" onclick="doPrint()" style="width:100%;margin-top:6px">
       <span class="popt-ico">🖨️</span>
       <span class="popt-name">طباعة الكاردات الآن</span>
@@ -1704,7 +1726,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v66<br>
+       <strong>الإصدار:</strong> v67<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1728,7 +1750,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v66 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v67 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -3893,6 +3915,11 @@ function selectAllStatus(checked){
   updateMsSummary('status');
 }
 
+function selectAllPrintType(checked){
+  document.querySelectorAll('input[name="print-type"]').forEach(cb=>cb.checked=checked);
+  updateMsSummary('type');
+}
+
 function selectAllDays(checked){
   document.querySelectorAll('input[name="print-day"]').forEach(cb=>cb.checked=checked);
   updateMsSummary('days');
@@ -3912,16 +3939,20 @@ document.addEventListener('click', e=>{
 
 // تحديث نص الملخص الظاهر على زر القائمة المغلقة
 function updateMsSummary(which){
-  const name = which==='days' ? 'print-day' : 'print-status';
+  const name = which==='days' ? 'print-day' : which==='type' ? 'print-type' : 'print-status';
   const summaryEl = document.getElementById('ms-'+which+'-summary');
   if(!summaryEl) return;
   const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)];
-  if(!checked.length){ summaryEl.textContent = which==='days' ? 'اختر الأيام...' : 'اختر الحالة...'; return; }
+  if(!checked.length){ summaryEl.textContent = which==='days' ? 'اختر الأيام...' : which==='type' ? 'كل الأنواع' : 'اختر الحالة...'; return; }
   if(which==='status'){
     const labels = {New:'طلب جديد',Preparing:'جاري التجهيز',Shipped:'مع التوصيل',Done:'تم التسليم',Waiting:'بانتظار تأكيد',Cancelled:'ملغي'};
     summaryEl.textContent = checked.length<=2
       ? checked.map(c=>labels[c.value]||c.value).join('، ')
       : checked.length+' حالات محددة';
+  } else if(which==='type'){
+    summaryEl.textContent = checked.length<=2
+      ? checked.map(c=>TYPE_AR[c.value]||c.value).join('، ')
+      : checked.length+' أنواع محددة';
   } else {
     summaryEl.textContent = checked.length===1
       ? checked[0].closest('.pday-cb').querySelector('.pday-cb-name').textContent
@@ -4226,6 +4257,10 @@ function doPrint(){
   const selectedStatuses = new Set(
     [...document.querySelectorAll('input[name="print-status"]:checked')].map(cb=>cb.value)
   );
+  // Get selected types — فاضية = كل الأنواع بدون تقييد
+  const selectedTypes = new Set(
+    [...document.querySelectorAll('input[name="print-type"]:checked')].map(cb=>cb.value)
+  );
 
   if(selectedStatuses.size === 0){ toast('❌ اختاري حالة واحدة على الأقل'); return; }
 
@@ -4234,10 +4269,11 @@ function doPrint(){
     const dd = String(o['Delivery Date']||'').trim();
     if(selectedDates.size > 0 && !selectedDates.has(dd)) return false;
     if(!selectedStatuses.has(o['Status']||'New')) return false;
+    if(selectedTypes.size > 0 && !selectedTypes.has(o['Product Type']||'')) return false;
     return true;
   });
 
-  if(!orders.length){ toast('❌ ما في أوردرات للطباعة'); return; }
+  if(!orders.length){ toast('❌ ما في أوردرات تطابق الفلاتر المحددة'); return; }
 
   // Group by exact Delivery Date
   const grouped = {};
