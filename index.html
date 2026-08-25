@@ -682,18 +682,6 @@ body.staff-view .cal-day-block-cnt{display:none}
 .type-grid-btn:active{transform:scale(.96);background:var(--gold-p)}
 .type-grid-btn.selected{border-color:var(--gold);background:var(--gold-p);box-shadow:0 0 0 2px rgba(201,169,110,.3)}
 .type-grid-btn.selected .type-grid-lbl{color:var(--dark)}
-
-/* ── شبكة اختيار تاريخ التسليم ── */
-.deldate-grid-btn{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  background:#F5F0E8;border:1.5px solid var(--border);border-radius:10px;
-  padding:10px 4px;cursor:pointer;transition:all .15s;font-family:'Tajawal',sans-serif;
-}
-.deldate-grid-btn:active{transform:scale(.96);background:var(--gold-p)}
-.deldate-grid-btn.selected{border-color:var(--gold);background:var(--gold-p);box-shadow:0 0 0 2px rgba(201,169,110,.3)}
-.deldate-grid-tag{font-size:9.5px;font-weight:900;color:var(--gold);text-transform:uppercase}
-.deldate-grid-day{font-size:12px;font-weight:800;color:var(--dark2)}
-.deldate-grid-date{font-size:11px;color:var(--muted)}
 .type-grid-ico{font-size:28px;line-height:1}
 .type-grid-lbl{font-size:12.5px;font-weight:800;color:var(--dark2)}
 
@@ -864,7 +852,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v71</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v69</span>
   </div>
 </div>
 <div class="tabs">
@@ -988,10 +976,10 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 
       <div class="fg">
         <label>تاريخ التسليم <span class="req">*</span></label>
-        <select id="f-deldate-sel" style="display:none"><option value="">اختر يوم التسليم...</option></select>
-        <div id="deldate-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
-        <button type="button" onclick="showCustomDeldate()" style="background:none;border:1.5px dashed var(--gold);color:#8A6030;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;width:100%">📅 اختيار تاريخ آخر</button>
-        <input type="date" id="f-deldate" style="display:none;margin-top:8px" onchange="deldateManualChange()">
+        <select id="f-deldate-sel" onchange="onDelDateSel(this.value)">
+          <option value="">اختر يوم التسليم...</option>
+        </select>
+        <input type="date" id="f-deldate" style="display:none" onchange="deldateManualChange()">
         <div class="hint" id="deldate-hint"></div>
       </div>
 
@@ -1764,7 +1752,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v71<br>
+       <strong>الإصدار:</strong> v69<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1788,7 +1776,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v71 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v69 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -3034,52 +3022,32 @@ function closeEdit(){ document.getElementById('edit-panel').classList.remove('op
 document.getElementById('edit-panel').addEventListener('click',function(e){if(e.target===this)closeEdit();});
 
 // ── FORM ──
-// شبكة تواريخ التسليم: من أمس ولغاية ٥ أيام قادمة (٧ أيام إجمالاً) — نفس نطاق عرض التقويم بالموبايل
 function buildDelDateOptions(){
-  const grid = document.getElementById('deldate-grid');
-  if(!grid) return;
+  const sel = document.getElementById('f-deldate-sel');
   const today = new Date(); today.setHours(0,0,0,0);
   const dayNamesAr = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-  grid.innerHTML = '';
-  for(let i=-1; i<=5; i++){
+
+  // Clear existing options except first
+  while(sel.options.length > 1) sel.remove(1);
+
+  // Add today + next 7 days
+  for(let i=0; i<=7; i++){
     const d = new Date(today);
     d.setDate(today.getDate()+i);
-    const val = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const dayAr = dayNamesAr[d.getDay()];
-    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1);
-    const tag = i===0 ? 'اليوم' : (i===-1 ? 'أمس' : '');
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'deldate-grid-btn';
-    btn.dataset.val = val;
-    btn.onclick = function(){ selectDelDateFromGrid(val); };
-    btn.innerHTML = (tag?'<div class="deldate-grid-tag">'+tag+'</div>':'')+'<div class="deldate-grid-day">'+dayAr+'</div><div class="deldate-grid-date">'+dateStr+'</div>';
-    grid.appendChild(btn);
+    const dateStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+    const val = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = (i===0?'اليوم — ':'')+dayAr + ' — ' + dateStr;
+    sel.appendChild(opt);
   }
-}
 
-// اختيار تاريخ من الشبكة
-function selectDelDateFromGrid(val){
-  const dateInput = document.getElementById('f-deldate');
-  dateInput.value = val;
-  dateInput.style.display = 'none';
-  document.querySelectorAll('.deldate-grid-btn').forEach(b=>{
-    b.classList.toggle('selected', b.dataset.val === val);
-  });
-  const d = new Date(val+'T00:00:00');
-  const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-  document.getElementById('deldate-hint').textContent = '📅 '+days[d.getDay()]+' '+fmtFull(d);
-}
-
-// فتح منتقي التاريخ اليدوي لتاريخ خارج نطاق الشبكة
-function showCustomDeldate(){
-  document.querySelectorAll('.deldate-grid-btn').forEach(b=>b.classList.remove('selected'));
-  const dateInput = document.getElementById('f-deldate');
-  dateInput.style.display = 'block';
-  dateInput.value = '';
-  document.getElementById('deldate-hint').textContent = '';
-  dateInput.focus();
-  dateInput.click();
+  // Add custom option
+  const customOpt = document.createElement('option');
+  customOpt.value = 'custom';
+  customOpt.textContent = '📅 تاريخ محدد آخر...';
+  sel.appendChild(customOpt);
 }
 
 function onDelDateSel(val){
@@ -3155,7 +3123,6 @@ function selectTypeFromGrid(type){
 function deldateManualChange(){
   const dateInput = document.getElementById('f-deldate');
   const hint = document.getElementById('deldate-hint');
-  document.querySelectorAll('.deldate-grid-btn').forEach(b=>b.classList.remove('selected'));
   if(!dateInput.value){ hint.textContent=''; return; }
   const d = new Date(dateInput.value+'T00:00:00');
   const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -3661,13 +3628,20 @@ function openAddForDate(dateStr){
     const p=dateStr.split('/');
     if(p.length===3){
       const inputVal=p[2]+'-'+p[1]+'-'+p[0];
-      // لو التاريخ داخل نطاق الشبكة (أمس لغاية ٥ أيام قادمة) نحدّده فيها، وإلا نفتح الاختيار اليدوي
-      const gridBtn = document.querySelector('.deldate-grid-btn[data-val="'+inputVal+'"]');
-      if(gridBtn){
-        selectDelDateFromGrid(inputVal);
-      } else {
-        showCustomDeldate();
-        const el=document.getElementById('f-deldate');
+      const sel=document.getElementById('f-deldate-sel');
+      const el=document.getElementById('f-deldate');
+      // Try to find in select options
+      let found=false;
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].value===inputVal){
+          sel.value=inputVal;
+          onDelDateSel(inputVal);
+          found=true; break;
+        }
+      }
+      if(!found){
+        sel.value='custom';
+        onDelDateSel('custom');
         if(el){ el.value=inputVal; el.dispatchEvent(new Event('change')); }
       }
     }
@@ -3776,22 +3750,6 @@ async function saveOrder(){
   }
   const price=parseFloat(document.getElementById('f-price').value);
   if(!price){toast('❌ أدخلي الحساب');return;}
-
-  // منع التكرار: نفس رقم الهاتف + نفس تاريخ التسليم بالضبط = شبه مؤكد نفس الأوردر مسجّل غلط مرتين
-  const dupOrder = allOrders.find(o=>{
-    const st = (o['Status']||'').toLowerCase();
-    if(st==='cancelled') return false; // الملغي ما يُحسب تكراراً
-    return normalizePhone(o['Phone']) === phone && String(o['Delivery Date']||'').trim() === fmtFull(new Date(deldate+'T00:00:00'));
-  });
-  if(dupOrder){
-    const dupNames = dupOrder['Product Type']==='Graduation' ? dupOrder['Bride'] : [dupOrder['Bride'],dupOrder['Groom']].filter(Boolean).join(' ❤️ ');
-    const proceed = confirm(
-      '⚠️ في أوردر تاني بنفس رقم الهاتف ونفس تاريخ التسليم:\n\n'+
-      (dupOrder['Order ID']||'')+' — '+(dupNames||'—')+'\n\n'+
-      'لو متأكدة إنه مو تكرار بالغلط (مثلاً طلب تاني منفصل)، اضغطي موافق للمتابعة.'
-    );
-    if(!proceed) return;
-  }
   const isEng=['Tray','Guest Book','Package','Frame'].includes(type);
   const hasTray=['Tray','Package'].includes(type);
   const isBouquet=type==='Bouquet';
@@ -3859,10 +3817,6 @@ async function saveOrder(){
     createdAt:nowStamp()          // وقت الإضافة من جهاز المُدخِل
   };
 
-  // مفتاح فريد لهذه المحاولة تحديداً — يبقى ثابت حتى لو أعادت آلية إعادة المحاولة نفس الطلب
-  // عدة مرات بسبب فشل وصول الرد فقط (بينما الحفظ الفعلي نجح بالسيرفر) — يمنع تكرار الأوردر فعلياً
-  const clientReqId = 'req_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
-
   // خطة استهلاك المستودع لهذا الأوردر — تُطبَّق مرة واحدة عند الإنشاء فقط (وليس عند التعديل)
   const invDeductions = computeInventoryDeductions(data);
 
@@ -3870,7 +3824,7 @@ async function saveOrder(){
   btn.disabled=true;
   showFullscreenLoading('⏳ جاري حفظ الطلب الجديد...');
   try{
-    const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data),inventoryDeductions:JSON.stringify(invDeductions),clientReqId});
+    const res=await writeToSheet({action:'addOrder',data:JSON.stringify(data),inventoryDeductions:JSON.stringify(invDeductions)});
     const newId = res.id;
 
     // رفع الصور المرفقة (إن وجدت) بعد إنشاء الأوردر بنجاح
@@ -3901,7 +3855,6 @@ function clearForm(){
   if(step1) step1.style.display = 'block';
   document.querySelectorAll('.type-grid-btn').forEach(b=>b.classList.remove('selected'));
   // Reset date selector
-  document.querySelectorAll('.deldate-grid-btn').forEach(b=>b.classList.remove('selected'));
   const fDelSel=document.getElementById('f-deldate-sel');
   if(fDelSel) fDelSel.selectedIndex=0;
   document.getElementById('f-deldate').value='';
