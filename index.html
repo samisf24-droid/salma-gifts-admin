@@ -864,7 +864,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v74</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v76</span>
   </div>
 </div>
 <div class="tabs">
@@ -1770,7 +1770,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v74<br>
+       <strong>الإصدار:</strong> v76<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1794,7 +1794,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v74 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v76 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2541,6 +2541,7 @@ async function freezeOrderToDraft(id, o){
     date:       toISODate(o['Occasion Date']),
     model:      isBouquetOrder ? rawModel : (isGradOrder ? '' : (isStdModel ? rawModel : 'Other')),
     modelOther: (!isBouquetOrder && !isGradOrder && !isStdModel) ? rawModel : '',
+    pkg:        o['PkgType']||'',
     phrase:     o['Phrase']||'',
     notes:      o['Notes']||'',
     additions:  o['Additions']||'', // نص مسطّح — يُستعاد كحقل حر (بدون فقدان المحتوى، بس بدون تفكيك لصفوف قابلة للتعديل)
@@ -3738,6 +3739,22 @@ function unlockAudioContext(){
 document.addEventListener('touchstart', unlockAudioContext, {once:true, passive:true});
 document.addEventListener('click', unlockAudioContext, {once:true});
 
+// نغمة "طقّة" معدنية وحيدة — مزيج نغمتين متقاربتين لإحساس رنين معدني حقيقي
+function playMetalClink(ctx, t0, volume, freqBase){
+  [1, 1.5].forEach(mult=>{
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freqBase * mult;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(Math.max(volume,0.008), t0+0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0+0.11);
+  });
+}
+
+// صوت "حصّالة" — سلسلة قطع معدنية بتوقع فوق بعض بترددات وتوقيت عشوائي خفيف، بتتلاشى تدريجياً
 function playCoinSound(){
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -3745,19 +3762,14 @@ function playCoinSound(){
     if(!sgAudioCtx) sgAudioCtx = new Ctx(); // احتياط لو ما صارت أي لمسة قبلها (نادر)
     if(sgAudioCtx.state === 'suspended') sgAudioCtx.resume();
     const ctx = sgAudioCtx;
-    const now = ctx.currentTime;
-    [880, 1318.5].forEach((freq, i)=>{
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const t0 = now + i*0.09;
-      gain.gain.setValueAtTime(0.001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.18, t0+0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t0+0.28);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(t0); osc.stop(t0+0.3);
-    });
+    let t = ctx.currentTime;
+    const numCoins = 6;
+    for(let i=0; i<numCoins; i++){
+      t += i===0 ? 0 : (0.035 + Math.random()*0.05);
+      const freqBase = 2100 + Math.random()*1500; // كل قطعة بتردد مختلف شوي — إحساس قطع متنوعة
+      const volume = 0.2 * Math.max(0.25, 1 - i*0.14); // تتلاشى تدريجياً زي القطع الأخيرة بتستقر
+      playMetalClink(ctx, t, volume, freqBase);
+    }
   }catch(e){ /* بعض المتصفحات ما بتدعم — نتجاهل بهدوء */ }
 }
 
@@ -5698,6 +5710,7 @@ function getFormData(){
     date:      document.getElementById('f-date').value,
     model:     type==='Bouquet' ? document.getElementById('f-bouquet-model').value.trim() : document.getElementById('f-model').value,
     modelOther:document.getElementById('f-model-other').value.trim(),
+    pkg:       document.getElementById('f-pkg') ? document.getElementById('f-pkg').value : '',
     phrase:    document.getElementById('f-phrase').value.trim(),
     notes:     type==='Bouquet' ? document.getElementById('f-bouquet-notes').value.trim() : document.getElementById('f-notes').value.trim(),
     additions: getAdditionsJoined(),
@@ -5715,7 +5728,7 @@ function getFormData(){
     dnotes:    document.getElementById('f-dnotes').value.trim(),
     price:     document.getElementById('f-price').value,
     link:      document.getElementById('f-link').value.trim(),
-    delSel, deldate,
+    delSel: '', deldate,
     deliveryDay:  deldateObj ? dayNames[deldateObj.getDay()] : '',
     deliveryDate: deldateObj ? fmtFull(deldateObj) : '',
   };
@@ -5749,10 +5762,16 @@ function loadDraft(draftId){
   switchTab('add');
   setTimeout(()=>{
     // Set type and trigger fields
+    // نخبر toggleFields إنه هاد "استرجاع" مو "تبديل نوع فعلي من المستخدم" — يمنعها من تصفير
+    // حقول خاصة بالنوع (مثل نوع البكج) بعد ما عبّيناها بالضبط قبل شوي بالسطر التالي
+    lastFType = d.type || '';
     document.getElementById('f-type').value = d.type||'';
     document.querySelectorAll('.type-grid-btn').forEach(b=>{
       b.classList.toggle('selected', b.dataset.type === d.type);
     });
+    // نوع البكج لازم يتعبّى قبل toggleFields مباشرة — هي يلي بتقرر تظهر باقي حقول البكج ولا لأ
+    const pkgSelEl = document.getElementById('f-pkg');
+    if(pkgSelEl) pkgSelEl.value = d.pkg||'';
     // المسودة فيها كل البيانات أصلاً (النوع والتاريخ معروفين) — ندخل مباشرة لشاشة التفاصيل
     if(d.type && d.deliveryDate){
       const dEl = document.getElementById('f-deldate');
