@@ -864,7 +864,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v76</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v77</span>
   </div>
 </div>
 <div class="tabs">
@@ -1482,6 +1482,7 @@ async function doLogin(){
 
 function doLogout(){
   clearSession();
+  try{ localStorage.removeItem('sg_cached_orders'); }catch(e){}
   currentUser = null;
   location.reload();
 }
@@ -1528,6 +1529,16 @@ function canEditOrder(o){
 
 function startApp(){
   applyRoleUI();
+  // عرض فوري لآخر بيانات معروفة محلياً (لو موجودة) — بدل شاشة فاضية لحد ما يوصل الرد من جوجل،
+  // خصوصاً بالاتصالات البطيئة. البيانات الطازجة بتوصل بعدها وتستبدلها تلقائياً بهدوء.
+  try{
+    const cached = localStorage.getItem('sg_cached_orders');
+    if(cached){
+      allOrders = JSON.parse(cached);
+      renderCal();
+      updateStats();
+    }
+  }catch(e){ /* أي خلل بالتخزين المحلي ما يمنع التحميل الطبيعي */ }
   loadOrders(true);
   fetchDraftsFromServer();
 }
@@ -1573,6 +1584,7 @@ async function loadOrders(silent){
   // مرحلة ٢: البيانات وصلت بنجاح — أي خطأ من هون فصاعداً هو خطأ برمجي بالمعالجة، مو خطأ اتصال
   allOrders = data.orders || [];
   setConn(true);
+  try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(e){ /* لو التخزين ممتلئ أو غير متاح، نتجاهل بهدوء */ }
   try {
     renderCal();
     updateStats();
@@ -1770,7 +1782,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v76<br>
+       <strong>الإصدار:</strong> v77<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1794,7 +1806,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v76 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v77 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
