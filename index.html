@@ -864,7 +864,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v77</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v78</span>
   </div>
 </div>
 <div class="tabs">
@@ -1782,7 +1782,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v77<br>
+       <strong>الإصدار:</strong> v78<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1806,7 +1806,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v77 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v78 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5694,8 +5694,16 @@ async function fetchDraftsFromServer(){
     cachedDrafts = (res.drafts||[]).map(d=>{
       let parsed = {};
       try{ parsed = JSON.parse(d.data); }catch(e){}
-      return { id:d.id, savedAt:d.savedAt, data:parsed };
-    }).sort((a,b)=> new Date(b.savedAt) - new Date(a.savedAt));
+      return { id:d.id, savedAt:d.savedAt, createdBy:d.createdBy||'', data:parsed };
+    }).sort((a,b)=>{
+      const ta = new Date(a.savedAt).getTime();
+      const tb = new Date(b.savedAt).getTime();
+      // مسودات قديمة بتاريخ غير صالح (من قبل الإصلاح) تُدفع لآخر القائمة بدل ما تخرّب الترتيب
+      if(isNaN(tb) && isNaN(ta)) return 0;
+      if(isNaN(tb)) return -1;
+      if(isNaN(ta)) return 1;
+      return tb - ta;
+    });
   }catch(e){
     cachedDrafts = [];
   }
@@ -5892,7 +5900,11 @@ async function renderDraftsList(){
                   d.type==='Bouquet'?'مسكة عروس':
                   [d.bride, d.groom].filter(Boolean).join(' ❤️ ')||'—';
     const dt = new Date(draft.savedAt);
-    const timeStr = pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
+    // دفاع مضاعف: أي قيمة غير قابلة للتفسير (مسودة قديمة من قبل الإصلاح مثلاً) تعرض نص واضح بدل NaN
+    const timeStr = isNaN(dt.getTime())
+      ? '—'
+      : pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
+    const byLabel = draft.createdBy || '';
     const fields = [
       d.deliveryDate && ['التسليم', d.deliveryDate],
       d.rname && ['المستلم', d.rname],
@@ -5904,7 +5916,7 @@ async function renderDraftsList(){
       <div class="draft-card-hdr">
         <span class="draft-type">${typeAr}</span>
         <span class="draft-names">${names}</span>
-        <span class="draft-time">${timeStr}</span>
+        <span class="draft-time">${timeStr}${byLabel?' — 👤 '+byLabel:''}</span>
       </div>
       <div class="draft-fields">
         ${fields.map(([k,v])=>`<span class="draft-field"><span style="color:#8B7355;font-size:11px">${k}: </span><strong>${v}</strong></span>`).join('')}
