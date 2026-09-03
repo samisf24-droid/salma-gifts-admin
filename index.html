@@ -75,7 +75,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 }
 
 /* HDR */
-.hdr{background:var(--dark);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
+.hdr{background:var(--dark);padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
 .hdr-brand{font-size:18px;font-weight:900;color:var(--gold)}
 .hdr-status{font-size:12px;color:var(--gold-l);opacity:.65;display:flex;align-items:center;gap:5px}
 .hdr-dot{width:7px;height:7px;border-radius:50%;background:#FF5252;flex-shrink:0}
@@ -353,7 +353,7 @@ body.staff-view .cal-day-block-cnt{display:none}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
-  .hdr,.tabs,.main,#welcome-bar,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
+  #sticky-hdr-wrap,.hdr,.tabs,.main,#welcome-bar,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
   #print-container{display:block!important}
   #names-print-container{display:block!important;padding:10mm}
   .names-print-item{margin-bottom:9mm;text-align:center;break-inside:avoid;padding-bottom:6mm;border-bottom:1px dashed #999}
@@ -651,7 +651,7 @@ body.staff-view .cal-day-block-cnt{display:none}
 }
 
 /* ── KPI GRID ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
 .kpi{
   background:#FFFFFF;border:1px solid #E5D9C7;border-radius:14px;
   padding:16px;position:relative;overflow:hidden;
@@ -672,6 +672,40 @@ body.staff-view .cal-day-block-cnt{display:none}
 .section{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:14px;padding:18px;margin-bottom:16px}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
+
+/* ── شاشة الترحيب (Splash) ── */
+#splash-screen{
+  position:fixed; inset:0; z-index:10000;
+  background:linear-gradient(160deg,#241A10 0%,#1A1410 55%,#0F0C08 100%);
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+#splash-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+.splash-inner{ display:flex; flex-direction:column; align-items:center; gap:18px; animation:splashRise .7s cubic-bezier(.2,.8,.3,1) both; }
+.splash-logo{ width:110px; height:110px; object-fit:contain; border-radius:22px; }
+.splash-title{ font-size:26px; font-weight:900; color:#C9A96E; letter-spacing:.5px; }
+.splash-slogan{
+  font-size:14px; font-weight:500; color:#B8A898; letter-spacing:.3px;
+  margin-top:-6px; text-align:center; padding:0 24px; line-height:1.7;
+  animation:sloganFade 1s ease-out .35s both;
+}
+@keyframes sloganFade{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+.splash-dots{ display:flex; gap:7px; margin-top:4px; }
+.splash-dots span{
+  width:8px; height:8px; border-radius:50%; background:#C9A96E; opacity:.35;
+  animation:splashDot 1.1s ease-in-out infinite;
+}
+.splash-dots span:nth-child(2){ animation-delay:.18s }
+.splash-dots span:nth-child(3){ animation-delay:.36s }
+@keyframes splashRise{
+  0%{ opacity:0; transform:translateY(14px) scale(.94); }
+  100%{ opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes splashDot{
+  0%,100%{ opacity:.3; transform:translateY(0); }
+  50%{ opacity:1; transform:translateY(-5px); }
+}
+@media print{ #splash-screen{display:none!important} }
 
 /* ── شبكة اختيار نوع المنتج ── */
 .type-grid-btn{
@@ -838,6 +872,15 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <body>
 
 <!-- ══ شاشة تسجيل الدخول ══ -->
+<div id="splash-screen">
+  <div class="splash-inner">
+    <img src="logo.png" alt="هدايا سلمى" class="splash-logo" onerror="this.style.display='none'">
+    <div class="splash-title">هدايا سلمى ✦</div>
+    <div class="splash-slogan">لتبقى ذكرياتكم الجميلة، خالدة.</div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
 <div id="login-screen" style="position:fixed;inset:0;background:#1A1410;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:360px;background:#FFFFFF;border-radius:16px;padding:28px 24px;text-align:center">
     <div style="font-size:22px;font-weight:900;color:#1A1410;margin-bottom:4px">هدايا سلمى ✦</div>
@@ -851,6 +894,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   </div>
 </div>
 
+<div id="sticky-hdr-wrap" style="position:sticky;top:0;z-index:300">
 <div class="hdr">
   <div class="hdr-brand">هدايا سلمى ✦</div>
   <div style="display:flex;align-items:center;gap:8px">
@@ -859,12 +903,12 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <button id="refresh-btn" onclick="loadOrders()" style="background:#C9A96E;border:none;border-radius:8px;cursor:pointer;color:#1A1410;font-size:12px;font-weight:800;padding:0 12px;font-family:Tajawal,sans-serif;display:flex;align-items:center;justify-content:center;white-space:nowrap;height:34px;flex-shrink:0">↻ تحديث</button>
   </div>
 </div>
-<div id="welcome-bar" style="background:#241A10;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:60px;z-index:290;border-bottom:1px solid rgba(201,169,110,.1)">
+<div id="welcome-bar" style="background:#241A10;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(201,169,110,.1)">
   <span id="welcome-msg" style="font-size:13px;font-weight:800;color:var(--gold-l)"></span>
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v78</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v86</span>
   </div>
 </div>
 <div class="tabs">
@@ -874,6 +918,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <button class="tab no-print" onclick="switchTab('drafts')" id="tab-drafts">📝 المسودات</button>
   <button class="tab no-print" onclick="switchTab('employees')" id="tab-employees" style="display:none">👥 الموظفين</button>
 </div>
+</div><!-- /sticky-hdr-wrap -->
 
 <div class="main">
 
@@ -1544,6 +1589,16 @@ function startApp(){
 }
 
 // ── INIT ──
+// إخفاء شاشة الترحيب — تُستدعى بعد جاهزية الواجهة، مع ضمان مطلق إنها ما تعلّق أبداً
+function hideSplash(){
+  const el = document.getElementById('splash-screen');
+  if(!el || el.classList.contains('hide')) return;
+  el.classList.add('hide');
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 600); // إزالة نهائية بعد انتهاء التلاشي
+}
+// حماية احتياطية: مهما صار (خطأ بالتحميل، شبكة بطيئة، أي استثناء) الشاشة تختفي بعد 3.5 ثانية كحد أقصى
+setTimeout(hideSplash, 3500);
+
 window.addEventListener('DOMContentLoaded', ()=>{
   currentUser = loadSession();
   if(currentUser && currentUser.username && currentUser.token){
@@ -1551,6 +1606,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
     startApp();
   }
   // وإلا: شاشة الدخول تضل ظاهرة (هي الافتراضي بالـ HTML) لحد ما يسجّل دخول
+  // مدة عرض مريحة تكفي لقراءة السلوجان بدون ما تصير مملة
+  setTimeout(hideSplash, 2200);
 });
 
 // كل كتابة تمر من هنا: تتحقق من نجاح الشيت فعلياً وترمي خطأ واضح إن فشلت
@@ -1737,10 +1794,6 @@ function getWeekDays(offset){
   start.setDate(today.getDate() - DAYS_BACK + offset*WINDOW_SIZE);
   return Array.from({length:WINDOW_SIZE},(_,i)=>{ const d=new Date(start); d.setDate(start.getDate()+i); return d; });
 }
-function weekLabel(off){
-  if(off===0) return '';
-  return off>0 ? ('بعد '+off+' نطاق') : ('قبل '+Math.abs(off)+' نطاق');
-}
 function groupWeek(days, orders){
   const g = days.map(()=>[]);
   orders.forEach(o=>{
@@ -1782,7 +1835,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v78<br>
+       <strong>الإصدار:</strong> v86<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1806,7 +1859,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v78 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v86 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -1958,15 +2011,6 @@ function toggleCalDay(key){
   el.classList.toggle('open', willOpen);
   if(willOpen){ calOpenDays.add(key); calClosedDays.delete(key); }
   else        { calClosedDays.add(key); calOpenDays.delete(key); }
-}
-
-function expandAllDays(open){
-  document.querySelectorAll('#cal-mobile .cal-day-block').forEach(el=>{
-    const key = el.dataset.key;
-    el.classList.toggle('open', open);
-    if(open){ calOpenDays.add(key); calClosedDays.delete(key); }
-    else    { calClosedDays.add(key); calOpenDays.delete(key); }
-  });
 }
 
 // يستخرج اسم العريس والعروس من نص التعليقة المخزّن ضمن Additions
@@ -2145,57 +2189,12 @@ function updateStats(){
   if(currentUser && currentUser.role === 'owner') loadCommissionOwedKPI();
 }
 
-// نافذة عامة لعرض أي محتوى (تعيد استخدام نافذة التشخيص الموجودة)
-function showDiagBox(title, html){
-  document.getElementById('diag-title').textContent = title;
-  document.getElementById('diag-body').innerHTML = html;
-  document.getElementById('diag-bg').style.display = 'flex';
-}
-function closeDiag(){
-  document.getElementById('diag-bg').style.display = 'none';
-  document.getElementById('diag-title').textContent = '🔎 تشخيص النظام';
-}
-
-// عرض الطلبات المتأخرة بنافذة سريعة — الرقم يصير قابلاً للتصرف مش مجرد معلومة
-function showLateOrders(){
-  const late = allOrders.filter(o=>{
-    const st=(o['Status']||'').toLowerCase();
-    if(['done','cancelled'].includes(st)) return false;
-    const dd=parseDate(o['Delivery Date']);
-    if(!dd) return false;
-    const d0=new Date(dd); d0.setHours(0,0,0,0);
-    return d0 < todayMid0();
-  }).sort((a,b)=>parseDate(a['Delivery Date'])-parseDate(b['Delivery Date']));
-
-  if(!late.length){ toast('✅ ما في ولا طلب متأخر'); return; }
-
-  const rows = late.map(o=>{
-    const dd = parseDate(o['Delivery Date']);
-    const daysLate = Math.round((todayMid0()-dd)/86400000);
-    const st = STATUSES[normStatus(o)] || STATUSES.New;
-    return `<div onclick="closeDiag();openPanel('${o['Order ID']}')" style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px dashed #E5D9C7;cursor:pointer">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:14px;color:#1A1410">${getOrderNames(o)}</div>
-        <div style="font-size:12px;color:#8B7355;margin-top:2px">${o['Order ID']} · ${o['Delivery Date']} · ${st.lbl}</div>
-      </div>
-      <span style="font-size:11px;font-weight:900;color:#C0392B;background:#FFF0F0;border:1px solid #FFCDD2;border-radius:99px;padding:3px 9px;white-space:nowrap">متأخر ${daysLate} يوم</span>
-    </div>`;
-  }).join('');
-
-  showDiagBox('⚠️ طلبات متأخرة ('+late.length+')', rows);
-}
-
 // حمولة تغيير الحالة — تسجّل وقت التحويل لـ"مع التوصيل" لتفعيل التسليم التلقائي بعد ٢٤ ساعة
 function statusPayload(status){
   const p = {Status: status};
   if(status === 'Shipped') p.ShippedAt = nowStamp();
   else if(status === 'New' || status === 'Preparing') p.ShippedAt = ''; // رجوع للخلف يلغي المؤقّت
   return p;
-}
-
-// منتصف ليل اليوم الحالي — مرجع ثابت لمقارنات التأخير
-function todayMid0(){
-  const t = new Date(); t.setHours(0,0,0,0); return t;
 }
 
 // ── SEARCH ──
@@ -2234,6 +2233,9 @@ function normalizeArabicSearch(s){
     .replace(/ة/g, 'ه')
     .replace(/ى/g, 'ي')
     .replace(/[ؤئ]/g, 'ء')
+    // أرقام عربية-هندية وفارسية → أرقام لاتينية، حتى البحث برقم يشتغل مهما كانت صيغة التخزين
+    .replace(/[٠-٩]/g, d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/[۰-۹]/g, d=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
     .toLowerCase();
 }
 
@@ -2248,17 +2250,11 @@ function parseCreatedAtStamp(s){
 function searchOrders(q){
   const raw = normalizeArabicSearch(q.trim());
   if(!raw) return [];
+  // بحث شامل: يمر على كل حقول الأوردر بدون استثناء (بدل قائمة حقول محددة يدوياً)،
+  // فيلتقط أي تفصيل — قصاصة، ملاحظة توصيل، نوع بكج، لون، عبارة، أو أي عمود جديد يُضاف مستقبلاً
   const matches = allOrders.filter(o=>{
-    const fields = normalizeArabicSearch([
-      o['Order ID'],
-      o['Bride'], o['Groom'],
-      o['Phone'], o['Recipient'],
-      o['Delivery Date'], o['Delivery Day'],
-      o['Governorate'], o['Area'],
-      o['Notes'], o['Additions'], o['Phrase'],
-      o['Model'], o['Product Type']
-    ].join(' '));
-    return fields.includes(raw);
+    const allValues = Object.values(o).filter(v=>v!==null && v!==undefined).join(' ');
+    return normalizeArabicSearch(allValues).includes(raw);
   });
   // أولوية: مطابقة اسم العريس/العروس أولاً، وداخل كل مجموعة الأحدث تسجيلاً أولاً
   return matches
@@ -2572,7 +2568,7 @@ async function freezeOrderToDraft(id, o){
   };
 
   const draftId = 'draft_' + Date.now();
-  const savedAt = new Date().toISOString();
+  const savedAt = String(Date.now()); // رقم صرف — يمنع جوجل شيتس من محاولة "تفسير" الصيغة كتاريخ
 
   try{
     await writeToSheet({action:'saveDraft', id:draftId, data:JSON.stringify(draftData), savedAt});
@@ -3099,28 +3095,6 @@ function showCustomDeldate(){
   document.getElementById('deldate-hint').textContent = '';
   dateInput.focus();
   dateInput.click();
-}
-
-function onDelDateSel(val){
-  const dateInput = document.getElementById('f-deldate');
-  const hint = document.getElementById('deldate-hint');
-  if(val === 'custom'){
-    dateInput.style.display = 'block';
-    dateInput.value = '';
-    hint.textContent = '';
-    dateInput.focus();
-    dateInput.click();
-  } else if(val){
-    dateInput.style.display = 'none';
-    dateInput.value = val;
-    const d = new Date(val+'T00:00:00');
-    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    hint.textContent = '📅 '+days[d.getDay()]+' '+fmtFull(d);
-  } else {
-    dateInput.style.display = 'none';
-    dateInput.value = '';
-    hint.textContent = '';
-  }
 }
 
 function checkDuplicatePhone(phone){
@@ -4029,14 +4003,6 @@ function clearForm(){
   if(genericPhrase) genericPhrase.style.display='block';
 }
 
-// ── PRINT ──
-function printOrders(){
-  // Expand all and print
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
-  document.getElementById('view-cal').classList.add('on');
-  setTimeout(()=>window.print(),150);
-}
-
 // ── TABS ──
 function switchTab(t){
   if(t==='print' && !(currentUser && currentUser.role==='owner')){
@@ -4052,11 +4018,6 @@ function switchTab(t){
   if(t==='print') buildPrintDayOptions();
   if(t==='add') buildDelDateOptions();
   if(t==='employees') loadEmployees();
-}
-
-// ── PRINT ──
-function openPrintModal(){
-  switchTab('print');
 }
 
 function buildPrintDayOptions(){
@@ -4177,11 +4138,6 @@ function updateMsSummary(which){
   }
 }
 
-function closePrintModal(){
-  
-}
-
-
 // ══════════════════════════════════════════════════════
 // طباعة الأسماء — قائمة مختصرة (أسماء + تاريخ فقط) للمصمّم
 // ══════════════════════════════════════════════════════
@@ -4289,12 +4245,6 @@ function orderHasBook(o){
 }
 
 // يستخرج تاريخ الكتاب المخزّن ضمن الملاحظات بصيغة "تاريخ الكتاب: dd/mm/yyyy"
-// يستخرج أسماء الكتاب/البرواز المخصصة من الملاحظات (إن سُجّلت مختلفة عن أسماء الصينية)
-function extractBookFrameNames(notes){
-  const m = String(notes||'').match(/أسماء (?:الكتاب|البرواز):\s*([^|]+)/);
-  return m ? m[1].trim().replace(/\s*&\s*/g,' ') : '';
-}
-
 function extractBookDate(notes){
   const m = String(notes||'').match(/تاريخ الكتاب:\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
   return m ? toDashDate(m[1]) : '';
@@ -4528,16 +4478,6 @@ function doPrint(){
 }
 
 
-function nextDateStr(dayName){
-  const DAY_JS2 = {'الأحد':0,'الاثنين':1,'الثلاثاء':2,'الأربعاء':3,'الخميس':4,'الجمعة':5,'السبت':6};
-  const target = DAY_JS2[dayName];
-  if(target===undefined) return '';
-  const today = new Date(); today.setHours(0,0,0,0);
-  let diff = (target-today.getDay()+7)%7; if(diff===0) diff=7;
-  const d = new Date(today); d.setDate(d.getDate()+diff);
-  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
-}
-
 // كلاس اللون حسب نوع الطلب — يميّز الكارد بلمحة عند الطباعة
 function printTypeClass(type){
   return {
@@ -4660,12 +4600,6 @@ function printCard(o){
 function prowInline(k,v,isShort){
   return `<div class="pc-row${isShort?' short':''}"><span class="pc-k">${k}:</span><span class="pc-v">${v}</span></div>`;
 }
-
-function prow(k,v){
-  return `<div class="pc-row"><span class="pc-k">${k}</span><span class="pc-v">${v}</span></div>`;
-}
-
-
 
 // ══════════════════════════════════
 // الموظفين والعمولات (owner فقط)
@@ -4894,46 +4828,6 @@ async function recordPaymentPrompt(username, displayName, currentBalance){
   }catch(e){ toast('❌ '+e.message); }
 }
 
-async function editEmployeeName(username, currentName){
-  const name = prompt('الاسم الظاهر الجديد لـ '+username+':', currentName);
-  if(name === null) return;
-  const clean = name.trim();
-  if(!clean){ toast('❌ الاسم ما يقدر يكون فاضي'); return; }
-  try{
-    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
-      targetUsername: username, data: JSON.stringify({displayName: clean})});
-    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
-    toast('✅ تم تحديث الاسم');
-    loadEmployees();
-  }catch(e){ toast('❌ '+e.message); }
-}
-
-async function editEmployeeRate(username, currentRate){
-  const rateStr = prompt('العمولة الجديدة لكل أوردر (د.أ):', currentRate);
-  if(rateStr === null) return;
-  const rate = parseFloat(rateStr);
-  if(isNaN(rate) || rate < 0){ toast('❌ قيمة غير صالحة'); return; }
-  try{
-    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
-      targetUsername: username, data: JSON.stringify({commissionRate: rate})});
-    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
-    toast('✅ تم تحديث العمولة');
-    loadEmployees();
-  }catch(e){ toast('❌ '+e.message); }
-}
-
-async function editEmployeePassword(username, currentPassword){
-  const pass = prompt('كلمة المرور الجديدة لـ '+username+':', currentPassword||'');
-  if(!pass) return;
-  try{
-    const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
-      targetUsername: username, data: JSON.stringify({password: pass})});
-    if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
-    toast('✅ تم تغيير كلمة المرور');
-    loadEmployees();
-  }catch(e){ toast('❌ '+e.message); }
-}
-
 async function toggleEmployeeActive(username, isActive, currentBalance){
   let msg = isActive ? 'إيقاف حساب '+username+'؟ لن يقدر يسجّل دخول بعدها.' : 'تفعيل حساب '+username+' من جديد؟';
   if(isActive && currentBalance > 0) msg += '\n\n⚠️ تنبيه: لا يزال له رصيد مستحق '+currentBalance.toFixed(2)+' د.أ حتى الآن — الإيقاف لا يُلغيه، يرجى التأكد من عدم إغفاله.';
@@ -5086,10 +4980,22 @@ async function loadDashData(){
     applyDashFilters();
     renderCal(); updateStats();   // مزامنة التقويم مع نفس البيانات
     loadInventoryData();
+    loadDashEmployeeRates();
   }catch(e){
     document.getElementById('dash-conn-dot').style.background='#FF5252';
     document.getElementById('dash-conn-lbl').textContent='خطأ في الاتصال';
   }
+}
+
+// نسب عمولة الموظفين — تُجلب مرة عند فتح الداشبورد لحساب عمولة كل موظفة بالفترة المختارة
+let dashEmployeeRates = {}; // username -> {commissionRate, displayName}
+async function loadDashEmployeeRates(){
+  try{
+    const res = await apiPost({action:'getEmployees', username: currentUser.username, token: currentUser.token});
+    dashEmployeeRates = {};
+    (res.employees||[]).forEach(e=>{ dashEmployeeRates[e.username] = {commissionRate: e.commissionRate||0, displayName: e.displayName||e.username}; });
+    renderDashStaffPerf();
+  }catch(e){ /* لو فشل الجلب، تبقى العمولة —  بدل ما توقف باقي القسم */ }
 }
 
 // ══════════════════════════════════════════════════════
@@ -5241,6 +5147,7 @@ function renderDashAll(){
   renderDashCharts();
   renderDashStatus();
   renderDashProds();
+  renderDashProductTrend();
   renderDashStaffPerf();
   renderDashTable();
   renderDashDays();
@@ -5272,26 +5179,92 @@ function renderDashStaffPerf(){
   });
   const rows = Object.keys(byUser).sort((a,b)=>byUser[b].count-byUser[a].count).map(u=>{
     const d = byUser[u];
-    return {username:u, count:d.count, total:d.total, avg: d.count ? d.total/d.count : 0};
+    const rateInfo = dashEmployeeRates[u];
+    const rate = rateInfo ? rateInfo.commissionRate : null;
+    const commission = rate!==null ? d.count * rate : null;
+    return { username:u, displayName: rateInfo ? rateInfo.displayName : u, count:d.count, total:d.total, commission };
   });
   if(!rows.length){
     box.innerHTML = '<div style="color:#8B7355;font-size:13px;text-align:center;padding:16px 0">لا تتوفر بيانات لأداء الفريق ضمن النطاق الزمني المحدد</div>';
     return;
   }
-  box.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="border-bottom:2px solid #C9A96E">
-      <th style="text-align:right;padding:6px 8px">الموظف</th>
-      <th style="text-align:right;padding:6px 8px">عدد الطلبات</th>
-      <th style="text-align:right;padding:6px 8px">إجمالي المبيعات</th>
-      <th style="text-align:right;padding:6px 8px">متوسط قيمة الطلب</th>
-    </tr></thead>
-    <tbody>${rows.map(r=>`<tr style="border-bottom:1px solid #F0E8DC">
-      <td style="padding:6px 8px;font-weight:800;color:#1A1410">${r.username}</td>
-      <td style="padding:6px 8px">${r.count}</td>
-      <td style="padding:6px 8px">${r.total.toFixed(2)} د.أ</td>
-      <td style="padding:6px 8px;font-weight:700;color:#8B6D2F">${r.avg.toFixed(2)} د.أ</td>
-    </tr>`).join('')}</tbody>
-  </table>`;
+  box.innerHTML = rows.map(r=>`
+    <div style="background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:14px;padding:16px 18px;margin-bottom:12px">
+      <div style="font-size:17px;font-weight:900;color:#1A1410;margin-bottom:12px">${r.displayName}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#1A1410">${r.count}</div>
+          <div style="font-size:11.5px;color:#8B7355;margin-top:2px">عدد الطلبات</div>
+        </div>
+        <div style="border-right:1.5px solid #E8D5B0;border-left:1.5px solid #E8D5B0">
+          <div style="font-size:22px;font-weight:900;color:#1A1410">${r.total.toFixed(2)}</div>
+          <div style="font-size:11.5px;color:#8B7355;margin-top:2px">إجمالي المبيعات (د.أ)</div>
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#8A6030">${r.commission!==null ? r.commission.toFixed(2) : '—'}</div>
+          <div style="font-size:11.5px;color:#8B7355;margin-top:2px">عمولتها بالفترة (د.أ)</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+let dashTrendChart = null;
+// تطوّر تثبيت الطلبات عبر الوقت — حسب وقت التثبيت الفعلي (Created At)، مستقل تماماً عن فلتر موعد التسليم
+// المفيد منها: معرفة هل يوم/أسبوع معيّن شهد ارتفاع بتثبيت نوع معيّن (مثلاً بعد حملة إعلانية)
+function renderDashProductTrend(){
+  const canvas = document.getElementById('dash-chart-trend');
+  if(!canvas) return;
+  const selType = document.getElementById('dash-trend-type').value;
+
+  // نطاق الأيام: نفس فترة الفلتر الحالي فوق الداشبورد — لو غير محدد (نادر) نستخدم آخر ٧ أيام كاحتياط
+  let from = dashDateFrom, to = dashDateTo;
+  if(!from || !to){
+    to = endOfDayD(new Date());
+    from = startOfDayD(new Date()); from.setDate(from.getDate()-6);
+  }
+
+  // فلترة حسب وقت التثبيت الفعلي (Created At) — لا علاقة لها بموعد التسليم إطلاقاً
+  const matched = allOrders.filter(o=>{
+    if(selType!=='all' && o['Product Type']!==selType) return false;
+    const ts = parseCreatedAtStamp(o['Created At']);
+    if(!ts) return false;
+    return ts >= from.getTime() && ts <= to.getTime();
+  });
+
+  const byDay = {};
+  matched.forEach(o=>{
+    const ts = parseCreatedAtStamp(o['Created At']);
+    const d = startOfDayD(new Date(ts));
+    const key = fmtFull(d);
+    byDay[key] = (byDay[key]||0)+1;
+  });
+
+  // بناء كل أيام الفترة بالترتيب (حتى الأيام بصفر تثبيتات تظهر بالرسم، مش تختفي)
+  const days = [];
+  const cur = new Date(from);
+  while(cur <= to){
+    days.push(fmtFull(cur));
+    cur.setDate(cur.getDate()+1);
+  }
+  const counts = days.map(d=>byDay[d]||0);
+
+  if(dashTrendChart) dashTrendChart.destroy();
+  dashTrendChart = new Chart(canvas, {
+    type:'line',
+    data:{ labels:days, datasets:[{
+      label:'عدد الطلبات المثبَّتة', data:counts,
+      borderColor:'#C9A96E', backgroundColor:'rgba(201,169,110,.15)',
+      borderWidth:2, tension:.3, fill:true, pointRadius:3, pointBackgroundColor:'#C9A96E'
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#8B7355',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},
+        y:{beginAtZero:true, ticks:{color:'#8B7355',font:{size:9},stepSize:1},grid:{color:'rgba(255,255,255,.05)'}}
+      }
+    }
+  });
 }
 
 function renderDashKPIs(){
@@ -5319,12 +5292,6 @@ function renderDashKPIs(){
     {ico:'🚚',val:delivRev+' د.أ',lbl:'رسوم التوصيل',sub:delivCount+' أوردر خارج عمّان',cls:'blue'},
     {ico:'⚡',val:active,lbl:'قيد التنفيذ الآن',sub:'كل الأوردرات — بغض النظر عن الفترة',cls:'orange'},
     {ico:'✅',val:done,lbl:'تم التسليم',sub:doneRate+'% من المحتسب — الفترة المحددة',cls:'green'},
-    {ico:'⏳',val:waiting,lbl:'بانتظار تأكيد الآن',sub:'كل الأوردرات — بغض النظر عن الفترة',cls:'purple'},
-    {ico:'❌',val:cancelled,lbl:'ملغي',sub:'في الفترة المحددة',cls:'red'},
-    {ico:'📊',val:avg+' د.أ',lbl:'متوسط قيمة الأوردر',sub:'على '+billCount+' أوردر',cls:'gold'},
-    {ico:'📅',val:[...new Set(t.map(o=>o['Delivery Date']).filter(Boolean))].length,lbl:'أيام تسليم',sub:'',cls:'blue'},
-    {ico:'🏙️',val:[...new Set(t.map(o=>o['Governorate']).filter(Boolean))].length,lbl:'محافظات',sub:'',cls:'purple'},
-    {ico:'📱',val:[...new Set(t.map(o=>o['Phone']).filter(Boolean))].length,lbl:'عملاء مختلفون',sub:'',cls:'gold'},
   ];
   document.getElementById('dash-kpi').innerHTML=kpis.map(k=>`<div class="kpi ${k.cls}"><div class="kpi-ico">${k.ico}</div><div class="kpi-val">${k.val}</div><div class="kpi-lbl">${k.lbl}</div>${k.sub?`<div class="kpi-sub">${k.sub}</div>`:''}</div>`).join('');
 }
@@ -5365,7 +5332,11 @@ function renderDashProds(){
   billable(dashFiltered).forEach(o=>{const t=o['Product Type']||'Other';if(!prods[t])prods[t]={count:0,rev:0};prods[t].count++;prods[t].rev+=orderTotalD(o);});
   const sorted=Object.entries(prods).sort((a,b)=>b[1].count-a[1].count);
   const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
-  document.getElementById('dash-prods').innerHTML=sorted.slice(0,5).map(([type,d],i)=>`<div class="prod-item"><div class="prod-rank">${medals[i]||i+1}</div><div class="prod-name">${TYPE_AR[type]||type}</div><div class="prod-cnt">${d.count} أوردر</div><div class="prod-rev">${d.rev} د.أ</div></div>`).join('');
+  if(!sorted.length){
+    document.getElementById('dash-prods').innerHTML='<div style="color:#8B7355;font-size:13px;text-align:center;padding:16px 0">لا توجد بيانات ضمن الفترة المحددة</div>';
+    return;
+  }
+  document.getElementById('dash-prods').innerHTML=sorted.map(([type,d],i)=>`<div class="prod-item"><div class="prod-rank">${medals[i]||(i+1)}</div><div class="prod-name">${TYPE_AR[type]||type}</div><div class="prod-cnt">${d.count} أوردر</div><div class="prod-rev">${d.rev} د.أ</div></div>`).join('');
 }
 
 function renderDashTable(){
@@ -5688,6 +5659,14 @@ async function deletePhotoFromOrder(orderId, url){
 // المسودات مخزّنة على الشيت (تبويب Drafts) — تظهر من أي جهاز، مش بس الجهاز اللي حفظها
 let cachedDrafts = [];
 
+// يفسّر الطابع الزمني للمسودة بأمان — يدعم الصيغة الرقمية الجديدة (ملي ثانية) والصيغة النصية القديمة (ISO) معاً
+function parseSavedAt(raw){
+  if(!raw) return new Date(NaN);
+  const n = Number(raw);
+  if(!isNaN(n) && n > 0) return new Date(n);
+  return new Date(raw);
+}
+
 async function fetchDraftsFromServer(){
   try{
     const res = await apiPost({action:'getDrafts'});
@@ -5696,8 +5675,8 @@ async function fetchDraftsFromServer(){
       try{ parsed = JSON.parse(d.data); }catch(e){}
       return { id:d.id, savedAt:d.savedAt, createdBy:d.createdBy||'', data:parsed };
     }).sort((a,b)=>{
-      const ta = new Date(a.savedAt).getTime();
-      const tb = new Date(b.savedAt).getTime();
+      const ta = parseSavedAt(a.savedAt).getTime();
+      const tb = parseSavedAt(b.savedAt).getTime();
       // مسودات قديمة بتاريخ غير صالح (من قبل الإصلاح) تُدفع لآخر القائمة بدل ما تخرّب الترتيب
       if(isNaN(tb) && isNaN(ta)) return 0;
       if(isNaN(tb)) return -1;
@@ -5761,7 +5740,7 @@ async function saveDraft(){
     return;
   }
   const id = 'draft_' + Date.now();
-  const savedAt = new Date().toISOString();
+  const savedAt = String(Date.now()); // رقم صرف — يمنع جوجل شيتس من محاولة "تفسير" الصيغة كتاريخ
   showFullscreenLoading('⏳ جاري حفظ المسودة...');
   try{
     await writeToSheet({action:'saveDraft', id, data:JSON.stringify(data), savedAt});
@@ -5899,7 +5878,7 @@ async function renderDraftsList(){
     const names = d.type==='Graduation'?(d.gradname||'—'):
                   d.type==='Bouquet'?'مسكة عروس':
                   [d.bride, d.groom].filter(Boolean).join(' ❤️ ')||'—';
-    const dt = new Date(draft.savedAt);
+    const dt = parseSavedAt(draft.savedAt);
     // دفاع مضاعف: أي قيمة غير قابلة للتفسير (مسودة قديمة من قبل الإصلاح مثلاً) تعرض نص واضح بدل NaN
     const timeStr = isNaN(dt.getTime())
       ? '—'
@@ -5943,7 +5922,7 @@ function toast(msg){
 </script>
 
 <!-- DASHBOARD MODAL -->
-<div id="dash-overlay" style="display:none;position:fixed;inset:0;background:#0F0C08;z-index:800;overflow-y:auto">
+<div id="dash-overlay" style="display:none;position:fixed;inset:0;background:#0F0C08;z-index:800;overflow-y:auto;overflow-x:hidden">
 
   <!-- DASH APP -->
   <div id="dash-app" style="display:none">
@@ -6024,8 +6003,27 @@ function toast(msg){
 
       <!-- ظاهر دايماً: أهم إجابة — شو أكثر شي مطلوب هالفترة، بعدد الأوردرات والقيمة -->
       <div class="section">
-        <div class="section-ttl">🏆 أكثر المنتجات طلباً</div>
+        <div class="section-ttl">🏆 المنتجات حسب الطلب (بالفترة المحددة)</div>
         <div class="prod-list" id="dash-prods"></div>
+      </div>
+
+      <!-- تطوّر تثبيت الطلبات عبر الوقت — يعتمد على وقت التثبيت الفعلي (Created At) مو موعد التسليم،
+           عشان يعكس فعلياً وقت استجابة الزبائن (مثلاً لحملة إعلانية) لا وقت التسليم المستقبلي -->
+      <div class="section">
+        <div class="section-ttl">📈 تطوّر تثبيت الطلبات (حسب وقت التثبيت الفعلي)</div>
+        <div style="margin-bottom:12px">
+          <select id="dash-trend-type" onchange="renderDashProductTrend()" style="width:100%;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:8px;padding:9px 12px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;color:#1A1410">
+            <option value="all">كل المنتجات</option>
+            <option value="Tray">صينية</option>
+            <option value="Package">بكج</option>
+            <option value="Guest Book">كتاب</option>
+            <option value="Frame">برواز</option>
+            <option value="Graduation">صينية تخرج</option>
+            <option value="Bouquet">مسكة عروس</option>
+          </select>
+        </div>
+        <canvas id="dash-chart-trend" height="180"></canvas>
+        <div style="font-size:11px;color:#8B7355;margin-top:8px;text-align:center">كل نقطة = عدد الطلبات اللي **اتثبّتت** (انحفظت بالنظام) بذاك اليوم — مفيد لمعرفة تأثير حملة إعلانية أو موسم معيّن</div>
       </div>
 
       <div class="section">
