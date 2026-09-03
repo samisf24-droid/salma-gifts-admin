@@ -81,8 +81,9 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .hdr-dot{width:7px;height:7px;border-radius:50%;background:#FF5252;flex-shrink:0}
 
 /* TABS */
-.tabs{background:var(--dark);display:flex;border-top:1px solid rgba(255,255,255,.08);overflow-x:auto}
-.tab{flex:1;min-width:60px;padding:10px 6px;text-align:center;font-size:13px;font-weight:700;color:var(--gold-l);opacity:.45;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;font-family:'Tajawal',sans-serif;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
+.tabs{background:var(--dark);display:flex;border-top:1px solid rgba(255,255,255,.08);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:var(--gold-l);opacity:.45;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;font-family:'Tajawal',sans-serif;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
 .tab.on{opacity:1;border-bottom-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
 
 
@@ -908,7 +909,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v86</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v87</span>
   </div>
 </div>
 <div class="tabs">
@@ -1835,7 +1836,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v86<br>
+       <strong>الإصدار:</strong> v87<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1859,7 +1860,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v86 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v87 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
