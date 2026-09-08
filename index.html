@@ -673,6 +673,12 @@ body.staff-view .cal-day-block-cnt{display:none}
 .section{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:14px;padding:18px;margin-bottom:16px}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
+.pc-paid-banner{
+  background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;
+  border-radius:6px;padding:6px 10px;margin-top:6px;
+  font-size:11.5px;font-weight:900;text-align:center;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
 
 /* ── شاشة الترحيب (Splash) ── */
 #splash-screen{
@@ -909,7 +915,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v87</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v89</span>
   </div>
 </div>
 <div class="tabs">
@@ -1028,8 +1034,9 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
           <button type="button" class="type-grid-btn" data-type="Guest Book" onclick="selectTypeFromGrid('Guest Book')"><div class="type-grid-ico">📖</div><div class="type-grid-lbl">كتاب</div></button>
           <button type="button" class="type-grid-btn" data-type="Frame" onclick="selectTypeFromGrid('Frame')"><div class="type-grid-ico">🖼️</div><div class="type-grid-lbl">برواز</div></button>
           <button type="button" class="type-grid-btn" data-type="Graduation" onclick="selectTypeFromGrid('Graduation')"><div class="type-grid-ico">🎓</div><div class="type-grid-lbl">صينية تخرج</div></button>
+          <button type="button" class="type-grid-btn" data-type="MahrBox" onclick="selectTypeFromGrid('MahrBox')"><div class="type-grid-ico">🎁</div><div class="type-grid-lbl">صندوق مهر</div></button>
         </div>
-        <select id="f-type" style="display:none"><option value="">اختر...</option><option value="Tray">صينية</option><option value="Guest Book">كتاب</option><option value="Package">بكج</option><option value="Frame">برواز</option><option value="Graduation">صينية تخرج</option><option value="Bouquet">مسكة عروس</option></select>
+        <select id="f-type" style="display:none"><option value="">اختر...</option><option value="Tray">صينية</option><option value="Guest Book">كتاب</option><option value="Package">بكج</option><option value="Frame">برواز</option><option value="Graduation">صينية تخرج</option><option value="Bouquet">مسكة عروس</option><option value="MahrBox">صندوق مهر</option></select>
       </div>
 
       <div class="fg">
@@ -1170,6 +1177,8 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <button type="button" id="ap-qassasat-btn" onclick="addOrEditAddition('qassasat')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة قصاصات</button>
       <button type="button" id="ap-fanajin-btn" onclick="addOrEditAddition('fanajin')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ فناجين (٥ د.أ)</button>
       <button type="button" id="ap-qalam-btn" onclick="addOrEditAddition('qalam')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصة التقويم / رسالة العمر (٢ د.أ)</button>
+      <button type="button" id="ap-mahrnames-btn" onclick="addOrEditAddition('mahrNames')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة أسماء (٢ د.أ)</button>
+      <button type="button" id="ap-mahrphrase-btn" onclick="addOrEditAddition('mahrPhrase')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة عبارة (٢ د.أ)</button>
       <button type="button" id="ap-taliqa-btn" onclick="addOrEditAddition('taliqa')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة تعليقة (٢ د.أ)</button>
     </div>
 
@@ -1191,6 +1200,20 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div class="fg"><label>تفاصيل</label><input type="text" id="ql-details" placeholder="مثال: رسالة العمر، أو تفاصيل قصاصة التقويم..."></div>
       <button type="button" onclick="confirmQalam()" class="btn btn-gold" style="margin-top:6px">✅ حفظ</button>
     </div>
+    <div id="mahrnames-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:#8A6030;margin-bottom:8px">الأسماء تُطبع مع أسماء الصواني بتبويب الطباعة</div>
+      <div class="form-grid">
+        <div class="fg"><label>اسم العريس <span class="req">*</span></label><input type="text" id="mn-groom"></div>
+        <div class="fg"><label>اسم العروس <span class="req">*</span></label><input type="text" id="mn-bride"></div>
+      </div>
+      <button type="button" onclick="confirmMahrNames()" class="btn btn-gold" style="margin-top:6px">✅ حفظ الأسماء</button>
+    </div>
+
+    <div id="mahrphrase-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div class="fg"><label>العبارة <span class="req">*</span></label><input type="text" id="mp-text" placeholder="مثال: بوركت فاتحة العمر"></div>
+      <button type="button" onclick="confirmMahrPhrase()" class="btn btn-gold" style="margin-top:6px">✅ حفظ العبارة</button>
+    </div>
+
     <div id="bq-taliqa-form" style="display:none;background:#FFF8EE;border:1.5px solid #E5D9C7;border-radius:8px;padding:12px;margin-bottom:12px">
       <div class="form-grid">
         <div class="fg"><label>اسم العريس</label><input type="text" id="bq-t-groom"></div>
@@ -1228,7 +1251,11 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="form-grid">
       <div class="fg">
         <label>الحساب الشامل (د.أ) <span class="req">*</span></label>
-        <input type="number" id="f-price" placeholder="15" min="0" step="0.5">
+        <input type="number" id="f-price" placeholder="15" min="0" step="0.5" oninput="updatePriceHint()">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:9px;cursor:pointer;font-size:13.5px;font-weight:700;color:#4A3728">
+          <input type="checkbox" id="f-paid" onchange="updatePriceHint()" style="width:18px;height:18px;accent-color:#C9A96E;cursor:pointer">
+          💰 الحساب واصل (لا يُحصَّل عند التسليم)
+        </label>
         <div class="hint" id="price-hint"></div>
       </div>
       <div class="fg"><label>رابط المحادثة</label><input type="url" id="f-link" placeholder="https://..."></div>
@@ -1411,6 +1438,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
           <label class="pday-cb"><input type="checkbox" name="print-type" value="Frame" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">برواز</div></div></label>
           <label class="pday-cb"><input type="checkbox" name="print-type" value="Graduation" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">تخرج</div></div></label>
           <label class="pday-cb"><input type="checkbox" name="print-type" value="Bouquet" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">مسكة عروس</div></div></label>
+          <label class="pday-cb"><input type="checkbox" name="print-type" value="MahrBox" onchange="updateMsSummary('type')"><div class="pday-cb-info"><div class="pday-cb-name">صندوق مهر</div></div></label>
         </div>
       </div>
     </div>
@@ -1465,6 +1493,13 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbzkrzR3982z7QbFuzH0VRAEd1RWYDaZnos8VMBkUPnrMLD2iU2GeEwbVlq7pWHBj-I-/exec';
 const DELIVERY_FEE = 2;
+
+// قيمة الطلب الحقيقية (للإيرادات) — لا تتأثر بكون الحساب واصلاً أو لا
+function orderValue(o){ return parseFloat(o['Total']||0) + (o['Governorate'] ? DELIVERY_FEE : 0); }
+// هل الحساب مدفوع مسبقاً؟
+function isPaidUp(o){ return String(o['Paid']||'').toLowerCase() === 'yes'; }
+// المبلغ الذي تُحصّله شركة التوصيل فعلياً — صفر إذا كان الحساب واصلاً
+function amountToCollect(o){ return isPaidUp(o) ? 0 : orderValue(o); }
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 // تطبيع الحالة: الشيت فيه قيم قديمة بأحرف صغيرة (done) وجديدة بكبيرة (Done)
 const STATUS_CANON = {new:'New',preparing:'Preparing',shipped:'Shipped',done:'Done',cancelled:'Cancelled',waiting:'Waiting',other:'Other'};
@@ -1473,7 +1508,7 @@ function normStatus(o){
   return STATUS_CANON[String(raw).toLowerCase()] || 'New';
 }
 const MODEL_AR = {Turkish:'التركي',White:'الأبيض',Elegant:'الأنيق',Luxury:'الفاخر',Royal:'الملكي'};
-const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Frame:'برواز',Graduation:'تخرج',Bouquet:'مسكة عروس'};
+const TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Frame:'برواز',Graduation:'تخرج',Bouquet:'مسكة عروس',MahrBox:'صندوق مهر'};
 const STATUSES = {
   New:      {lbl:'طلب جديد',           cls:'s-New'},
   Preparing:{lbl:'جاري التجهيز',          cls:'s-Preparing'},
@@ -1836,7 +1871,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v87<br>
+       <strong>الإصدار:</strong> v89<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1860,7 +1895,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v87 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v89 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2051,7 +2086,8 @@ function miniCard(o){
   const status = normStatus(o);
   const st = STATUSES[status]||STATUSES.New;
   const total = parseFloat(o['Total']||0);
-  const grandTotal = o['Governorate'] ? total+DELIVERY_FEE : total;
+  const grandTotal = amountToCollect(o);
+  const paidMark = isPaidUp(o) ? ' ✅' : '';
   const typeAr = TYPE_AR[type]||type;
   const tc = typeClass(type);
   const sel = selectedIds.has(id);
@@ -2062,7 +2098,7 @@ function miniCard(o){
     <div class="mc-row">
       <span class="mc-type ${tc}">${typeAr}</span>
       <span class="mc-st ${st.cls}">${st.lbl}</span>
-      <span class="mc-price">${grandTotal}د.أ</span>
+      <span class="mc-price">${grandTotal}د.أ${paidMark}</span>
     </div>
     ${byTag}
   </div>`;
@@ -2280,7 +2316,7 @@ function searchItemHTML(o, q){
   const st=STATUSES[status]||STATUSES.New;
   const dd=o['Delivery Date']||o['Delivery Day']||'—';
   const total=parseFloat(o['Total']||0);
-  const grand=o['Governorate']?total+DELIVERY_FEE:total;
+  const grand=amountToCollect(o);
   const stColors={New:'#EAF3DE,#3B6D11',Preparing:'#FFF3CD,#856404',Shipped:'#DBEAFE,#1E40AF',Done:'#F0F0F0,#666',Cancelled:'#FFDDD9,#C0392B',Waiting:'#F3E8FF,#6B21A8'};
   const [bg,fg]=(stColors[status]||'#F3E8FF,#666').split(',');
   return `<div class="search-item" onclick="closeSearchPanel();openPanel('${id}')">
@@ -2315,7 +2351,7 @@ function showSearchPanel(results, q){
     const typeAr=TYPE_AR[type]||type;
     const dd=o['Delivery Date']||o['Delivery Day']||'—';
     const total=parseFloat(o['Total']||0);
-    const grand=o['Governorate']?total+DELIVERY_FEE:total;
+    const grand=amountToCollect(o);
     const stColors={New:'#EAF3DE,#3B6D11',Preparing:'#FFF3CD,#856404',Shipped:'#DBEAFE,#1E40AF',Done:'#F0F0F0,#666',Cancelled:'#FFDDD9,#C0392B',Waiting:'#F3E8FF,#6B21A8'};
     const [bg,fg]=(stColors[status]||'#F3E8FF,#666').split(',');
     return `<div class="sr-card" onclick="closeSearchPanel();openPanel('${id}')">
@@ -2364,7 +2400,7 @@ function openPanel(id){
   const names=type==='Graduation'?bride:type==='Bouquet'?('مسكة عروس'+(o['Recipient']?' — '+o['Recipient']:'')):([bride,groom].filter(Boolean).join(' ❤️ '));
   const total=parseFloat(o['Total']||0);
   const prov=o['Governorate']||'';
-  const grandTotal=prov?total+DELIVERY_FEE:total;
+  const grandTotal=amountToCollect(o);
   const model=MODEL_AR[o['Model']]||o['Model']||'';
   const status=normStatus(o);
 
@@ -2411,7 +2447,8 @@ function openPanel(id){
   dF+=pr('تاريخ التسليم',o['Delivery Date']||o['Delivery Day']||'—');
   if(o['Delivery Notes']) dF+=pr('ملاحظات التوصيل',o['Delivery Notes']);
   if(prov) dF+=pr('رسوم التوصيل',DELIVERY_FEE+' د.أ');
-  dF+=`<div class="pr"><span class="prk">الحساب الكامل</span><span class="prv prv-total">${grandTotal} د.أ</span></div>`;
+  dF+=`<div class="pr"><span class="prk">${isPaidUp(o)?'المطلوب تحصيله':'الحساب الكامل'}</span><span class="prv prv-total">${grandTotal} د.أ</span></div>`;
+  if(isPaidUp(o)) dF+=`<div class="pr"><span class="prk">حالة الدفع</span><span class="prv" style="color:#2D5A0D;font-weight:800">✅ الحساب كامل واصل (${orderValue(o)} د.أ)</span></div>`;
   // سطر التوثيق: متى أُضيف الأوردر
   const created = o['Created At']||'';
   const createdBy = o['CreatedBy']||'';
@@ -2837,7 +2874,12 @@ function openEdit(id, overrideType){
     <div class="sec-lbl">بيانات التوصيل</div>
     <div class="form-grid">
       <div class="fg"><label>تاريخ التسليم <span style="color:#C0392B">*</span></label><input type="date" id="e-deldate" value="${toInputDate(o['Delivery Date'])}"></div>
-      <div class="fg"><label>الحساب (د.أ) <span style="color:#C0392B">*</span></label><input type="number" id="e-price" value="${o['Total']||0}" min="0" step="0.5"></div>
+      <div class="fg"><label>الحساب (د.أ) <span style="color:#C0392B">*</span></label><input type="number" id="e-price" value="${o['Total']||0}" min="0" step="0.5">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:9px;cursor:pointer;font-size:13px;font-weight:700;color:#4A3728">
+          <input type="checkbox" id="e-paid" ${isPaidUp(o)?'checked':''} style="width:17px;height:17px;accent-color:#C9A96E;cursor:pointer">
+          💰 الحساب واصل
+        </label>
+      </div>
       <div class="fg"><label>اسم المستلم</label><input type="text" id="e-rname" value="${(o['Recipient']||'').replace(/"/g,'&quot;')}"></div>
       <div class="fg"><label>الهاتف</label><input type="tel" id="e-phone" value="${o['Phone']||''}" dir="ltr" style="text-align:right"></div>
       <div class="fg"><label>المحافظة</label><select id="e-prov" style="width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;appearance:none;-webkit-appearance:none">${provOpts}</select></div>
@@ -2946,6 +2988,7 @@ async function applyEdit(id){
     'Delivery Date': newDeliveryDate,
     'Delivery Day':  newDeliveryDay,
     Total:          parseFloat(document.getElementById('e-price').value)||0,
+    Paid:           document.getElementById('e-paid').checked ? 'Yes' : '',
     Groom:          getVal('e-groom'),
     Bride:          getVal('e-bride'),
     'Occasion Date': (() => { const el=document.getElementById('e-occdate'); if(!el||!el.value) return ''; const d=new Date(el.value+'T00:00:00'); return fmtFull(d); })(),
@@ -3219,6 +3262,7 @@ function toggleFields(){
   const hasTray=['Tray','Package'].includes(t);
   const isBouquet=t==='Bouquet';
   const isGrad=t==='Graduation';
+  const isMahr=t==='MahrBox';
 
   // هل تغيّر نوع المنتج فعلياً بهذا الاستدعاء؟ (مهم: التصفير يحدث مرة واحدة فقط عند التبديل)
   const typeChanged = (t !== lastFType);
@@ -3241,6 +3285,9 @@ function toggleFields(){
     if(!isBouquet){
       ['f-bouquet-model','f-bouquet-notes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
     }
+    if(!isMahr){
+      ['mn-groom','mn-bride','mp-text'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+    }
     resetAdditions(); // الإضافات وأسعارها لا تنتقل بين الأنواع أبداً
     lastFType = t;
   }
@@ -3260,18 +3307,22 @@ function toggleFields(){
   const genericPhoto = document.getElementById('generic-photo-section');
   if(genericPhoto) genericPhoto.style.display = (isBouquet || !pkgReady) ? 'none' : 'block';
   const genericPhrase = document.getElementById('generic-phrase-section');
-  if(genericPhrase) genericPhrase.style.display = (isBouquet || !pkgReady) ? 'none' : 'block';
+  // صندوق المهر: العبارة تُدار من إضافة "عبارة" المدفوعة، مو من الحقل العام
+  if(genericPhrase) genericPhrase.style.display = (isBouquet || isMahr || !pkgReady) ? 'none' : 'block';
 
   // أزرار الإضافات — تظهر بحسب النوع
   const btnVis = (id, show) => { const el=document.getElementById(id); if(el) el.style.display = show ? 'inline-flex' : 'none'; };
   btnVis('ap-letters-btn',  hasTray);
   btnVis('ap-stand-btn',    ['Tray','Package','Graduation'].includes(t));
-  btnVis('ap-qassasat-btn', t && t!=='Graduation');
-  btnVis('ap-fanajin-btn',  t && t!=='Graduation');
-  btnVis('ap-qalam-btn',    t && t!=='Graduation');
+  // صندوق المهر: إضافتان فقط لا غير (أسماء + عبارة)
+  btnVis('ap-qassasat-btn', t && t!=='Graduation' && !isMahr);
+  btnVis('ap-fanajin-btn',  t && t!=='Graduation' && !isMahr);
+  btnVis('ap-qalam-btn',    t && t!=='Graduation' && !isMahr);
   btnVis('ap-taliqa-btn',   isBouquet);
+  btnVis('ap-mahrnames-btn',  isMahr);
+  btnVis('ap-mahrphrase-btn', isMahr);
   refreshBookFrameFields();
-  const prices={Tray:15,'Guest Book':9,Package:22,Frame:7,Graduation:13,Bouquet:18};
+  const prices={Tray:15,'Guest Book':9,Package:22,Frame:7,Graduation:13,Bouquet:18,MahrBox:18};
   if(t!=='Package' && prices[t]) document.getElementById('f-price').value=prices[t];
   // تصفير نوع البكج يحدث فقط عند تبديل نوع المنتج فعلياً — لا مع كل استدعاء
   // (وإلا كان يمسح الاختيار فور اختياره ويمنع ظهور قسم الكتاب/البرواز)
@@ -3336,6 +3387,8 @@ const ADDITION_META = {
   fanajin:  {price:5, fields:['cup1','cup2']},
   qalam:    {price:2, fields:['details']},
   taliqa:   {price:2, fields:['groom','bride','date','notes']},
+  mahrNames:  {price:2, fields:['groom','bride']},  // صندوق المهر — الأسماء تُطبع مع الصواني
+  mahrPhrase: {price:2, fields:['text']},
 };
 
 // يبني نص القصاصات من مصفوفة (كل قصاصة نص حر) — الفاصل ؛؛ لتفادي تعارضه مع فاصل | بين الإضافات المختلفة
@@ -3356,6 +3409,8 @@ function additionRowText(kind, d){
   d = d || {};
   if(kind==='letters')  return 'أحرف على العلب';
   if(kind==='stand')    return 'ستاند';
+  if(kind==='mahrNames') return 'أسماء ('+[d.groom,d.bride].filter(Boolean).join(' ، ')+')';
+  if(kind==='mahrPhrase') return 'عبارة: '+(d.text||'');
   if(kind==='qassasat') return buildQassasatText(d.items);
   if(kind==='fanajin')  return 'فناجين (١: '+(d.cup1||'—')+' / ٢: '+(d.cup2||'—')+')';
   if(kind==='qalam')    return 'قصاصة التقويم/رسالة العمر: '+(d.details||'');
@@ -3429,7 +3484,7 @@ function addFreeAdditionRow(value){
 }
 
 function closeAllAdditionForms(){
-  ['qassasat-form','fanajin-form','qalam-form','bq-taliqa-form'].forEach(id=>{
+  ['qassasat-form','fanajin-form','qalam-form','bq-taliqa-form','mahrnames-form','mahrphrase-form'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
 }
@@ -3471,6 +3526,15 @@ function addOrEditAddition(kind){
   closeAllAdditionForms();
   const data = existing ? JSON.parse(existing.dataset.fields.replace(/&#39;/g,"'")||'{}') : {};
 
+  if(kind==='mahrNames'){
+    document.getElementById('mn-groom').value = data.groom||'';
+    document.getElementById('mn-bride').value = data.bride||'';
+    document.getElementById('mahrnames-form').style.display='block';
+  }
+  if(kind==='mahrPhrase'){
+    document.getElementById('mp-text').value = data.text||'';
+    document.getElementById('mahrphrase-form').style.display='block';
+  }
   if(kind==='qassasat'){
     const list = document.getElementById('qs-items-list');
     list.innerHTML='';
@@ -3496,6 +3560,30 @@ function saveAdditionFromForm(kind, data, requiredMsg){
   else createAdditionRow(kind, data);
   closeAllAdditionForms();
   return true;
+}
+
+function confirmMahrNames(){
+  const groom = document.getElementById('mn-groom').value.trim();
+  const bride = document.getElementById('mn-bride').value.trim();
+  if(!groom || !bride){ toast('❌ أدخلي اسم العريس والعروس'); return; }
+  if(saveAdditionFromForm('mahrNames', {groom,bride}, '')){
+    // الأسماء تُخزَّن كمان بحقلي العريس/العروس الأساسيين — عشان تطلع بقائمة الطباعة والبحث
+    const gEl=document.getElementById('f-groom'); if(gEl) gEl.value = groom;
+    const bEl=document.getElementById('f-bride'); if(bEl) bEl.value = bride;
+    document.getElementById('mn-groom').value='';
+    document.getElementById('mn-bride').value='';
+    toast('✅ تم حفظ الأسماء');
+  }
+}
+
+function confirmMahrPhrase(){
+  const text = document.getElementById('mp-text').value.trim();
+  if(!text){ toast('❌ أدخلي العبارة'); return; }
+  if(saveAdditionFromForm('mahrPhrase', {text}, '')){
+    const pEl=document.getElementById('f-phrase'); if(pEl) pEl.value = text;
+    document.getElementById('mp-text').value='';
+    toast('✅ تم حفظ العبارة');
+  }
 }
 
 function confirmQassasat(){
@@ -3575,7 +3663,8 @@ function computeInventoryDeductions(data){
   const additionsText = data.additions || '';
   const hasAdd = (kw) => additionsText.indexOf(kw) !== -1;
 
-  if(type === 'Bouquet') return d; // نواقص المسكات لاحقاً — بدون استهلاك حالياً
+  // المسكات وصناديق المهر: موادهما غير معرّفة بالمستودع بعد — بدون استهلاك حالياً
+  if(type === 'Bouquet' || type === 'MahrBox') return d;
 
   const applyTrayMaterials = () => {
     add('mirror', 1);
@@ -3632,7 +3721,17 @@ function toggleModelOther(){
 function updatePriceHint(){
   const prov=document.getElementById('f-prov').value;
   const price=parseFloat(document.getElementById('f-price').value)||0;
-  document.getElementById('price-hint').textContent=prov&&price?'+ 2 د.أ توصيل = الإجمالي: '+(price+DELIVERY_FEE)+' د.أ':'';
+  const paidEl = document.getElementById('f-paid');
+  const isPaid = paidEl && paidEl.checked;
+  const hintEl = document.getElementById('price-hint');
+  const grand = price + (prov?DELIVERY_FEE:0);
+  if(isPaid){
+    hintEl.innerHTML = '✅ الحساب واصل — <b>شركة التوصيل لا تُحصّل شيئاً</b>'+(grand?' (قيمة الطلب '+grand+' د.أ)':'');
+  } else if(prov){
+    hintEl.textContent = '+ 2 د.أ توصيل = المطلوب تحصيله: '+grand+' د.أ';
+  } else {
+    hintEl.textContent = '';
+  }
 }
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('f-prov').addEventListener('change',updatePriceHint);
@@ -3832,7 +3931,8 @@ async function saveOrder(){
     return;
   }
   const price=parseFloat(document.getElementById('f-price').value);
-  if(!price){toast('❌ أدخلي الحساب');return;}
+  // الصفر قيمة مقبولة (هدية/تعويض) — نرفض الفاضي أو غير الرقمي فقط
+  if(isNaN(price)){toast('❌ أدخلي الحساب');return;}
 
   // منع التكرار: نفس رقم الهاتف + نفس تاريخ التسليم بالضبط = شبه مؤكد نفس الأوردر مسجّل غلط مرتين
   let confirmedDuplicate = false;
@@ -3914,6 +4014,7 @@ async function saveOrder(){
     deliveryNotes:document.getElementById('f-dnotes').value.trim(),
     total:price,
     link:document.getElementById('f-link').value.trim(),
+    paid: document.getElementById('f-paid').checked ? 'Yes' : '',
     status:'New',
     createdAt:nowStamp(),          // وقت الإضافة من جهاز المُدخِل
     confirmDuplicate: confirmedDuplicate  // المستخدمة أكّدت هذا التكرار عالمتصفح — السيرفر ما يرفضه ثانية
@@ -3971,6 +4072,7 @@ function clearForm(){
   document.getElementById('f-deldate').value='';
   document.getElementById('f-deldate').style.display='none';
   document.getElementById('deldate-hint').textContent='';
+  const paidBox=document.getElementById('f-paid'); if(paidBox) paidBox.checked=false;
   const fDelStep2=document.getElementById('f-deldate-step2');
   if(fDelStep2) fDelStep2.value='';
   const hint2El=document.getElementById('deldate-hint-step2');
@@ -4196,8 +4298,14 @@ function generateNamesList(){
       });
     });
   } else {
-    // صواني/بكج/تخرج — يستثني الكتاب المنفصل والمسكة
-    matched.filter(o=>['Tray','Package','Graduation'].includes(o['Product Type'])).forEach(o=>{
+    // صواني/بكج/تخرج + صندوق المهر (لما يكون فيه إضافة أسماء فقط) — يستثني الكتاب المنفصل والمسكة
+    matched.filter(o=>{
+      const t = o['Product Type'];
+      if(['Tray','Package','Graduation'].includes(t)) return true;
+      // صندوق المهر يدخل قائمة الطباعة فقط إذا انطلبت معه إضافة الأسماء
+      if(t==='MahrBox') return /أسماء\s*\(/.test(String(o['Additions']||''));
+      return false;
+    }).forEach(o=>{
       if(o['Product Type']==='Graduation'){
         const major = o['Model'] ? ' ('+o['Model']+')' : '';
         entries.push({id:o['Order ID'], line1:(o['Bride']||'—')+major+' (تخرج)', line2:'', printed:isNamePrinted(o), label:'تخرج'});
@@ -4495,7 +4603,7 @@ function printCard(o){
   const names=getOrderNames(o);
   const total=parseFloat(o['Total']||0);
   const prov=o['Governorate']||'';
-  const grandTotal=prov?total+DELIVERY_FEE:total;
+  const grandTotal=amountToCollect(o);
   const model=MODEL_AR[o['Model']]||o['Model']||'';
   const delDate=o['Delivery Date']||o['Delivery Day']||'—';
 
@@ -4572,10 +4680,16 @@ function printCard(o){
     dRow('العنوان', location) +
     dRow('التسليم', delDate) +
     dRow('ملاحظات', o['Delivery Notes']) +
-    `<div class="pc-del-total">
-      <span class="pc-del-total-k">الحساب الكامل</span>
-      <span class="pc-del-total-v">${grandTotal} د.أ</span>
-    </div>`;
+    (isPaidUp(o)
+      ? `<div class="pc-paid-banner">✅ الحساب كامل واصل — لا يُحصَّل شيء</div>
+         <div class="pc-del-total">
+           <span class="pc-del-total-k">المطلوب تحصيله</span>
+           <span class="pc-del-total-v">٠ د.أ</span>
+         </div>`
+      : `<div class="pc-del-total">
+           <span class="pc-del-total-k">الحساب الكامل</span>
+           <span class="pc-del-total-v">${grandTotal} د.أ</span>
+         </div>`);
 
   return `<div class="pc-card">
     <div class="pc-card-hdr">
@@ -4583,7 +4697,7 @@ function printCard(o){
       <span class="pc-type">${typeAr}</span>
       <span class="pc-names">${names||'—'}</span>
       <span class="pc-date-hdr">${delDate}</span>
-      <span class="pc-price">${grandTotal} د.أ</span>
+      <span class="pc-price">${isPaidUp(o)?'واصل ✅':grandTotal+' د.أ'}</span>
     </div>
     <div class="pc-secs">
       <div class="pc-sec pc-sec-o ${printTypeClass(type)}" style="--pv-size:${pvSize}px">
@@ -5124,7 +5238,8 @@ function renderForecastResult(totals, orderCount, dateStrs){
     }).join('');
 }
 
-function orderTotalD(o){return parseFloat(o['Total']||0)+(o['Governorate']?DELIVERY_FEE:0)}
+// إيرادات الداشبورد: قيمة الطلب الحقيقية — الحساب الواصل مبيعات فعلية، بس محصّلة مسبقاً
+function orderTotalD(o){return orderValue(o)}
 function stOf(o){ return String(o['Status']||'').toLowerCase(); }
 function isCancelled(o){ return stOf(o)==='cancelled'; }
 // الأوردرات المحتسبة مالياً = كل شي عدا الملغي
@@ -6021,6 +6136,7 @@ function toast(msg){
             <option value="Frame">برواز</option>
             <option value="Graduation">صينية تخرج</option>
             <option value="Bouquet">مسكة عروس</option>
+            <option value="MahrBox">صندوق مهر</option>
           </select>
         </div>
         <canvas id="dash-chart-trend" height="180"></canvas>
@@ -6059,6 +6175,7 @@ function toast(msg){
             <option value="Frame">برواز</option>
             <option value="Graduation">تخرج</option>
             <option value="Bouquet">مسكة عروس</option>
+            <option value="MahrBox">صندوق مهر</option>
           </select>
           <select class="of-sel" id="dash-tbl-sort" onchange="renderDashTable()">
             <option value="date-desc">الأحدث أولاً</option>
