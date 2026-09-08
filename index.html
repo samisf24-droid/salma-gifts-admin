@@ -915,7 +915,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v89</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v90</span>
   </div>
 </div>
 <div class="tabs">
@@ -1871,7 +1871,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v89<br>
+       <strong>الإصدار:</strong> v90<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1895,7 +1895,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v89 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v90 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5777,10 +5777,17 @@ let cachedDrafts = [];
 
 // يفسّر الطابع الزمني للمسودة بأمان — يدعم الصيغة الرقمية الجديدة (ملي ثانية) والصيغة النصية القديمة (ISO) معاً
 function parseSavedAt(raw){
-  if(!raw) return new Date(NaN);
+  if(raw === null || raw === undefined || raw === '') return new Date(NaN);
+  // ١) الصيغة الرقمية (ملي ثانية) — المعتمدة حالياً
   const n = Number(raw);
-  if(!isNaN(n) && n > 0) return new Date(n);
-  return new Date(raw);
+  if(!isNaN(n) && n > 1000000000000) return new Date(n);
+  const s = String(raw).trim();
+  // ٢) صيغة عربية dd/MM/yyyy [HH:mm] — لو حوّلها جوجل شيتس رغم كل شيء
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,]+(\d{1,2}):(\d{2}))?/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0));
+  // ٣) أي صيغة قياسية يفهمها المتصفح (ISO مثلاً)
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? new Date(NaN) : d;
 }
 
 async function fetchDraftsFromServer(){
