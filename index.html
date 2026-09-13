@@ -203,7 +203,7 @@ body{font-family:'Tajawal',sans-serif;background:#F5F0E8;color:#1A1410;direction
 .cal-day-block-name{font-size:14px;font-weight:900;color:#C9A96E;flex:1}
 .cal-day-block-date{font-size:12px;color:#E8D5B0;opacity:.85}
 .cal-day-block-cnt{background:#C9A96E;color:#1A1410;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;flex-shrink:0}
-body.staff-view .cal-day-block-cnt{display:none}
+body.staff-view:not(.prep-view) .cal-day-block-cnt{display:none}
 .cal-day-block-cnt.zero{background:rgba(232,213,176,.2);color:#E8D5B0}
 .cal-arrow{color:#C9A96E;font-size:15px;flex-shrink:0;transition:transform 180ms ease;display:inline-block;width:14px;text-align:center}
 .cal-day-block.open .cal-arrow{transform:rotate(90deg)}
@@ -674,6 +674,25 @@ body.staff-view .cal-day-block-cnt{display:none}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
 
+/* ── تحسينات واجهة مسؤول التجهيز ── */
+/* اليوم المختار من اللوحة يبرز بوضوح داخل التقويم */
+body.prep-view .cal-day-block.open{
+  border:2px solid var(--gold);
+  box-shadow:0 2px 14px rgba(201,169,110,.22);
+  border-radius:12px;
+}
+/* عدّاد اليوم أكبر وأوضح — هو الرقم الأهم لمسؤول التجهيز */
+body.prep-view .cal-day-block-cnt{
+  font-size:14px; padding:3px 12px; min-width:34px; text-align:center;
+}
+/* الأيام الفارغة تتراجع بصرياً بدل أن تزاحم المهم */
+body.prep-view .cal-day-block:not(.open){ opacity:.62 }
+/* السعر لا يعني مسؤول التجهيز — يهمّه النوع والتفاصيل */
+body.prep-view .mc-price{ display:none }
+/* ليبل من سجّل الطلب مفيد له لتوزيع المهام — نبقيه ونوضّحه */
+body.prep-view .mc-by{ opacity:.9 }
+
+
 /* ── لوحة مسؤول التجهيز ── */
 .prep-mini{
   background:none;border:1.5px solid #E8D5B0;border-radius:8px;padding:6px 12px;
@@ -950,7 +969,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v92</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v93</span>
   </div>
 </div>
 <div class="tabs">
@@ -1705,9 +1724,10 @@ function renderPrepStats(){
       <span class="prep-type-n">${n}</span>
     </button>`).join('');
 
+  const shownCount = prepMatchedOrders().length;
   filtBox.innerHTML = prepTypeFilter
     ? `<div style="background:var(--gold-p);border:1.5px solid var(--gold);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-         <span style="font-size:13px;font-weight:800;color:#8A6030">التقويم يعرض: ${TYPE_AR[prepTypeFilter]||prepTypeFilter} فقط</span>
+         <span style="font-size:13px;font-weight:800;color:#8A6030">التقويم يعرض ${shownCount} ${TYPE_AR[prepTypeFilter]||prepTypeFilter} فقط</span>
          <button type="button" onclick="prepToggleType('${prepTypeFilter}')" style="background:none;border:1.5px solid var(--gold);border-radius:8px;padding:5px 11px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;color:#8A6030;cursor:pointer">إلغاء</button>
        </div>`
     : '';
@@ -1745,9 +1765,22 @@ function prepSelectAll(on){
   applyPrepToCalendar();
 }
 
-// يعكس فلتر النوع المختار على التقويم أسفل اللوحة
+// يعكس اختيار مسؤول التجهيز على التقويم: الأيام المختارة تُفتح وحدها، والباقي يُطوى،
+// وفلتر النوع يُطبَّق على المحتوى المعروض
 function applyPrepToCalendar(){
   typeFilterSet = prepTypeFilter ? new Set([prepTypeFilter]) : new Set();
+  calOpenDays.clear();
+  calClosedDays.clear();
+  if(prepSelectedDays.size){
+    prepSelectedDays.forEach(k=>calOpenDays.add(k));
+    // كل يوم غير مختار يُطوى صراحةً حتى لا يفتحه المنطق التلقائي
+    const today = new Date(); today.setHours(0,0,0,0);
+    for(let i=-1;i<=9;i++){
+      const d=new Date(today); d.setDate(today.getDate()+i);
+      const k=fmtFull(d);
+      if(!prepSelectedDays.has(k)) calClosedDays.add(k);
+    }
+  }
   renderCal();
 }
 
@@ -2080,7 +2113,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v92<br>
+       <strong>الإصدار:</strong> v93<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2104,7 +2137,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v92 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v93 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
