@@ -673,6 +673,41 @@ body.staff-view .cal-day-block-cnt{display:none}
 .section{background:#FFFFFF;border:1px solid #E5D9C7;border-radius:14px;padding:18px;margin-bottom:16px}
 .section-ttl{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dash-sec-arrow{font-size:13px;color:#8B7355;transition:transform .15s}
+
+/* ── لوحة مسؤول التجهيز ── */
+.prep-mini{
+  background:none;border:1.5px solid #E8D5B0;border-radius:8px;padding:6px 12px;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:#8A6030;cursor:pointer;
+}
+.prep-day{
+  flex:0 0 auto;background:#F5F0E8;border:1.5px solid var(--border);border-radius:10px;
+  padding:9px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;text-align:center;min-width:74px;
+}
+.prep-day.on{background:var(--gold-p);border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,169,110,.28)}
+.prep-day-name{font-size:12.5px;font-weight:800;color:var(--dark2)}
+.prep-day-date{font-size:11px;color:var(--muted);margin-top:1px}
+.prep-day-cnt{
+  display:inline-block;margin-top:4px;background:var(--gold);color:var(--dark);
+  border-radius:99px;padding:0 7px;font-size:10.5px;font-weight:900;
+}
+.prep-total-box{
+  background:var(--dark);color:var(--gold-l);border-radius:14px;padding:18px;text-align:center;
+}
+.prep-total-n{font-size:38px;font-weight:900;color:#fff;line-height:1.1}
+.prep-total-l{font-size:13px;margin-top:4px;opacity:.75}
+.prep-type{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;
+  cursor:pointer;font-family:'Tajawal',sans-serif;width:100%;text-align:right;
+}
+.prep-type.on{border-color:var(--gold);background:var(--gold-p)}
+.prep-type-name{font-size:15px;font-weight:800;color:var(--dark)}
+.prep-type-n{font-size:20px;font-weight:900;color:var(--gold)}
+/* مسؤول التجهيز: إخفاء كل ما يعدّل البيانات */
+body.prep-view .mc-add,
+body.prep-view #bulk-bar,
+body.prep-view .day-menu-btn{display:none!important}
+
 .pc-paid-banner{
   background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;
   border-radius:6px;padding:6px 10px;margin-top:6px;
@@ -915,7 +950,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v91</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v92</span>
   </div>
 </div>
 <div class="tabs">
@@ -938,6 +973,24 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
     <div class="stat stat-week"><div class="stat-n" id="st-week">—</div><div class="stat-l">🚚 مع التوصيل</div></div>
     <div class="stat stat-comm-owed" onclick="showCommissionOwedBreakdown()" style="cursor:pointer;border-color:#C9A96E;background:#FAF5EC" title="اضغطي لعرض تفاصيل كل موظف"><div class="stat-n" id="st-comm-owed" style="color:#8B6D2F">—</div><div class="stat-l">💰 عمولات مستحقة</div></div>
     <div class="stat" id="stat-commission" style="display:none;background:#FAF5EC;border-color:#E8D5B0"><div class="stat-n" id="st-commission" style="color:#8B6D2F">—</div><div class="stat-l">💰 عمولتي</div></div>
+  </div>
+
+
+  <!-- ══ لوحة مسؤول التجهيز — قراءة فقط: كم يلزمنا وكيف نوزّع المهام ══ -->
+  <div id="prep-panel" style="display:none;margin-bottom:16px">
+    <div style="background:#FFFFFF;border:1.5px solid #E8D5B0;border-radius:14px;padding:14px 16px">
+      <div style="font-size:13px;font-weight:800;color:#8A6030;margin-bottom:10px">📅 اختر الأيام المطلوب تجهيزها</div>
+      <div id="prep-days" style="display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;margin-bottom:6px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" onclick="prepSelectToday()" class="prep-mini">اليوم</button>
+        <button type="button" onclick="prepSelectAll(true)" class="prep-mini">تحديد الكل</button>
+        <button type="button" onclick="prepSelectAll(false)" class="prep-mini">إلغاء الكل</button>
+      </div>
+    </div>
+
+    <div id="prep-total" style="margin-top:12px"></div>
+    <div id="prep-breakdown" style="margin-top:10px;display:grid;gap:8px"></div>
+    <div id="prep-active-filter" style="margin-top:10px"></div>
   </div>
 
   <!-- SEARCH -->
@@ -1302,6 +1355,14 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <div class="fg"><label>الاسم الظاهر <span class="req">*</span></label><input type="text" id="emp-displayname" placeholder="سماح"></div>
       <div class="fg"><label>كلمة المرور <span class="req">*</span></label><input type="text" id="emp-password" dir="ltr" style="text-align:right"></div>
       <div class="fg"><label>العمولة لكل أوردر (د.أ) <span class="req">*</span></label><input type="number" id="emp-rate" step="0.1" min="0" placeholder="0.5"></div>
+      <div class="fg">
+        <label>الدور <span class="req">*</span></label>
+        <select id="emp-role" onchange="onEmpRoleChange()">
+          <option value="staff">مسؤول إدخال</option>
+          <option value="prep">مسؤول تجهيز (اطّلاع فقط)</option>
+        </select>
+        <div class="hint" id="emp-role-hint">يسجّل الطلبات ويكسب عمولة على كل طلب</div>
+      </div>
     </div>
     <button class="btn btn-gold" onclick="addEmployeeSubmit()" id="emp-add-btn">💾 إضافة الموظف</button>
   </div>
@@ -1568,26 +1629,173 @@ function doLogout(){
   location.reload();
 }
 
+
+// ══════════════════════════════════════════
+// لوحة مسؤول التجهيز — قراءة فقط
+// الهدف: يعرف كم يلزمه لكل يوم، وبأي نوع، عشان يوزّع المهام ويحدّد النواقص
+// ══════════════════════════════════════════
+let prepSelectedDays = new Set();   // تواريخ dd/mm/yyyy المختارة
+let prepTypeFilter   = null;        // نوع منتج واحد للتركيز عليه، أو null لعرض الكل
+
+// الطلبات النشطة (غير المسلَّمة والملغاة) ضمن الأيام المختارة
+function prepMatchedOrders(ignoreTypeFilter){
+  return allOrders.filter(o=>{
+    const st = String(o['Status']||'').toLowerCase();
+    if(st==='done' || st==='cancelled') return false;
+    const dd = String(o['Delivery Date']||'').trim();
+    if(!prepSelectedDays.has(dd)) return false;
+    if(!ignoreTypeFilter && prepTypeFilter && o['Product Type']!==prepTypeFilter) return false;
+    return true;
+  });
+}
+
+function renderPrepPanel(){
+  const daysBox = document.getElementById('prep-days');
+  if(!daysBox) return;
+
+  // نطاق الأيام: أمس + اليوم + ٩ أيام قادمة — تجهيز الطلبات يحتاج نظرة أبعد من التقويم
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  let html = '';
+  for(let i=-1; i<=9; i++){
+    const d = new Date(today); d.setDate(today.getDate()+i);
+    const key = fmtFull(d);
+    const cnt = allOrders.filter(o=>{
+      const st=String(o['Status']||'').toLowerCase();
+      if(st==='done'||st==='cancelled') return false;
+      return String(o['Delivery Date']||'').trim()===key;
+    }).length;
+    const tag = i===0 ? 'اليوم' : (i===-1 ? 'أمس' : dayNames[d.getDay()]);
+    html += `<button type="button" class="prep-day ${prepSelectedDays.has(key)?'on':''}" onclick="prepToggleDay('${key}')">
+      <div class="prep-day-name">${tag}</div>
+      <div class="prep-day-date">${pad(d.getDate())}/${pad(d.getMonth()+1)}</div>
+      ${cnt?`<span class="prep-day-cnt">${cnt}</span>`:''}
+    </button>`;
+  }
+  daysBox.innerHTML = html;
+  renderPrepStats();
+}
+
+function renderPrepStats(){
+  const totalBox = document.getElementById('prep-total');
+  const brkBox   = document.getElementById('prep-breakdown');
+  const filtBox  = document.getElementById('prep-active-filter');
+  if(!totalBox) return;
+
+  if(!prepSelectedDays.size){
+    totalBox.innerHTML = '<div style="background:#FFF8EE;border:1.5px dashed #E5D9C7;border-radius:12px;padding:20px;text-align:center;font-size:14px;color:#8A6030">اختر يوماً أو أكثر من الأعلى لعرض الإحصائيات</div>';
+    brkBox.innerHTML=''; filtBox.innerHTML='';
+    return;
+  }
+
+  // الإجمالي دائماً بدون فلتر النوع — حتى يبقى المرجع ثابتاً عند التصفية
+  const all = prepMatchedOrders(true);
+  totalBox.innerHTML = `<div class="prep-total-box">
+    <div class="prep-total-n">${all.length}</div>
+    <div class="prep-total-l">طلب للتجهيز — ${prepSelectedDays.size} ${prepSelectedDays.size===1?'يوم':'أيام'}</div>
+  </div>`;
+
+  // التفصيل حسب النوع، مرتّباً بالأكثر
+  const byType = {};
+  all.forEach(o=>{ const t=o['Product Type']||'—'; byType[t]=(byType[t]||0)+1; });
+  const rows = Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  brkBox.innerHTML = rows.map(([t,n])=>`
+    <button type="button" class="prep-type ${prepTypeFilter===t?'on':''}" onclick="prepToggleType('${t}')">
+      <span class="prep-type-name">${TYPE_AR[t]||t}</span>
+      <span class="prep-type-n">${n}</span>
+    </button>`).join('');
+
+  filtBox.innerHTML = prepTypeFilter
+    ? `<div style="background:var(--gold-p);border:1.5px solid var(--gold);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+         <span style="font-size:13px;font-weight:800;color:#8A6030">التقويم يعرض: ${TYPE_AR[prepTypeFilter]||prepTypeFilter} فقط</span>
+         <button type="button" onclick="prepToggleType('${prepTypeFilter}')" style="background:none;border:1.5px solid var(--gold);border-radius:8px;padding:5px 11px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:700;color:#8A6030;cursor:pointer">إلغاء</button>
+       </div>`
+    : '';
+}
+
+function prepToggleDay(key){
+  if(prepSelectedDays.has(key)) prepSelectedDays.delete(key);
+  else prepSelectedDays.add(key);
+  renderPrepPanel();
+  applyPrepToCalendar();
+}
+
+function prepToggleType(t){
+  prepTypeFilter = (prepTypeFilter===t) ? null : t;
+  renderPrepStats();
+  applyPrepToCalendar();
+}
+
+function prepSelectToday(){
+  prepSelectedDays = new Set([fmtFull(new Date())]);
+  prepTypeFilter = null;
+  renderPrepPanel();
+  applyPrepToCalendar();
+}
+
+function prepSelectAll(on){
+  if(!on){ prepSelectedDays.clear(); }
+  else {
+    const today = new Date(); today.setHours(0,0,0,0);
+    prepSelectedDays = new Set();
+    for(let i=-1;i<=9;i++){ const d=new Date(today); d.setDate(today.getDate()+i); prepSelectedDays.add(fmtFull(d)); }
+  }
+  prepTypeFilter = null;
+  renderPrepPanel();
+  applyPrepToCalendar();
+}
+
+// يعكس فلتر النوع المختار على التقويم أسفل اللوحة
+function applyPrepToCalendar(){
+  typeFilterSet = prepTypeFilter ? new Set([prepTypeFilter]) : new Set();
+  renderCal();
+}
+
 function applyRoleUI(){
   const isOwner = currentUser && currentUser.role === 'owner';
+  const isPrep  = currentUser && currentUser.role === 'prep';   // مسؤول التجهيز — قراءة فقط
+  const isStaff = currentUser && currentUser.role === 'staff';
+
   const empTab = document.getElementById('tab-employees');
   if(empTab) empTab.style.display = isOwner ? '' : 'none';
   const dashTab = document.getElementById('hdr-dash-btn');
   if(dashTab) dashTab.style.display = isOwner ? 'flex' : 'none';
   const printTab = document.getElementById('tab-print-btn');
-  if(printTab) printTab.style.display = isOwner ? '' : 'none';
+  // مسؤول التجهيز يحتاج الطباعة لتوزيع المهام على الفريق
+  if(printTab) printTab.style.display = (isOwner || isPrep) ? '' : 'none';
+
+  // "عمولتي" لمسؤول الإدخال فقط — مسؤول التجهيز ما إله عمولة
   const commStat = document.getElementById('stat-commission');
-  if(commStat) commStat.style.display = isOwner ? 'none' : '';
-  // الموظفة ما بدها تشوف أي رقم إجمالي (حساسية تجارية) — بس "عمولتي" الخاصة فيها ظاهرة
+  if(commStat) commStat.style.display = isStaff ? '' : 'none';
+
+  // أرقام المبيعات الإجمالية للأدمن فقط
   document.querySelectorAll('.stat-active, .stat-comm-owed, .stat-all, .stat-week').forEach(el=>{ el.style.display = isOwner ? '' : 'none'; });
   const statsGrid = document.getElementById('stats-grid');
-  if(statsGrid){ statsGrid.classList.toggle('stats-3', false); statsGrid.classList.toggle('stats-1', !isOwner); }
-  // إخفاء عداد عدد الأوردرات فوق كل يوم بالتقويم عن الموظفة (نفس منطق "بدون أرقام إجمالية")
+  if(statsGrid){
+    statsGrid.classList.toggle('stats-3', false);
+    statsGrid.classList.toggle('stats-1', isStaff);
+    statsGrid.style.display = isPrep ? 'none' : '';   // لمسؤول التجهيز لوحة خاصة بدلها
+  }
+
+  // لوحة التجهيز — تظهر لمسؤول التجهيز وحده
+  const prepPanel = document.getElementById('prep-panel');
+  if(prepPanel) prepPanel.style.display = isPrep ? 'block' : 'none';
+
+  // إخفاء الأزرار التي تعدّل البيانات عن مسؤول التجهيز
   document.body.classList.toggle('staff-view', !isOwner);
-  // ترحيب بسيط باسم المستخدم الحالي
+  document.body.classList.toggle('prep-view', !!isPrep);
+
+  // تبويب "أوردر جديد" و"المسودات" لا معنى لهما لمن صلاحيته القراءة
+  document.querySelectorAll('.tab').forEach(tb=>{
+    const oc = tb.getAttribute('onclick')||'';
+    if(isPrep && (oc.includes("'add'") || oc.includes("'drafts'"))) tb.style.display='none';
+    else if(!isPrep && (oc.includes("'add'") || oc.includes("'drafts'"))) tb.style.display='';
+  });
+
   const welcomeEl = document.getElementById('welcome-msg');
   if(welcomeEl) welcomeEl.textContent = currentUser ? ('أهلاً '+(currentUser.displayName||currentUser.username)+' 👋') : '';
-  if(!isOwner) refreshMyCommission();
+  if(isStaff) refreshMyCommission();
+  if(isPrep) renderPrepPanel();
 }
 
 async function refreshMyCommission(){
@@ -1682,6 +1890,7 @@ async function loadOrders(silent){
     renderCal();
     updateStats();
     if(currentUser && currentUser.role === 'staff') refreshMyCommission();
+    if(currentUser && currentUser.role === 'prep') renderPrepPanel();
     if(typeof updateTypeFilterBanner === 'function') updateTypeFilterBanner();
     checkUnparsedDates();
     logDiag();
@@ -1871,7 +2080,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v91<br>
+       <strong>الإصدار:</strong> v92<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -1895,7 +2104,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v91 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v92 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -4784,7 +4993,7 @@ function renderEmployees(list){
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div>
           <div style="font-weight:800;color:#1A1410;font-size:14px">${esc(emp.displayName)} <span style="font-weight:400;color:#8B7355;font-size:12px">(${esc(emp.username)})</span> ${emp.active?'':'<span style="color:#C0392B;font-size:11px">— موقوف</span>'}</div>
-          <div style="font-size:12px;color:#8B7355;margin-top:2px">العمولة: ${emp.commissionRate} د.أ / أوردر</div>
+          <div style="font-size:12px;color:#8B7355;margin-top:2px">${emp.role==='prep' ? '👁️ مسؤول تجهيز — اطّلاع فقط' : ('✍️ مسؤول إدخال · العمولة: '+emp.commissionRate+' د.أ / أوردر')}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div style="text-align:left">
@@ -4829,6 +5038,13 @@ async function openEmployeeFullEdit(username){
   document.getElementById('edit-ttl').textContent = '✏️ تعديل بيانات — '+emp.displayName;
   document.getElementById('edit-body').innerHTML = `
     <div class="fg"><label>الاسم الظاهر</label><input type="text" id="fe-name" value="${emp.displayName.replace(/"/g,'&quot;')}"></div>
+    <div class="fg">
+      <label>الدور</label>
+      <select id="fe-role">
+        <option value="staff" ${emp.role!=='prep'?'selected':''}>مسؤول إدخال</option>
+        <option value="prep" ${emp.role==='prep'?'selected':''}>مسؤول تجهيز (اطّلاع فقط)</option>
+      </select>
+    </div>
     <div class="fg"><label>العمولة لكل أوردر (د.أ)</label><input type="number" id="fe-rate" step="0.1" min="0" value="${emp.commissionRate}"></div>
     <div class="fg"><label>كلمة المرور <span class="opt">(اتركي هذا الحقل فارغاً في حال عدم الرغبة بتغييره)</span></label><input type="text" id="fe-pass" dir="ltr" style="text-align:right" placeholder="${emp.password?('الحالية: '+emp.password):''}"></div>
     <div class="fg">
@@ -4846,12 +5062,14 @@ async function openEmployeeFullEdit(username){
 
 async function submitEmployeeFullEdit(username){
   const name = document.getElementById('fe-name').value.trim();
+  const role = document.getElementById('fe-role') ? document.getElementById('fe-role').value : undefined;
   const rate = parseFloat(document.getElementById('fe-rate').value);
   const pass = document.getElementById('fe-pass').value;
   const active = document.getElementById('fe-active').checked;
   if(!name){ toast('❌ الاسم ما يقدر يكون فاضي'); return; }
   if(isNaN(rate) || rate<0){ toast('❌ قيمة عمولة غير صالحة'); return; }
   const data = {displayName:name, commissionRate:rate, active};
+  if(role) data.role = role;
   if(pass) data.password = pass;
   try{
     const res = await apiPost({action:'updateEmployee', username: currentUser.username, token: currentUser.token,
@@ -4907,18 +5125,34 @@ async function showCommissionHistory(username, displayName){
   }
 }
 
+// تبديل شرح الدور وإخفاء حقل العمولة لمسؤول التجهيز
+function onEmpRoleChange(){
+  const role = document.getElementById('emp-role').value;
+  const hint = document.getElementById('emp-role-hint');
+  const rateField = document.getElementById('emp-rate');
+  if(hint) hint.textContent = role==='prep'
+    ? 'يطّلع على الطلبات والإحصائيات فقط — لا يعدّل ولا يكسب عمولة'
+    : 'يسجّل الطلبات ويكسب عمولة على كل طلب';
+  if(rateField){
+    const wrap = rateField.closest('.fg');
+    if(wrap) wrap.style.display = role==='prep' ? 'none' : '';
+  }
+}
+
 async function addEmployeeSubmit(){
   const username = document.getElementById('emp-username').value.trim();
   const displayName = document.getElementById('emp-displayname').value.trim();
   const password = document.getElementById('emp-password').value;
-  const rate = parseFloat(document.getElementById('emp-rate').value);
+  const role = document.getElementById('emp-role').value;
+  // مسؤول التجهيز لا يسجّل طلبات فلا عمولة له — نثبّتها صفراً بدل مطالبته بقيمة لا معنى لها
+  const rate = role==='prep' ? 0 : parseFloat(document.getElementById('emp-rate').value);
   if(!username||!displayName||!password){ toast('❌ عبّي كل الحقول الإلزامية'); return; }
   if(isNaN(rate)||rate<0){ toast('❌ أدخلي عمولة صحيحة'); return; }
   const btn = document.getElementById('emp-add-btn');
   btn.disabled = true; btn.textContent = '⏳ جاري الإضافة...';
   try{
     const res = await apiPost({action:'addEmployee', username: currentUser.username, token: currentUser.token,
-      data: JSON.stringify({username, displayName, password, commissionRate: rate})});
+      data: JSON.stringify({username, displayName, password, commissionRate: rate, role})});
     if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
     toast('✅ تمت إضافة الموظف');
     ['emp-username','emp-displayname','emp-password','emp-rate'].forEach(id=>document.getElementById(id).value='');
