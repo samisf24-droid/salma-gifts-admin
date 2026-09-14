@@ -234,23 +234,27 @@ body.staff-view:not(.prep-view) .cal-day-block-cnt{display:none}
 .mc.t-book    {background:#EDF8F7; border-color:#B2DFDB}
 .mc.t-grad    {background:#FFF5EE; border-color:#FFD4B8}
 .mc.t-bouquet {background:#FEF1F7; border-color:#FBCFE8}
+.mc.t-mahr    {background:#FFF7E8; border-color:#F5DFA8}
 .mc.t-other   {background:#F7F8FA; border-color:#E5E7EB}
 .mc.t-tray::before   {background:#2563EB}
 .mc.t-package::before{background:#7C3AED}
 .mc.t-book::before   {background:#0D9488}
 .mc.t-grad::before   {background:#EA580C}
 .mc.t-bouquet::before{background:#DB2777}
+.mc.t-mahr::before{background:#C68A16}
 .mc.t-other::before  {background:#9CA3AF}
 .mc.t-tray    .mc-names{color:#12306B}
 .mc.t-package .mc-names{color:#3F1470}
 .mc.t-book    .mc-names{color:#0B4F4A}
 .mc.t-grad    .mc-names{color:#7A2A0A}
 .mc.t-bouquet .mc-names{color:#7A1140}
+.mc.t-mahr .mc-names{color:#7A5410}
 .mc-type.t-tray   {background:#DBE7FB;color:#12306B;border:1px solid #BFD4F5}
 .mc-type.t-package{background:#EBDCFA;color:#3F1470;border:1px solid #DDC7F7}
 .mc-type.t-book   {background:#D6EFED;color:#0B4F4A;border:1px solid #B2DFDB}
 .mc-type.t-grad   {background:#FFE6D5;color:#7A2A0A;border:1px solid #FFD4B8}
 .mc-type.t-bouquet{background:#FBDCEA;color:#7A1140;border:1px solid #FBCFE8}
+.mc-type.t-mahr{background:#FBEFD4;color:#7A5410;border:1px solid #F5DFA8}
 .mc-type.t-other  {background:#EEF0F3;color:#374151;border:1px solid #E5E7EB}
 /* عناوين الأسابيع */
 .wk-total{display:block;margin-top:4px;background:#C9A96E;color:#1A1410;border-radius:9999px;padding:1px 8px;font-size:10px;font-weight:900}
@@ -421,6 +425,7 @@ body.staff-view:not(.prep-view) .cal-day-block-cnt{display:none}
   .pc-t-tray{background:#F2F7FC!important}      /* صينية — أزرق فاتح جداً */
   .pc-t-package{background:#F7F3FA!important}   /* بكج — بنفسجي فاتح جداً */
   .pc-t-bouquet{background:#FDF2F5!important}   /* مسكة — وردي فاتح جداً */
+  .pc-t-mahr{background:#FFFBF2!important}      /* صندوق مهر — عنبري فاتح جداً */
   .pc-t-grad{background:#FFF6EE!important}      /* تخرج — برتقالي فاتح جداً */
   .pc-t-book{background:#F2FAF4!important}      /* كتاب/برواز — أخضر فاتح جداً */
 
@@ -969,7 +974,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v93</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v94</span>
   </div>
 </div>
 <div class="tabs">
@@ -2113,7 +2118,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v93<br>
+       <strong>الإصدار:</strong> v94<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2137,7 +2142,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v93 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v94 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2310,12 +2315,17 @@ function getOrderNames(o){
     if(taliqaNames) return 'مسكة عروس — ('+taliqaNames+')';
     return 'مسكة عروس — ('+(o['Recipient']||'—')+')';
   }
+  // صندوق المهر: الأسماء إضافة اختيارية — بدونها نعرض اسم المستلم بدل ترك الكارد بلا عنوان
+  if(type==='MahrBox'){
+    if(groom || bride) return [bride,groom].filter(Boolean).join(' ❤️ ');
+    return 'صندوق مهر — ('+(o['Recipient']||'—')+')';
+  }
   return [bride,groom].filter(Boolean).join(' ❤️ ');
 }
 
 function typeClass(t){
   return ({Tray:'t-tray',Package:'t-package','Guest Book':'t-book',
-           Graduation:'t-grad',Bouquet:'t-bouquet'})[t] || 't-other';
+           Graduation:'t-grad',Bouquet:'t-bouquet',MahrBox:'t-mahr'})[t] || 't-other';
 }
 
 function miniCard(o){
@@ -2324,7 +2334,11 @@ function miniCard(o){
   const groom=o['Groom']||''; const bride=o['Bride']||'';
   const isBouquet2 = type==='Bouquet';
   const bqNote = o['Notes']?(o['Notes'].length>15?o['Notes'].slice(0,15)+'...':o['Notes']):''; 
-  const names = type==='Graduation' ? bride : isBouquet2 ? ('مسكة عروس'+(bqNote?' — '+bqNote:'')).trim() : [bride,groom].filter(Boolean).join(' ❤️ ');
+  // صندوق المهر: الأسماء إضافة اختيارية — بدونها نعرض اسم المستلم بدل ترك الكارد يعرض رقم الأوردر
+  const names = type==='Graduation' ? bride
+              : isBouquet2 ? ('مسكة عروس'+(bqNote?' — '+bqNote:'')).trim()
+              : type==='MahrBox' ? ((groom||bride) ? [bride,groom].filter(Boolean).join(' ❤️ ') : ('صندوق مهر — '+(o['Recipient']||'—')))
+              : [bride,groom].filter(Boolean).join(' ❤️ ');
   const status = normStatus(o);
   const st = STATUSES[status]||STATUSES.New;
   const total = parseFloat(o['Total']||0);
@@ -3064,11 +3078,12 @@ function openEdit(id, overrideType){
   const isGrad=type==='Graduation';
   const isBouquet=type==='Bouquet';
   const hasTray=['Tray','Package'].includes(type);
+  const isMahr=type==='MahrBox';
 
   document.getElementById('edit-ttl').textContent='✏️ تعديل — '+id;
   const _cur=normStatus(o);
   const stOpts=Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${_cur===k?'selected':''}>${v.lbl}</option>`).join('');
-  const typeOpts=['Tray','Guest Book','Package','Graduation','Bouquet'].map(t=>`<option value="${t}" ${type===t?'selected':''}>${TYPE_AR[t]||t}</option>`).join('');
+  const typeOpts=['Tray','Guest Book','Package','Frame','Graduation','Bouquet','MahrBox'].map(t=>`<option value="${t}" ${type===t?'selected':''}>${TYPE_AR[t]||t}</option>`).join('');
   const modelOpts=['Turkish','White','Elegant','Luxury','Royal','Other'].map(m=>`<option value="${m}" ${o['Model']===m?'selected':''}>${MODEL_AR[m]||m}</option>`).join('');
   const provOpts=['','عمّان','الزرقاء','إربد','البلقاء','الكرك','مادبا','السلط','جرش','عجلون','المفرق','الطفيلة','معان','العقبة'].map(p=>`<option value="${p}" ${o['Governorate']===p?'selected':''}>${p||'—'}</option>`).join('');
 
@@ -3097,6 +3112,14 @@ function openEdit(id, overrideType){
         <option value="full" ${o['PkgType']==='full'?'selected':''}>البكج الشامل (صينية + كتاب + فناجين + قصاصات)</option>
         <option value="frame" ${o['PkgType']==='frame'?'selected':''}>بكج البرواز (صينية + برواز)</option>
       </select></div>`:''}
+    </div>`:''}
+
+    ${isMahr?`
+    <div class="sec-lbl">بيانات صندوق المهر</div>
+    <div style="font-size:12px;color:#8A6030;margin-bottom:8px">الأسماء اختيارية — تُطلب كإضافة بدينارين، وتُطبع مع أسماء الصواني</div>
+    <div class="form-grid">
+      <div class="fg"><label>اسم العريس</label><input type="text" id="e-groom" value="${o['Groom']||''}"></div>
+      <div class="fg"><label>اسم العروس</label><input type="text" id="e-bride" value="${o['Bride']||''}"></div>
     </div>`:''}
 
     ${isGrad?`
@@ -4832,7 +4855,7 @@ function doPrint(){
 // كلاس اللون حسب نوع الطلب — يميّز الكارد بلمحة عند الطباعة
 function printTypeClass(type){
   return {
-    'Tray':'pc-t-tray', 'Package':'pc-t-package', 'Bouquet':'pc-t-bouquet',
+    'Tray':'pc-t-tray', 'Package':'pc-t-package', 'Bouquet':'pc-t-bouquet', 'MahrBox':'pc-t-mahr',
     'Graduation':'pc-t-grad', 'Guest Book':'pc-t-book', 'Frame':'pc-t-book'
   }[type] || '';
 }
