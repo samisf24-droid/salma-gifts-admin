@@ -974,7 +974,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v94</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v95</span>
   </div>
 </div>
 <div class="tabs">
@@ -1256,7 +1256,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
       <button type="button" id="ap-qalam-btn" onclick="addOrEditAddition('qalam')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ قصاصة التقويم / رسالة العمر (٢ د.أ)</button>
       <button type="button" id="ap-mahrnames-btn" onclick="addOrEditAddition('mahrNames')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة أسماء (٢ د.أ)</button>
       <button type="button" id="ap-mahrphrase-btn" onclick="addOrEditAddition('mahrPhrase')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة عبارة (٢ د.أ)</button>
-      <button type="button" id="ap-taliqa-btn" onclick="addOrEditAddition('taliqa')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة تعليقة (٢ د.أ)</button>
+      <button type="button" id="ap-taliqa-btn" onclick="addOrEditAddition('taliqa')" style="display:none;background:none;border:1.5px solid #C9A96E;color:#8A6030;border-radius:6px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:800;cursor:pointer">+ إضافة تعليقة (٣ د.أ)</button>
     </div>
 
     <!-- النماذج المصغّرة المشتركة — تُملأ ديناميكياً بحسب إضافة/تعديل -->
@@ -2118,7 +2118,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v94<br>
+       <strong>الإصدار:</strong> v95<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2142,7 +2142,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v94 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v95 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2953,9 +2953,17 @@ function parseTaliqaText(additions){
 }
 
 // يبني صندوق تعديل التعليقة داخل نافذة التعديل — بنفس حقول الإضافة الأصلية
+// التعليقة صار سعرها ٣ د.أ من ٢٠/٩/٢٠٢٦ — الأوردرات المسجّلة قبلها انضافت تعليقتها بـ٢، فحذفها يخصم ٢ مش ٣
+const TALIQA_PRICE3_SINCE = new Date(2026, 8, 20, 13, 0).getTime();
+function taliqaDeltaForOrder(o){
+  const ts = parseCreatedAtStamp(o && o['Created At']);
+  const cur = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 3;
+  return (ts && ts >= TALIQA_PRICE3_SINCE) ? cur : 2;
+}
 function renderEditTaliqaBox(o){
   const t = parseTaliqaText(o['Additions']);
   const has = !!t;
+  const removeDelta = has ? taliqaDeltaForOrder(o) : 0;
   const iso = d => { const m=String(d||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m? m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0') : ''; };
   return `
   <div style="background:#F3E9D8;border:1.5px solid #D9C4A0;border-radius:12px;padding:14px;margin:14px 0">
@@ -2970,7 +2978,7 @@ function renderEditTaliqaBox(o){
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button type="button" onclick="applyTaliqaEdit()" style="flex:1;background:#EAF3DE;border:1.5px solid #A8C88A;color:#2D5A0D;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">✅ ${has?'تحديث التعليقة':'إضافة التعليقة'}</button>
-      ${has?`<button type="button" onclick="removeTaliqaFromEdit()" style="flex:1;background:#FFF0F0;border:1.5px solid #FFCDD2;color:#C0392B;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🗑️ حذف التعليقة</button>`:''}
+      ${has?`<button type="button" onclick="removeTaliqaFromEdit(${removeDelta})" style="flex:1;background:#FFF0F0;border:1.5px solid #FFCDD2;color:#C0392B;border-radius:8px;padding:10px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer">🗑️ حذف التعليقة</button>`:''}
     </div>
     <div style="font-size:11px;color:#8A6030;margin-top:8px">التغييرات تنعكس على حقل "إضافات" فوق، واحفظي بزر "حفظ التعديل" بالأسفل</div>
   </div>`;
@@ -3043,7 +3051,7 @@ function applyTaliqaEdit(){
     : (cur.trim() ? cur.trim()+' | '+newText : newText);
 
   // تعليقة جديدة (مو تعديل واحدة موجودة أصلاً) → تضيف سعرها للحساب الشامل تلقائياً
-  const taliqaPrice = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 2;
+  const taliqaPrice = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 3;
   if(!hadTaliqaBefore){
     const priceEl = document.getElementById('e-price');
     if(priceEl) priceEl.value = (parseFloat(priceEl.value)||0) + taliqaPrice;
@@ -3053,9 +3061,9 @@ function applyTaliqaEdit(){
 }
 
 // يحذف التعليقة من حقل الإضافات مع الحفاظ على باقي الإضافات
-function removeTaliqaFromEdit(){
-  if(!confirm('حذف التعليقة من هذا الأوردر؟ رح يُخصم سعرها من الحساب الشامل تلقائياً.')) return;
-  const taliqaPrice = (ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 2;
+function removeTaliqaFromEdit(delta){
+  const taliqaPrice = (typeof delta==='number' && !isNaN(delta)) ? delta : ((ADDITION_META.taliqa && ADDITION_META.taliqa.price) || 3);
+  if(!confirm('حذف التعليقة من هذا الأوردر؟ رح يُخصم '+taliqaPrice+' د.أ من الحساب الشامل تلقائياً.')) return;
   const addEl = document.getElementById('e-add');
   const hadTaliqa = /تعليقة\s*\(/.test(String(addEl.value||''));
   addEl.value = String(addEl.value||'')
@@ -3651,7 +3659,7 @@ const ADDITION_META = {
   qassasat: {price:0, fields:['items']}, // سعرها مرن (٣ د.أ لـ٧ قصاصات عادةً، بس ممكن يختلف) — ما تنعكس تلقائياً، تُضبط يدوياً بالحساب
   fanajin:  {price:5, fields:['cup1','cup2']},
   qalam:    {price:2, fields:['details']},
-  taliqa:   {price:2, fields:['groom','bride','date','notes']},
+  taliqa:   {price:3, fields:['groom','bride','date','notes']},
   mahrNames:  {price:2, fields:['groom','bride']},  // صندوق المهر — الأسماء تُطبع مع الصواني
   mahrPhrase: {price:2, fields:['text']},
 };
@@ -3691,13 +3699,15 @@ function findAdditionRow(kind){
   return document.querySelector('#additions-list [data-kind="'+kind+'"]');
 }
 
-function additionRowHTML(kind, data){
+function additionRowHTML(kind, data, delta){
   const meta = ADDITION_META[kind];
   const text = additionRowText(kind, data);
   const editable = meta.fields.length>0;
-  const priceTag = meta.price ? ' <span style="opacity:.7;font-weight:600">(+'+meta.price+' د.أ)</span>' : '';
+  // delta = المبلغ اللي انضاف فعلاً للسعر لما انضافت هاي الإضافة (افتراضياً سعرها الحالي)
+  const d = (delta===undefined || delta===null || isNaN(delta)) ? meta.price : Number(delta);
+  const priceTag = d ? ' <span style="opacity:.7;font-weight:600">(+'+d+' د.أ)</span>' : '';
   const editIcon = editable ? ' <span style="opacity:.55">✏️</span>' : '';
-  return `<div data-kind="${kind}" data-price-delta="${meta.price}" data-fields='${JSON.stringify(data).replace(/'/g,"&#39;")}' style="display:flex;gap:6px;align-items:center">
+  return `<div data-kind="${kind}" data-price-delta="${d}" data-fields='${JSON.stringify(data).replace(/'/g,"&#39;")}' style="display:flex;gap:6px;align-items:center">
     <div ${editable?`onclick="addOrEditAddition('${kind}')"`:''} style="flex:1;background:#FAF5EC;border:1.5px solid #E8D5B0;border-radius:8px;padding:9px 12px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;color:#8A6030;${editable?'cursor:pointer':''}">${text}${priceTag}${editIcon}</div>
     <button type="button" onclick="removeAdditionRow(this)" style="background:#FFF0F0;color:#C0392B;border:1.5px solid #FFCDD2;border-radius:6px;width:34px;height:34px;flex-shrink:0;font-size:14px;cursor:pointer">✕</button>
   </div>`;
@@ -3712,14 +3722,14 @@ function createAdditionRow(kind, data){
 }
 
 // تُدرج صف إضافة بدون لمس السعر — تُستخدم فقط عند استعادة مسودة (السعر مُستعاد أصلاً من رقم المسودة المحفوظ)
-function insertAdditionRowSilent(kind, data){
-  document.getElementById('additions-list').insertAdjacentHTML('beforeend', additionRowHTML(kind, data));
+function insertAdditionRowSilent(kind, data, delta){
+  document.getElementById('additions-list').insertAdjacentHTML('beforeend', additionRowHTML(kind, data, delta));
 }
 
 function updateAdditionRowInPlace(kind, data){
   const row = findAdditionRow(kind);
   if(!row) return;
-  row.outerHTML = additionRowHTML(kind, data); // السعر ما يتغيّر — نفس نوع الإضافة بسعر ثابت
+  row.outerHTML = additionRowHTML(kind, data, parseFloat(row.dataset.priceDelta)); // السعر ما يتغيّر — نحافظ على نفس المبلغ المضاف أصلاً
 }
 
 function removeAdditionRow(btn){
@@ -6129,6 +6139,7 @@ function getFormData(){
     // هيكل صفوف الإضافات الفعلي (نوع + تفاصيل) — يحفظ القدرة على التعديل والحذف لاحقاً بدل نص مسطّح فقط
     additionsRows: [...document.querySelectorAll('#additions-list > [data-kind]')].map(row=>({
       kind: row.dataset.kind,
+      priceDelta: parseFloat(row.dataset.priceDelta||'0')||0,
       fields: row.dataset.kind==='free'
         ? {text: (row.querySelector('input')?row.querySelector('input').value:'')}
         : JSON.parse((row.dataset.fields||'{}').replace(/&#39;/g,"'"))
@@ -6227,7 +6238,9 @@ function loadDraft(draftId){
         if(r.kind==='free'){
           if(r.fields.text) addFreeAdditionRow(r.fields.text);
         } else {
-          insertAdditionRowSilent(r.kind, r.fields); // بدون زيادة السعر — مُستعاد أصلاً من d.price
+          // بدون زيادة السعر — مُستعاد أصلاً من d.price. المسودات القديمة (قبل v95) ما فيها priceDelta، والتعليقة كانت وقتها بـ٢
+          const legacyDelta = (r.kind==='taliqa') ? 2 : undefined;
+          insertAdditionRowSilent(r.kind, r.fields, (r.priceDelta!==undefined) ? r.priceDelta : legacyDelta);
         }
       });
     } else if(d.additions){
