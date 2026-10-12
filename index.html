@@ -998,6 +998,30 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .ch-order-banner{margin-top:10px;background:#EAF5EA;border:1.5px solid #B7DDB7;color:#1A4D1A;border-radius:12px;padding:12px 14px;font-size:13.5px;font-weight:800;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
 .ch-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4A3728;margin:14px 2px 8px}
 .ch-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-left:5px;vertical-align:-1px}
+/* ── تبسيط للموبايل (v109) ── */
+#view-chats{padding:0 0 16px}
+.ch-refresh{padding:11px 10px;font-size:14.5px;border-radius:12px}
+.ch-sub{margin:4px 0 6px;font-size:11.5px;min-height:0}
+.ch-sub:empty{display:none}
+.ch-search input{padding:10px 12px;font-size:14.5px}
+.ch-filters{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:8px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ch-filters::-webkit-scrollbar{display:none}
+.ch-fbtn{padding:7px 12px;font-size:13px;white-space:nowrap;flex:none}
+#ch-list{margin-top:0}
+.ch-row{padding:10px 12px;gap:10px}
+.ch-av{width:40px;height:40px;font-size:16px}
+.ch-pbtn{padding:4px 10px;font-size:11.5px;margin-bottom:4px!important}
+.ch-dhead{padding:8px 10px;gap:8px;margin-bottom:6px;top:0;box-shadow:0 2px 8px rgba(43,33,24,.12)}
+.ch-back{width:auto;height:42px;padding:0 14px;background:#2B2118;color:#F5E9D3;border:none;font:inherit;font-size:15px;font-weight:900;border-radius:12px;white-space:nowrap}
+.ch-back:active{background:#4A3728}
+.ch-sel{border:1.5px solid #E5D9C7;background:#fff;border-radius:10px;padding:6px 8px;font:inherit;font-size:12.5px;font-weight:800;color:#4A3728;max-width:118px}
+.ch-msgs{padding:8px;max-height:48vh}
+.ch-reply{margin-top:6px}
+.ch-reply textarea{padding:8px 10px}
+.ch-legend{margin:8px 2px 4px;gap:10px}
+.ch-more{width:100%;background:#fff;border:1.5px dashed #C9A96E;color:#6B4F00;border-radius:12px;padding:8px;margin-bottom:6px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+.ch-more[disabled]{opacity:.6}
+
 .ch-ok{border-color:#2D6A2D!important;background:#F2FAF2!important}
 .ch-need{border-color:#E08A00!important;background:#FFF8EC!important}
 .ch-need-wrap{outline:2px dashed #E08A00;outline-offset:4px;border-radius:10px}
@@ -1045,7 +1069,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v108</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v110</span>
   </div>
 </div>
 <div class="tabs">
@@ -1179,21 +1203,21 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   </div>
   <div id="ch-detail-screen" style="display:none">
     <div class="ch-dhead">
-      <button class="ch-back" onclick="chBack()" aria-label="رجوع">→</button>
-      <div class="ch-av" id="ch-d-av" style="width:42px;height:42px;font-size:17px"></div>
-      <div class="ch-main"><div class="ch-name" id="ch-d-name"></div><div class="ch-l3" id="ch-d-chip" style="margin-top:3px"></div></div>
-      <button class="ch-meta-btn" id="ch-d-meta" onclick="chOpenMeta()">فتح في ميتا ↗</button>
+      <button class="ch-back" onclick="chBack()" aria-label="رجوع">→ رجوع</button>
+      <div class="ch-av" id="ch-d-av" style="display:none"></div>
+      <div class="ch-main"><div class="ch-name" id="ch-d-name"></div><div class="ch-l3" id="ch-d-chip" style="margin-top:2px"></div></div>
+      <span id="ch-stat"></span>
     </div>
-    <div class="ch-stat" id="ch-stat"></div>
+    <button class="ch-more" id="ch-more" onclick="chMore()" style="display:none">⬆ عرض الرسائل الأقدم</button>
     <div class="ch-msgs" id="ch-msgs"></div>
     <div class="ch-reply" id="ch-reply" style="display:none">
-      <textarea id="ch-reply-t" rows="2" placeholder="اكتب رد للزبون..." onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){chSend();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"></textarea>
-      <button class="btn btn-gold btn-sm" id="ch-reply-b" onclick="chSend()" style="width:auto">إرسال ➤</button>
+      <textarea id="ch-reply-t" rows="1" placeholder="اكتب رد للزبون..." onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){chSend();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"></textarea>
+      <button class="btn btn-gold btn-sm" id="ch-reply-b" onclick="chSend()" style="width:auto">إرسال</button>
     </div>
     <div class="ch-warns" id="ch-warns"></div>
     <div id="ch-order-banner"></div>
     <div id="ch-form-wrap" style="display:none">
-      <div class="ch-legend"><span><i style="background:#2D6A2D"></i>معبّى من المحادثة — راجعيه</span><span><i style="background:#E08A00"></i>ناقص — عبّيه بنفسك</span></div>
+      <div class="ch-legend"><span><i style="background:#2D6A2D"></i>من المحادثة</span><span><i style="background:#E08A00"></i>ناقص</span></div>
       <div id="ch-form-host"></div>
       <div id="ch-missing"></div>
     </div>
@@ -2078,7 +2102,7 @@ async function fetchWithRetry(doFetch, maxAttempts){
 // أكشنز لازم لها جلسة صحيحة — تُرفَق هوية المستخدم الحالي تلقائياً بأي طلب منها
 const AUTH_REQUIRED_ACTIONS = ['getOrders','getDrafts','addOrder','updateOrder','deleteOrder',
   'uploadPhoto','deletePhoto','getInventory','addInventoryPurchase','saveDraft','deleteDraft','clearAllDrafts',
-  'inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect'];
+  'inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead'];
 function withAuth(params){
   if(currentUser && AUTH_REQUIRED_ACTIONS.includes(params.action)){
     return Object.assign({}, params, {authUsername: currentUser.username, authToken: currentUser.token});
@@ -2226,7 +2250,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v108<br>
+       <strong>الإصدار:</strong> v110<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2250,7 +2274,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v108 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v110 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6495,11 +6519,7 @@ function chChip(c){
   if(k==='pinned') return '<span class="ch-chip ch-pinned">تم التثبيت</span>';
   if(c.status==='phone') return '<span class="ch-chip ch-emp">رقم بدون تأكيد</span>';
   if(k!=='wait') return '';
-  if(!c.confirmAt) return '<span class="ch-chip ch-tent">بانتظار التثبيت</span>';
-  const left = CH.tentH*3600000-(Date.now()-c.confirmAt);
-  if(left<=0) return '<span class="ch-chip ch-late">تأكيد مبدئي (متأخر)</span>';
-  const h = Math.ceil(left/3600000);
-  return '<span class="ch-chip '+(h<=2?'ch-late':'ch-tent')+'">تأكيد مبدئي (باقي '+h+' س)</span>';
+  return '<span class="ch-chip ch-tent">بانتظار التثبيت</span>';
 }
 function chSubline(c){
   if(c.status==='none'||c.status==='phone') return '';
@@ -6523,8 +6543,8 @@ async function chLoadList(){
 }
 function chUpdateSub(){
   const el=document.getElementById('ch-sub'); if(!el) return;
-  let t = 'آخر تحديث: '+chAgo(CH.lastRefreshAt);
-  if(CH.remaining>0) t += ' — لسا في محادثات قديمة عم تنجلب، اضغطي تحديث لإكمال الجلب';
+  let t = 'آخر تحديث '+chAgo(CH.lastRefreshAt);
+  if(CH.remaining>0) t += ' — بيكمل جلب القديم';
   if(CH.pausedMsg) t += ' — 🛡 '+CH.pausedMsg;
   el.textContent = t;
   const btn=document.getElementById('ch-refresh');
@@ -6542,7 +6562,7 @@ function chRenderList(){
   const kinds=new Map(); let nWait=0, nPin=0, nCan=0;
   CH.list.forEach(c=>{ const k=chKind(c); kinds.set(c.id,k); if(k==='wait') nWait++; else if(k==='pinned') nPin++; else if(k==='cancelled') nCan++; });
   const fb=document.getElementById('ch-filters');
-  if(fb) fb.innerHTML=[['wait','⏳ بانتظار التثبيت ('+nWait+')'],['pinned','✅ مثبّتة ('+nPin+')'],['cancelled','🚫 ملغية ('+nCan+')'],['all','الكل ('+CH.list.length+')']]
+  if(fb) fb.innerHTML=[['wait','⏳ انتظار '+nWait],['pinned','✅ مثبّتة '+nPin],['cancelled','🚫 ملغية '+nCan],['all','الكل '+CH.list.length]]
     .map(x=>'<button class="ch-fbtn'+(f===x[0]?' on':'')+'" onclick="chSetFilter(\''+x[0]+'\')">'+x[1]+'</button>').join('');
   let arr = CH.list;
   if(f!=='all') arr = arr.filter(c=>kinds.get(c.id)===f);
@@ -6743,7 +6763,24 @@ async function chOpen(id){
 function chStatBar(c){
   const el=document.getElementById('ch-stat'); if(!el) return;
   const cur=c.manual||'';
-  el.innerHTML='<span>حالة المحادثة:</span>'+[['','تلقائي'],['wait','تأكيد'],['pinned','مثبّت'],['cancelled','ملغي']].map(x=>'<button class="ch-sbtn'+(cur===x[0]?' on':'')+'" onclick="chSetStatus(\''+x[0]+'\')">'+x[1]+'</button>').join('');
+  el.innerHTML='<select class="ch-sel" onchange="chSetStatus(this.value)" aria-label="حالة المحادثة">'+[['','الحالة: تلقائي'],['wait','الحالة: تأكيد'],['pinned','الحالة: مثبّت'],['cancelled','الحالة: ملغي']].map(x=>'<option value="'+x[0]+'"'+(cur===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>';
+}
+// قراءة كاملة يدوية للمحادثة المفتوحة (طلب واحد لميتا بس لهالمحادثة)
+async function chMore(){
+  const id=CH.cur; if(!id) return;
+  const b=document.getElementById('ch-more'); b.disabled=true; b.textContent='⏳ جاري جلب الأقدم...';
+  try{
+    const d=await apiPost({action:'inboxDeepRead', convId:id});
+    if(d.throttled){ toast('⏳ استني لحظات وجرّبي مرة ثانية'); b.disabled=false; b.textContent='⬆ عرض الرسائل الأقدم'; return; }
+    if(d.paused){ toast('🛡 '+(d.reason||'الجلب موقوف مؤقتاً')); b.disabled=false; b.textContent='⬆ عرض الرسائل الأقدم'; return; }
+    const r=await apiPost({action:'inboxGetChat', convId:id});
+    if(CH.cur!==id) return;
+    CH.cache[id]=r;
+    const c=CH.list.find(x=>x.id===id);
+    const box=document.getElementById('ch-msgs'); box.innerHTML=chMsgsHTML(r.messages); box.scrollTop=0;
+    b.style.display=r.full?'none':'block'; b.disabled=false; b.textContent='⬆ عرض الرسائل الأقدم';
+    toast(d.after>d.before ? '✅ انجلب '+(d.after-d.before)+' رسالة أقدم' : '✅ المحادثة كاملة، ما في أقدم');
+  }catch(e){ b.disabled=false; b.textContent='⬆ عرض الرسائل الأقدم'; toast('❌ '+e.message); }
 }
 // زر التحديث العلوي: يحدّث المحادثات كمان (بالخلفية، والفواصل الوقائية تبقى سارية)
 function chTopRefresh(){ try{ if(chCanUse() && !CH.busy) chRefresh({}); }catch(e){} }
@@ -6779,6 +6816,7 @@ async function chSetStatus(v){
 function chRenderDetail(c, r){
   chStatBar(c);
   const rb=document.getElementById('ch-reply'); if(rb) rb.style.display = r.canSend ? 'flex' : 'none';
+  const mb=document.getElementById('ch-more'); if(mb){ mb.style.display = r.full ? 'none' : 'block'; mb.disabled=false; mb.textContent='⬆ عرض الرسائل الأقدم'; }
   const box=document.getElementById('ch-msgs');
   box.innerHTML = chMsgsHTML(r.messages);
   box.scrollTop = box.scrollHeight;
