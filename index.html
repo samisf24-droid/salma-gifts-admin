@@ -1079,7 +1079,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v116</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v117</span>
   </div>
 </div>
 <div class="tabs">
@@ -2270,7 +2270,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v116<br>
+       <strong>الإصدار:</strong> v117<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2294,7 +2294,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v116 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v117 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6631,7 +6631,7 @@ function chRenderList(){
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
     const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const chips = chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (dels.has(c.id)?'<span class="ch-chip ch-emp">تم التسليم</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'') + (()=>{const w=chWhy(c); return w?'<span class="ch-chip ch-why">'+chEsc(w)+'</span>':'';})();
+    const chips = chChannel(c) + chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (dels.has(c.id)?'<span class="ch-chip ch-emp">تم التسليم</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'') + (()=>{const w=chWhy(c); return w?'<span class="ch-chip ch-why">'+chEsc(w)+'</span>':'';})();
     const eye = ord ? '<button class="ch-eye" title="عرض الأوردر" onclick="event.stopPropagation();openPanel(\''+chEsc(ord['Order ID'])+'\')">👁</button>' : '';
     const kk=kinds.get(c.id);
     return '<div class="ch-row'+(kk==='pinned'?' ch-row-pin':kk==='wait'?' ch-row-wait':'')+'" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
@@ -6827,6 +6827,7 @@ function chKind(c){
 }
 function chSetFilter(f){ CH.filter=f; if(f!=='wait') CH.empF=''; chRenderList(); }
 function chSetEmp(e){ CH.empF=e||''; chRenderList(); }
+function chChannel(c){ return (c&&c.ch==='fb')?'<span class="ch-chip" style="background:rgba(24,119,242,.15);color:#1877F2">ماسنجر</span>':''; }
 function chSyncHdr(){ try{ const d=document.getElementById('ch-detail-screen'); document.body.classList.toggle('ch-in-detail', !!(d && d.offsetParent!==null)); }catch(e){} }
 setInterval(chSyncHdr, 400);
 async function chOpen(id){
@@ -6836,7 +6837,7 @@ async function chOpen(id){
   document.getElementById('ch-detail-screen').style.display='block';
   const av=document.getElementById('ch-d-av'); av.textContent=chInit(c); av.style.background=chColor(c.handle||c.customer);
   document.getElementById('ch-d-name').textContent=c.customer;
-  document.getElementById('ch-d-chip').innerHTML=chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
+  document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
   document.getElementById('ch-msgs').innerHTML='<div class="ch-skel">⏳ جاري تحميل المحادثة...</div>';
   document.getElementById('ch-warns').innerHTML='';
   document.getElementById('ch-order-banner').innerHTML='';
@@ -6900,9 +6901,9 @@ async function chSend(){
 }
 async function chSetStatus(v){
   const id=CH.cur, c=CH.list.find(x=>x.id===id); if(!c) return;
-  const old=c.manual||''; c.manual=v; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
+  const old=c.manual||''; c.manual=v; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
   try{ await apiPost({action:'inboxSetStatus', convId:id, status:v}); toast('✅ تم تغيير حالة المحادثة'); }
-  catch(e){ c.manual=old; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':''); toast('❌ '+e.message); }
+  catch(e){ c.manual=old; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':''); toast('❌ '+e.message); }
 }
 function chRenderDetail(c, r){
   chStatBar(c);
