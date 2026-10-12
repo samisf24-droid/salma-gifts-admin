@@ -1019,6 +1019,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .ch-reply{margin-top:6px}
 .ch-reply textarea{padding:8px 10px}
 .ch-legend{margin:8px 2px 4px;gap:10px}
+.ch-why{background:#fff;color:#7A6A5A;border:1px dashed #D9C9AE}
 .ch-more{width:100%;background:#fff;border:1.5px dashed #C9A96E;color:#6B4F00;border-radius:12px;padding:8px;margin-bottom:6px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
 .ch-more[disabled]{opacity:.6}
 
@@ -1069,7 +1070,7 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v110</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v111</span>
   </div>
 </div>
 <div class="tabs">
@@ -2250,7 +2251,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v110<br>
+       <strong>الإصدار:</strong> v111<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2274,7 +2275,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v110 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v111 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6581,7 +6582,7 @@ function chRenderList(){
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
     const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const chips = chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'');
+    const chips = chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'') + (()=>{const w=chWhy(c); return w?'<span class="ch-chip ch-why">'+chEsc(w)+'</span>':'';})();
     const eye = ord ? '<button class="ch-eye" title="عرض الأوردر" onclick="event.stopPropagation();openPanel(\''+chEsc(ord['Order ID'])+'\')">👁</button>' : '';
     const kk=kinds.get(c.id);
     return '<div class="ch-row'+(kk==='pinned'?' ch-row-pin':kk==='wait'?' ch-row-wait':'')+'" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
@@ -6727,6 +6728,16 @@ function chFindOrder(c){
   const mv=Number(c.price)+DELIVERY_FEE;
   const m=(chIdx()[ph]||[]).filter(o=>Math.abs(orderValue(o)-mv)<0.01);
   return m.length?m[m.length-1]:null;
+}
+// سبب بقاء المحادثة «بانتظار التثبيت» (للموظفة: شو ينقص)
+function chWhy(c){
+  if(chKind(c)!=='wait' || c.manual==='wait') return '';
+  const ph=c.phone?normalizePhone(c.phone):'';
+  if(!ph) return 'ما في رقم مقروء';
+  if(c.price===''||c.price==null||isNaN(c.price)) return 'السعر ما انقرأ';
+  const os=chIdx()[ph]||[];
+  if(os.length){ const o=os[os.length-1]; return 'في أوردر بنفس الرقم بقيمة '+chFmtNum(orderValue(o))+' والشات '+chFmtNum(Number(c.price)+DELIVERY_FEE); }
+  return 'ما في أوردر بهالرقم';
 }
 // حالة العرض: مثبّتة فقط إذا لقينا أوردر مطابق؛ غير هيك (فيها تأكيد منا) = بانتظار التثبيت
 function chKind(c){
