@@ -1079,7 +1079,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v117</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v118</span>
   </div>
 </div>
 <div class="tabs">
@@ -2270,7 +2270,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v117<br>
+       <strong>الإصدار:</strong> v118<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2294,7 +2294,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v117 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v118 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6855,7 +6855,7 @@ async function chOpen(id){
 function chStatBar(c){
   const el=document.getElementById('ch-stat'); if(!el) return;
   const cur=c.manual||'';
-  el.innerHTML='<select class="ch-sel" onchange="chSetStatus(this.value)" aria-label="حالة المحادثة">'+[['','الحالة: تلقائي'],['wait','الحالة: تأكيد'],['pinned','الحالة: مثبّت'],['cancelled','الحالة: ملغي']].map(x=>'<option value="'+x[0]+'"'+(cur===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>';
+  el.innerHTML='<select class="ch-sel" onchange="chSetStatus(this.value)" aria-label="حالة المحادثة">'+[['','الحالة: تلقائي'],['wait','الحالة: تأكيد'],['pinned','الحالة: مثبّت'],['cancelled','الحالة: ملغي'],['hidden','🗑 إزالة من القائمة']].map(x=>'<option value="'+x[0]+'"'+(cur===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>';
 }
 // قراءة كاملة يدوية للمحادثة المفتوحة (طلب واحد لميتا بس لهالمحادثة)
 async function chMore(){
@@ -6902,7 +6902,9 @@ async function chSend(){
 async function chSetStatus(v){
   const id=CH.cur, c=CH.list.find(x=>x.id===id); if(!c) return;
   const old=c.manual||''; c.manual=v; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
-  try{ await apiPost({action:'inboxSetStatus', convId:id, status:v}); toast('✅ تم تغيير حالة المحادثة'); }
+  try{ await apiPost({action:'inboxSetStatus', convId:id, status:v});
+    if(v==='hidden'){ toast('🗑 انشالت من القائمة — بترجع إذا أكّدت عليها موظفة من جديد'); CH.list=CH.list.filter(x=>x.id!==id); chBack(); chRenderList(); return; }
+    toast('✅ تم تغيير حالة المحادثة'); }
   catch(e){ c.manual=old; chStatBar(c); document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':''); toast('❌ '+e.message); }
 }
 function chRenderDetail(c, r){
