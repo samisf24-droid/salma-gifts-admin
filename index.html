@@ -1003,6 +1003,10 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .ch-img{display:block;max-width:100%;width:220px;border-radius:12px;margin-bottom:4px;background:#eee}
 .ch-link{display:inline-block;color:inherit;font-weight:700;text-decoration:underline;margin-bottom:3px}
 .ch-warns{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.ch-ai{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.ch-ai-n{border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:800;line-height:1.6}
+.ch-ai-w{background:#FFF3E0;border:1px solid #F2B766;color:#7A4300}
+.ch-ai-i{background:#EEF4FF;border:1px solid #B9CDF3;color:#1F3F77}
 .ch-warn{background:#FFF8E1;border:1px solid #F0D58A;color:#6B4F00;border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:700}
 .ch-order-banner{margin-top:10px;background:#EAF5EA;border:1.5px solid #B7DDB7;color:#1A4D1A;border-radius:12px;padding:12px 14px;font-size:13.5px;font-weight:800;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
 .ch-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4A3728;margin:14px 2px 8px}
@@ -1083,7 +1087,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v126</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v128</span>
   </div>
 </div>
 <div class="tabs">
@@ -1232,6 +1236,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
     <div class="ch-warns" id="ch-warns"></div>
     <div id="ch-order-banner"></div>
     <div id="ch-form-wrap" style="display:none">
+      <div class="ch-ai" id="ch-ainotes"></div>
       <div class="ch-legend"><span><i style="background:#2D6A2D"></i>من المحادثة</span><span><i style="background:#E08A00"></i>ناقص</span></div>
       <div id="ch-form-host"></div>
       <div id="ch-missing"></div>
@@ -2274,7 +2279,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v126<br>
+       <strong>الإصدار:</strong> v128<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2298,7 +2303,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v126 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v128 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -7050,7 +7055,7 @@ function chRoleNames(text){
 function chOccasionDate(cust){
   const DELIV=/(استلام|الاستلام|تسليم|التسليم|توصيل|التوصيل|توصل|يوصل|اوصل|وصول|بكره|بكرا)/;
   const OCC=/(تاريخ|عرس|زفاف|زواج|مناسبه|خطوب|كتب\s*الكتاب|كتب كتاب|فرح)/;
-  const found=[];
+  const found=[], weakL=[];
   for(let k=cust.length-1;k>=0;k--){
     const t=chNormAr(cust[k].m.text);
     const re=/(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})(?!\d)|(\d{1,2})\s*[\/\-.–—]\s*(\d{1,2})(?:\s*[\/\-.–—]\s*(\d{2,4}))?(?!\d)/g; let m;
@@ -7059,21 +7064,24 @@ function chOccasionDate(cust){
       if(DELIV.test(before.slice(-20)) && !OCC.test(before.slice(-20))) continue;   // تاريخ استلام مو مناسبة
       let d,mo,y;
       if(m[1]){ y=+m[1]; mo=+m[2]; d=+m[3]; }
-      else { d=+m[4]; mo=+m[5]; y=m[6]?(+m[6]<100?2000+(+m[6]):+m[6]):0; if(!y && !OCC.test(before) && !OCC.test(after)) continue; }
+      else { d=+m[4]; mo=+m[5]; y=m[6]?(+m[6]<100?2000+(+m[6]):+m[6]):0; let weak=false; if(!y && !OCC.test(before) && !OCC.test(after)){ if(/^\s*\d{1,2}\s*[\/\-.–—]\s*\d{1,2}\s*$/.test(t)) weak=true; else continue; } m.weak=weak; }
       if(d<1||d>31||mo<1||mo>12) continue;
       const base=new Date(cust[k].m.t||Date.now());
       if(!y){ y=base.getFullYear(); if(new Date(y,mo-1,d)<new Date(base.getTime()-30*86400000)) y++; }
-      const ds=y+'-'+pad(mo)+'-'+pad(d); if(found.indexOf(ds)<0) found.push(ds);
+      const ds=y+'-'+pad(mo)+'-'+pad(d);
+      if(m.weak){ if(weakL.indexOf(ds)<0) weakL.push(ds); continue; }   // رسالة تاريخ لحالها: ما نعبّي منها، بس نكشف التعارض
+      if(found.indexOf(ds)<0) found.push(ds);
     }
   }
-  return found.length===1 ? found[0] : '';   // أكثر من تاريخ مناسبة = مش متأكدين → فاضي
+  return (found.length===1 && weakL.every(x=>x===found[0])) ? found[0] : '';   // أكثر من تاريخ مناسبة = مش متأكدين → فاضي
 }
-function chCoupleRaw(msgs){
+function chCoupleRaw(msgs, excl){
+  excl=excl||[];
   msgs=msgs||[];
   const res={groom:'',bride:'',date:'',found:false,how:''};
   const cust=msgs.map((m,i)=>({m,i})).filter(x=>x.m && !x.m.own && x.m.text);
   res.date=chOccasionDate(cust);
-  const take=(pair,how)=>{ if(pair && pair.length===2){ res.groom=pair[0]; res.bride=pair[1]; res.found=true; res.how=how; } };
+  const take=(pair,how)=>{ if(pair && pair.length===2 && excl.indexOf(pair.join('|'))<0){ res.groom=pair[0]; res.bride=pair[1]; res.found=true; res.how=how; } };
   const KW=/(?<![ء-ي])و?(?:الأسماء|الاسماء|أسماء|اسماء|الأسامي|الاسامي|أسامي|اسامي|اسمين|باسم|بإسم|بسم|الاسم|إسم|اسم)(?![ء-ي])/;
   // ١) «اسمي X واسمه Y» (الأول صاحب المحادثة — الترتيب يحتاج مراجعة)
   for(let k=cust.length-1;k>=0 && !res.found;k--){
@@ -7134,14 +7142,19 @@ function chCoupleRaw(msgs){
   return res;
 }
 function chCoupleFromMsgs(msgs){
-  const r=chCoupleRaw(msgs);
-  if(!r.found) return r;
-  if(r.how==='roles') return r;                          // الزبون حدد العريس والعروس صراحةً
-  const o=chOrderByGender(r.groom,r.bride);
-  if(o){ r.groom=o.groom; r.bride=o.bride; r.certain=true; return r; }
-  r.unsure=[r.groom,r.bride].join(' ، ');
-  r.groom=''; r.bride=''; r.found=false; r.how='unsure';  // مش متأكدين من الجنس → ما نعبّي
-  return r;
+  // نجرّب المرشحين بالترتيب: اللي ما ينجح بفحص الجنس (مثلاً اسم المستلم أو كلام عادي) نتجاوزه ونكمّل بحث
+  const excl=[]; let first=null;
+  for(let n=0;n<6;n++){
+    const r=chCoupleRaw(msgs, excl);
+    if(!r.found){ if(first){ first.groom=''; first.bride=''; first.found=false; first.how='unsure'; return first; } return r; }
+    if(r.how==='roles') return r;                        // الزبون حدد العريس والعروس صراحةً
+    const o=chOrderByGender(r.groom,r.bride);
+    if(o){ r.groom=o.groom; r.bride=o.bride; r.certain=true; return r; }
+    if(!first){ first=r; first.unsure=[r.groom,r.bride].join(' ، '); }
+    excl.push(r.groom+'|'+r.bride);
+  }
+  first.groom=''; first.bride=''; first.found=false; first.how='unsure';
+  return first;
 }
 function chTaliqaFromMsgs(msgs){
   msgs=msgs||[];
@@ -7176,15 +7189,21 @@ function chApplyCouple(msgs, type, setFn){
   try{ autoFillBookFrameNames(); }catch(e){}
   return c;
 }
-function chApplyTaliqa(msgs){
+function chAiNotes(list){
+  const box=document.getElementById('ch-ainotes'); if(!box) return;
+  box.innerHTML=(list||[]).map(n=>'<div class="ch-ai-n '+(n.w?'ch-ai-w':'ch-ai-i')+'">'+(n.w?'⚠️ ':'💡 ')+chEsc(n.t)+'</div>').join('');
+}
+function chApplyTaliqa(msgs, notes){
   const t=chTaliqaFromMsgs(msgs); if(!t) return;
   const priceEl=document.getElementById('f-price'); const keep=priceEl?priceEl.value:'';
   const data={groom:t.groom,bride:t.bride,date:t.date,notes:t.found?'':'الأسماء غير مؤكدة — راجعي المحادثة'+(t.date?'':' (والتاريخ)')};
   if(!findAdditionRow('taliqa')) createAdditionRow('taliqa', data);
   if(priceEl){ priceEl.value=keep; updatePriceHint(); }   // رقم التأكيد شامل التعليقة أصلاً
   chSwapNote(!!t.found,'additions-list');
-  toast(t.found ? '🏷 أُضيفت التعليقة: '+t.groom+' ، '+t.bride+(t.date?' — '+t.date.split('-').reverse().join('/'):'')+' (حسب الجنس — راجعي)'
-                : '🏷 أُضيفت التعليقة بدون أسماء لأني مش متأكد منها — اكتبيها من المحادثة');
+  if(notes){
+    if(t.found) notes.push({t:'🏷 أُضيفت تعليقة من المحادثة: '+t.groom+' ، '+t.bride+(t.date?' — '+t.date.split('-').reverse().join('/'):'')+' (الحساب شامل التعليقة +2). راجعي الأسماء والتاريخ.'});
+    else notes.push({w:1,t:'🏷 أُضيفت التعليقة (+2 شاملة بالحساب) لكن بدون أسماء'+(t.unsure?' — قرأت «'+t.unsure+'» بس مش متأكد منها':' — ما لقيتها بالمحادثة')+(t.date?'':' وبدون تاريخ مؤكد')+'. اكتبيها بالإضافات بعد ما تتأكدي من المحادثة.'});
+  }
 }
 function chPrefill(c, r){
   const p = r.prefill||{};
@@ -7206,10 +7225,20 @@ function chPrefill(c, r){
   if(p.price!=='' && p.price!=null) set('f-price',p.price);
   if(r.metaExact && r.metaLink) set('f-link',r.metaLink);
   try{
-    const cp=chApplyCouple(r.messages, document.getElementById('f-type').value, set);
+    const ty=document.getElementById('f-type').value;
+    const notes=[];
+    const cp=chApplyCouple(r.messages, ty, set);
     chSwapNote(!!(cp && cp.found));
-    if(cp && cp.found) toast('👰🤵 الأسماء من المحادثة: '+cp.groom+' ، '+cp.bride+(cp.date?' — مناسبة '+cp.date.split('-').reverse().join('/'):'')+' (حسب الجنس — راجعي)');
-    chApplyTaliqa(r.messages);
+    if(['Tray','Guest Book','Package','Frame'].includes(ty)){
+      const all=cp||chCoupleFromMsgs(r.messages);
+      if(all.found) notes.push({t:'👰🤵 الأسماء من المحادثة'+(all.how==='roles'?' (الزبون حدد العريس والعروس)':' — العريس المذكّر والعروس المؤنّث')+': '+all.groom+' ، '+all.bride+'. راجعيها قبل التثبيت.'});
+      else notes.push({w:1,t:'ما عبّيت اسم العريس والعروس'+(all.unsure?' — قرأت «'+all.unsure+'» بس مش متأكد منها (الجنس غير واضح أو ممكن تكون اسم المستلم)':' — ما لقيتهم بالمحادثة')+'. اكتبيهم من المحادثة.'});
+      if(all.date) notes.push({t:'📅 تاريخ المناسبة من المحادثة: '+all.date.split('-').reverse().join('/')+' (مو تاريخ الاستلام). راجعيه.'});
+      else notes.push({w:1,t:'ما عبّيت تاريخ المناسبة — ما لقيت تاريخ مؤكد بالمحادثة (أو في أكثر من تاريخ مختلف). تأكدي منه.'});
+    }
+    if(p.price==='' || p.price==null) notes.push({w:1,t:'ما لقيت السعر (رسالة تأكيد الطلب) بالمحادثة — اكتبي الحساب يدوياً.'});
+    chApplyTaliqa(r.messages, notes);
+    chAiNotes(notes);
   }catch(e){ console.warn('couple',e); }
   if(p.phone) checkDuplicatePhone(p.phone);
   updatePriceHint();
@@ -7272,7 +7301,7 @@ function chReleaseForm(){
   const addView=document.getElementById('view-add');
   if(CH.formEl && addView && CH.formEl.parentNode!==addView) addView.appendChild(CH.formEl);
   const note=document.getElementById('ch-missing'); if(note) note.innerHTML='';
-  try{ chSwapNote(false); }catch(e){}
+  try{ chSwapNote(false); chAiNotes([]); }catch(e){}
   CH.ctx=null;
 }
 function chBack(){
