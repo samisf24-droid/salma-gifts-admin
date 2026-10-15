@@ -1087,7 +1087,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v128</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v129</span>
   </div>
 </div>
 <div class="tabs">
@@ -2279,7 +2279,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v128<br>
+       <strong>الإصدار:</strong> v129<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2303,7 +2303,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v128 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v129 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -7141,7 +7141,97 @@ function chCoupleRaw(msgs, excl){
   }
   return res;
 }
+// ── أسماء بالانجليزي: الزبون يكتبها لاتيني، أو يطلب «بالانجليزي» ──
+// جنس الاسم اللاتيني: نقارن هيكل الحروف الساكنة مع قائمة الأسماء العربية (فقط لو التطابق واضح)
+function chSkelAr(w){
+  const m={'ب':'b','ت':'t','ث':'t','ج':'j','ح':'h','خ':'k','د':'d','ذ':'d','ر':'r','ز':'z','س':'s','ش':'S','ص':'s','ض':'d','ط':'t','ظ':'z','غ':'G','ف':'f','ق':'k','ك':'k','ل':'l','م':'m','ن':'n','ه':'h'};
+  let o=''; for(const ch of chNormAr(w)){ if(m[ch]) o+=m[ch]; }
+  return o.replace(/(.)\1+/g,'$1');
+}
+function chSkelLat(w){
+  let s=String(w||'').toLowerCase().replace(/[^a-z]/g,'');
+  s=s.replace(/sh/g,'S').replace(/kh/g,'k').replace(/gh/g,'G').replace(/th/g,'t').replace(/ch/g,'S').replace(/dh/g,'d').replace(/ph/g,'f');
+  const m={p:'b',v:'f',q:'k',c:'k',g:'j',x:'k'};
+  let o=''; for(const ch of s){ if('aeiouyw'.indexOf(ch)>=0) continue; o+=(m[ch]||ch); }
+  return o.replace(/(.)\1+/g,'$1');
+}
+let CH_SKEL=null;
+const CH_LATG={adam:'M',adel:'M',ahmad:'M',ahmed:'M',ali:'M',ameen:'M',amer:'M',amin:'M',amr:'M',anas:'M',awad:'M',ayman:'M',bader:'M',baha:'M',basel:'M',basem:'M',bashar:'M',bilal:'M',ebrahim:'M',ehab:'M',elias:'M',fadi:'M',fahad:'M',faisal:'M',fares:'M',faris:'M',fawwaz:'M',feras:'M',firas:'M',fouad:'M',fraij:'M',fuad:'M',ghaith:'M',ghassan:'M',hadi:'M',haitham:'M',hamza:'M',hani:'M',hasan:'M',hashem:'M',hassan:'M',hisham:'M',hosam:'M',hossam:'M',husam:'M',hussain:'M',hussein:'M',ibrahim:'M',ilyas:'M',isa:'M',issa:'M',jamal:'M',jihad:'M',johnny:'M',jony:'M',kamal:'M',kareem:'M',karim:'M',khaled:'M',khalid:'M',kinan:'M',laith:'M',loay:'M',luay:'M',maher:'M',mahmoud:'M',majd:'M',majed:'M',malik:'M',mamoun:'M',marwan:'M',mazen:'M',moath:'M',mohamed:'M',mohammad:'M',mohammed:'M',mohand:'M',mohannad:'M',mohanned:'M',mohd:'M',mostafa:'M',moussa:'M',muath:'M',muhammad:'M',muhannad:'M',mundhir:'M',munther:'M',musa:'M',mustafa:'M',mutaz:'M',nabil:'M',nader:'M',naser:'M',nasser:'M',nawaf:'M',nidal:'M',noah:'M',nuh:'M',obada:'M',odai:'M',oday:'M',omar:'M',osama:'M',othman:'M',qais:'M',qusai:'M',raed:'M',rafat:'M',rakan:'M',ramez:'M',rami:'M',ramy:'M',ramzi:'M',rashed:'M',rayan:'M',rayyan:'M',rushdi:'M',saad:'M',saed:'M',saeed:'M',said:'M',saif:'M',salah:'M',saleh:'M',salman:'M',sameer:'M',samer:'M',sami:'M',sayf:'M',shadi:'M',shaker:'M',sharaf:'M',sulaiman:'M',suleiman:'M',sultan:'M',taher:'M',tala:'M',talal:'M',tameem:'M',tamer:'M',tamim:'M',tarek:'M',tareq:'M',tariq:'M',thaer:'M',uday:'M',usama:'M',wael:'M',waleed:'M',walid:'M',yahya:'M',yaqoub:'M',yaseen:'M',yaser:'M',yasin:'M',yasser:'M',yazan:'M',yazid:'M',yousef:'M',youssef:'M',yousuf:'M',yusuf:'M',zaed:'M',zaid:'M',zakaria:'M',zayed:'M',zeyad:'M',ziad:'M',zuhair:'M',abeer:'F',aleen:'F',alia:'F',aliaa:'F',amal:'F',amani:'F',ameera:'F',amira:'F',amna:'F',ansam:'F',areej:'F',aseel:'F',asma:'F',asmaa:'F',athaar:'F',athar:'F',athare:'F',aya:'F',ayah:'F',ayat:'F',basma:'F',batool:'F',bayan:'F',besan:'F',bisan:'F',bushra:'F',dalal:'F',daleen:'F',dalia:'F',dalin:'F',dana:'F',danah:'F',dania:'F',deema:'F',diana:'F',dima:'F',dina:'F',doaa:'F',dua:'F',duaa:'F',duha:'F',eman:'F',esraa:'F',farah:'F',fatima:'F',fatimah:'F',ghada:'F',ghadeer:'F',ghalia:'F',hadeel:'F',hadil:'F',hala:'F',hana:'F',hanaa:'F',hanan:'F',haneen:'F',hanin:'F',hayat:'F',heba:'F',hiba:'F',hind:'F',huda:'F',ibtisam:'F',ibtissam:'F',iman:'F',isra:'F',israa:'F',jana:'F',jenna:'F',jody:'F',jolan:'F',joud:'F',jude:'F',judy:'F',lama:'F',lamar:'F',lamis:'F',lana:'F',layal:'F',layan:'F',leen:'F',lin:'F',lina:'F',lubna:'F',lujain:'F',mai:'F',mais:'F',majdouleen:'F',malak:'F',manar:'F',marah:'F',maram:'F',mariam:'F',maryam:'F',maya:'F',mayar:'F',mira:'F',nada:'F',nadine:'F',nagham:'F',nahed:'F',nahla:'F',nawal:'F',nesreen:'F',nisreen:'F',nourhan:'F',nujood:'F',ola:'F',raghad:'F',rahaf:'F',rahma:'F',rama:'F',rana:'F',rand:'F',randa:'F',ranim:'F',rasha:'F',rawabi:'F',rawan:'F',razan:'F',reem:'F',reema:'F',reeman:'F',reham:'F',riham:'F',rim:'F',rima:'F',roba:'F',rola:'F',ruaa:'F',ruba:'F',rula:'F',saja:'F',salma:'F',sama:'F',sara:'F',sarah:'F',sawsan:'F',seema:'F',shahd:'F',shahed:'F',shahid:'F',shaimaa:'F',shimaa:'F',shymaa:'F',sima:'F',solaf:'F',sondos:'F',soraya:'F',sundus:'F',tahani:'F',taleen:'F',tamara:'F',tasneem:'F',teeba:'F',thuraya:'F',toqa:'F',tuqa:'F',yakeen:'F',yaqeen:'F',yara:'F',yasmeen:'F',yasmin:'F',yumna:'F',zahra:'F',zainab:'F',zaynab:'F',zeina:'F',eslam:'M',islam:'M',isaa:'M',issa:'M',eisa:'M',esa:'M',noor:'U',nour:'U',nor:'U',alaa:'U',zien:'U',zain:'U',zein:'U',majd:'M'};
+function chLatinGender(name){
+  const first=String(name||'').trim().split(/\s+/)[0]||''; const low=first.toLowerCase().replace(/[^a-z]/g,'');
+  if(!low) return '';
+  if(/^abd/.test(low) || /^abdel|^abdul|^abdal/.test(low)) return 'M';
+  if(CH_LATG[low]) return CH_LATG[low]==='U'?'':CH_LATG[low];
+  if(!CH_SKEL){
+    CH_SKEL={};
+    CH_MALE.forEach(w=>{ const k=chSkelAr(w); if(k.length>=3){ (CH_SKEL[k]=CH_SKEL[k]||{}).M=1; } });
+    CH_FEMALE.forEach(w=>{ const k=chSkelAr(w); if(k.length>=3){ (CH_SKEL[k]=CH_SKEL[k]||{}).F=1; } });
+  }
+  const k=chSkelLat(low); if(k.length<3) return '';
+  const e=CH_SKEL[k]; if(!e) return '';
+  return (e.M&&!e.F)?'M':(e.F&&!e.M)?'F':'';
+}
+const CH_ENW=new Set(['ok','okay','okey','thanks','thank','you','hi','hello','yes','no','love','please','plz','pls','nice','good','bye','sorry','welcome','tamam','inshallah','insha','allah','thx','hey','like','done','price','order','whatsapp','instagram','link','dm','pm','am','amman','irbid','zarqa','aqaba','jordan','omg','lol','haha','wow','cm','kg','js','tt','graphic','design','get','started','reply','sent','photo','image','story','reel','reels','video','page','follow','shop','store','gifts','gift','salma','flowers','flower','bouquet','tray','book','available','price','delivery','free','new','sale']);
+function chCapEn(w){ return String(w||'').trim().split(/\s+/).map(x=>x.charAt(0).toUpperCase()+x.slice(1).toLowerCase()).join(' '); }
+// يقرأ اسمين لاتينيين من رسائل الزبون: رسالة وحدة (علامة فاصلة أو سطرين) أو رسالتين متتاليتين، كل وحدة اسم
+function chLatinPair(msgs){
+  msgs=msgs||[];
+  const parse=t=>{
+    let x=String(t||'').replace(/https?:\/\/\S+/g,' ').replace(/[٠-٩۰-۹\d]+/g,' ').replace(/[^A-Za-z؀-ۿ\s]/g,'|').replace(/\s*\n\s*/g,'|');
+    if(/[ء-ي]/.test(x)) return null;
+    const groups=x.split('|').map(g=>g.trim().replace(/\s+/g,' ')).filter(Boolean);
+    if(!groups.length) return null;
+    for(const g of groups){ if(!/^[A-Za-z]{2,}( [A-Za-z]{2,})?$/.test(g)) return null; if(g.split(' ').some(w=>CH_ENW.has(w.toLowerCase()))) return null; }
+    return groups;
+  };
+  const items=[]; msgs.forEach((m,i)=>{ if(m && !m.own && m.text){ const g=parse(m.text); items.push({i,g}); } });
+  for(let k=items.length-1;k>=0;k--){
+    const g=items[k].g; if(!g) continue;
+    if(g.length===2) return [chCapEn(g[0]),chCapEn(g[1])];
+    if(g.length===1 && g[0].indexOf(' ')<0){
+      const p=items[k-1]; if(p && p.g && p.g.length===1 && p.g[0].indexOf(' ')<0 && items[k].i-p.i<=2) return [chCapEn(p.g[0]),chCapEn(g[0])];
+    }
+    if(g.length===1 && g[0].split(' ').length===2){ const w=g[0].split(' '); if(!/^abd/i.test(w[0])) return [chCapEn(w[0]),chCapEn(w[1])]; }
+  }
+  return null;
+}
+// طلب «بالانجليزي»: للأسماء / للتاريخ / للأحرف (على العلب)
+function chEnglishAsk(msgs){
+  msgs=msgs||[]; const res={names:false,date:false,letters:false};
+  const RX=/(انجليز|إنجليز|انكليز|انجلش|english)/i;
+  msgs.forEach((m,i)=>{
+    if(!m || m.own || !m.text) return;
+    String(m.text).split('\n').forEach(line=>{
+      if(!RX.test(chNormAr(line))) return;
+      const n=chNormAr(line);
+      if(/تاريخ|تاريح|التاريخ/.test(n)){ res.date=true; if(/(اسم|اسماء|الاسماء|عريس|عروس)/.test(n)) res.names=true; return; }
+      if(/(احرف|حرف|الاحرف|العلب|علب|دبل)/.test(n)){ res.letters=true; return; }
+      if(/(اسم|اسماء|الاسماء|عريس|عروس|تعليق|اسمي|اسمنا)/.test(n)){ res.names=true; return; }
+      // «بالانجليزي» لحالها: نشوف الجيران
+      let ctx=''; for(let j=Math.max(0,i-3);j<=Math.min(msgs.length-1,i+2);j++){ if(msgs[j] && msgs[j].text) ctx+=' '+chNormAr(msgs[j].text); }
+      if(/(اسماء|الاسماء|اسم |عريس|عروس|تعليق|الاسمين)/.test(ctx) && !/(احرف|الاحرف)/.test(chNormAr(m.text))) res.names=true; else if(/(احرف|الاحرف)/.test(ctx)) res.letters=true;
+    });
+  });
+  return res;
+}
 function chCoupleFromMsgs(msgs){
+  const r=chCoupleAr(msgs);
+  r.ask=chEnglishAsk(msgs);
+  const lp=chLatinPair(msgs);
+  if(lp){
+    const g1=chLatinGender(lp[0]), g2=chLatinGender(lp[1]); let o=null;
+    if(g1==='M'&&g2==='F') o=[lp[0],lp[1]]; else if(g1==='F'&&g2==='M') o=[lp[1],lp[0]];
+    if(!o && r.found && r.certain){   // الاسمين بالعربي مؤكدين: نطابق اللاتيني معهم بهيكل الحروف
+      const a=w=>chSkelAr(String(w).split(' ')[0]), b=w=>chSkelLat(String(w).split(' ')[0]);
+      if(b(lp[0])===a(r.groom) && b(lp[1])===a(r.bride) && b(lp[0])!==b(lp[1])) o=[lp[0],lp[1]];
+      else if(b(lp[1])===a(r.groom) && b(lp[0])===a(r.bride) && b(lp[0])!==b(lp[1])) o=[lp[1],lp[0]];
+    }
+    if(o){ r.groom=o[0]; r.bride=o[1]; r.found=true; r.how='latin'; r.lang='en'; r.certain=true; }
+    else { r.latinUnsure=lp.join(' ، '); }
+  }
+  return r;
+}
+function chCoupleAr(msgs){
   // نجرّب المرشحين بالترتيب: اللي ما ينجح بفحص الجنس (مثلاً اسم المستلم أو كلام عادي) نتجاوزه ونكمّل بحث
   const excl=[]; let first=null;
   for(let n=0;n<6;n++){
@@ -7196,7 +7286,8 @@ function chAiNotes(list){
 function chApplyTaliqa(msgs, notes){
   const t=chTaliqaFromMsgs(msgs); if(!t) return;
   const priceEl=document.getElementById('f-price'); const keep=priceEl?priceEl.value:'';
-  const data={groom:t.groom,bride:t.bride,date:t.date,notes:t.found?'':'الأسماء غير مؤكدة — راجعي المحادثة'+(t.date?'':' (والتاريخ)')};
+  const enN=[]; if(t.ask && t.ask.date) enN.push('التاريخ بالانجليزي'); if(t.ask && (t.ask.names||t.latinUnsure) && t.lang!=='en') enN.push('الأسماء بالانجليزي');
+  const data={groom:t.groom,bride:t.bride,date:t.date,notes:(t.found?'':'الأسماء غير مؤكدة — راجعي المحادثة'+(t.date?'':' (والتاريخ)'))+((!t.found&&enN.length)?' - ':'')+enN.join(' - ')};
   if(!findAdditionRow('taliqa')) createAdditionRow('taliqa', data);
   if(priceEl){ priceEl.value=keep; updatePriceHint(); }   // رقم التأكيد شامل التعليقة أصلاً
   chSwapNote(!!t.found,'additions-list');
@@ -7236,6 +7327,12 @@ function chPrefill(c, r){
       if(all.date) notes.push({t:'📅 تاريخ المناسبة من المحادثة: '+all.date.split('-').reverse().join('/')+' (مو تاريخ الاستلام). راجعيه.'});
       else notes.push({w:1,t:'ما عبّيت تاريخ المناسبة — ما لقيت تاريخ مؤكد بالمحادثة (أو في أكثر من تاريخ مختلف). تأكدي منه.'});
     }
+    try{ const e=chCoupleFromMsgs(r.messages), ak=e.ask||{};
+      if(e.lang==='en') notes.push({t:'🔤 الزبون كتب الأسماء بالانجليزي: '+e.groom+' ، '+e.bride+' — انكتبت متل ما كتبها (العريس المذكّر). راجعي التهجئة.'});
+      else if(ak.names||e.latinUnsure) notes.push({w:1,t:'🔤 الزبون بدّه الأسماء بالانجليزي'+(e.latinUnsure?' (كتبها «'+e.latinUnsure+'» بس ما قدرت أحدد مين العريس ومين العروس)':' — والأسماء مكتوبة عندي بالعربي')+'. اكتبيها بالانجليزي مع الترتيب الصحيح.'});
+      if(ak.date) notes.push({w:1,t:'🔤 الزبون بدّه التاريخ بالانجليزي (أرقام/شهر بالانجليزي) — انتبهي وقت التصميم.'});
+      if(ak.letters) notes.push({w:1,t:'🔤 الأحرف على العلب بالانجليزي حسب كلام الزبون — ضيفيها بالملاحظات.'});
+    }catch(e){}
     if(p.price==='' || p.price==null) notes.push({w:1,t:'ما لقيت السعر (رسالة تأكيد الطلب) بالمحادثة — اكتبي الحساب يدوياً.'});
     chApplyTaliqa(r.messages, notes);
     chAiNotes(notes);
