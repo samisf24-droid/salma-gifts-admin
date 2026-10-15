@@ -1083,7 +1083,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v121</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v126</span>
   </div>
 </div>
 <div class="tabs">
@@ -2274,7 +2274,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v121<br>
+       <strong>الإصدار:</strong> v126<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2298,7 +2298,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v121 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v126 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -3888,9 +3888,9 @@ function removeAdditionRow(btn){
   if(delta>0){
     const priceEl = document.getElementById('f-price');
     priceEl.value = Math.max(0, (parseFloat(priceEl.value)||0)-delta);
-    updatePriceHint();
   }
   row.remove();
+  updatePriceHint();
   toast(delta ? 'تم حذف الإضافة وخصم '+delta+' د.أ' : 'تم حذف الإضافة');
 }
 
@@ -4150,12 +4150,13 @@ function updatePriceHint(){
   const isPaid = paidEl && paidEl.checked;
   const hintEl = document.getElementById('price-hint');
   const grand = price + (prov?DELIVERY_FEE:0);
+  let tq=''; try{ if(findAdditionRow('taliqa')) tq=' — شامل التعليقة (+2 د.أ)'; }catch(e){}
   if(isPaid){
     hintEl.innerHTML = '✅ الحساب واصل — <b>شركة التوصيل لا تُحصّل شيئاً</b>'+(grand?' (قيمة الطلب '+grand+' د.أ)':'');
   } else if(prov){
-    hintEl.textContent = '+ 2 د.أ توصيل = المطلوب تحصيله: '+grand+' د.أ';
+    hintEl.textContent = '+ 2 د.أ توصيل = المطلوب تحصيله: '+grand+' د.أ'+tq;
   } else {
-    hintEl.textContent = '';
+    hintEl.textContent = tq ? tq.replace(/^ — /,'') : '';
   }
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -6959,6 +6960,232 @@ function chYmd(v){
   const d=new Date(s); if(isNaN(d)) return '';
   return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 }
+// ───── التعليقة من المحادثة ─────
+// إذا رسالة التأكيد فيها «تعليقة» نضيفها للأوردر، ونسحب الاسمين والتاريخ من كلام الزبون.
+// السعر: رقم رسالة التأكيد شامل التعليقة (+2) والتوصيل (+2) أصلاً، فلا نضيف 2 ثانية للسعر.
+function chNormAr(t){
+  return String(t||'').replace(/[ً-ٟـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-1632)).replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-1776)).toLowerCase();
+}
+const CH_VOW_EXC=['ولاء','وفاء','وعد','وسام','وليد','وسن','وجدان','وداد','ورد','وردة','وئام','وصال','وسيم','وائل','وضحى','وجد','وسما'];
+const CH_BADW=new Set(['يعطيك','يعطيكي','العافيه','عافيه','تم','حبيبتي','شكرا','مرحبا','اهلا','تمام','اوك','ok','طيب','بدي','ممكن','اه','لا','نعم','الاسماء','الاسم','اسماء','اسم','التاريخ','تاريخ','عنوان','العنوان','الطلب','رقم','التلفون','هاتف','عمان','اربد','الزرقاء','العقبه','مادبا','جرش','عجلون','السلط','المفرق','الكرك','معان','الطفيله','دينار','مسكه','تعليقه','مع','على','في','من','الى','الي','هاي','هذا','هيك','كمان','بس','يعني','حاضر','ماشي','بالانجليزي','بالانجليزيه','انجليزي','عربي','اسمي','اسمه','اسمها','عرس','العرس','زواج','خطوبه','ابو','ام','مش','وين','كيف','ليش','شو','متى','كم','هلا','صباح','مساء','الخير','النور','الله','يسلموا','يسلمو','يا','حياتي','قلبي','عمري','ماما','العرسان','العروسين','العريس','العروس','عروس','عريس','الاسمين','اسمين','اللي','يلي','عليها','عليه','يكون','بدك','بدها','بتحبي','او','بالعربي','بالعربيه','الاسامي','اسامي','موعد','الموعد','الاستلام','استلام','التسليم','تسليم','توصيل','التوصيل']);
+function chBadW(x){ const n=chNormAr(x); return CH_BADW.has(n) || CH_BADW.has(n.replace(/^و(?=ال)/,'')); }
+function chCleanName(v){
+  v=String(v||'').trim().replace(/^و\s+/,'').trim().replace(/عبد\s+ال/g,'عبدال');
+  if(!v || v==='و' || /\d/.test(v) || /تاريخ/.test(chNormAr(v))) return '';
+  if(!/^[A-Za-z؀-ۿ\s]+$/.test(v)) return '';
+  let w=v.split(/\s+/);
+  while(w.length && chBadW(w[0])) w.shift();
+  while(w.length && chBadW(w[w.length-1])) w.pop();
+  if(!w.length || w.length>3 || w.some(chBadW)) return '';
+  v=w.join(' ');
+  const c=v.replace(/\s/g,''); if(c.length<2 || c.length>22) return '';
+  return v;
+}
+const CH_SEP=/[\n.،,&+\-\/؛;:؟?!…@❤♥️\u{1F300}-\u{1FAFF}]+/u;
+function chStripDates(t){ return String(t||'').replace(/[0-9٠-٩۰-۹]{1,4}\s*[\/\-.–—]\s*[0-9٠-٩۰-۹]{1,2}(?:\s*[\/\-.–—]\s*[0-9٠-٩۰-۹]{2,4})?/g,' '); }
+// glue: false | 'vow' (تقسيم «احمد وغزل») | 'plain' (أي كلمتين متجاورتين)
+function chNameTokens(txt, glue){
+  const out=[];
+  chStripDates(txt).split(CH_SEP).forEach(piece=>{
+    piece.split(/\s+و\s+/).forEach(x=>{ const v=chCleanName(x); if(v) out.push(v); });
+  });
+  if(glue && out.length===1){
+    const w=out[0].split(/\s+/);
+    if(w.length===2){
+      const b=w[1];
+      if(/^و/.test(b) && b.length>=4 && CH_VOW_EXC.indexOf(b)<0) return [w[0],b.slice(1)];
+      if(glue==='plain') return [w[0],b];
+    }
+  }
+  return out;
+}
+function chIsDateLine(l){ const n=chNormAr(l); return /تاريخ/.test(n) || /\d{1,4}\s*[\/\-.–—]\s*\d{1,2}/.test(n); }
+// اسمين من مجموعة أسطر: سطر فيه اسمين، أو سطرين كل واحد اسم مفرد (حد أقصى كلمتين)
+function chPairFromLines(lines, glue){
+  const L=lines.map(x=>String(x||'').trim()).filter(Boolean);
+  if(L.length===1){ const t=chNameTokens(L[0],glue||'vow'); return t.length===2?t:null; }
+  if(L.length===2){
+    const t1=chNameTokens(L[0],false), t2=chNameTokens(L[1],false);
+    if(t1.length===1 && t2.length===1 && L[0].split(/\s+/).length<=2 && L[1].split(/\s+/).length<=2) return [t1[0],t2[0]];
+  }
+  return null;
+}
+// ── جنس الاسم: نقرر العريس/العروس بالجنس، ولو مش متأكدين ما نعبّي ──
+const CH_MALE=new Set(('ابراهيم احمد ادم ادهم اسامه اسحاق اسلام اصيل المعتز المنتصر الهيثم امجد امين انس انور اوس اياد ايمن ايهم ايوب باسل باسم بدر بسام بشار بكر بلال بهاء تيم ثائر ثابت جاسم جعفر جميل جنيد جهاد جواد جودت حاتم حازم حذيفه حسام حسان حسن حسين حماده حمد حمزه خالد خضر خلدون خلف خليل ذياب رائد راشد راغب راكان رامز رامي ربحي ربيع رزق رضوان رعد رمزي رياض زاهر زايد زكريا زياد زيد سائد سالم سامح سامر سامي سعد سعود سعيد سفيان سلطان سليم سليمان سمير سند سيف شادي شاكر شاهر شرف شريف صابر صالح صبري صخر صدام صفوان صلاح صهيب صيدم طارق طلال طه عادل عاصم عامر عاهد عايد عباده عباس عبدالحليم عبدالحمد عبدالرحمان عبدالرحمن عبدالعزيز عبدالكريم عبدالله عبود عثمان عدنان عدي عزالدين عزام عزمي عصام عطاالله علاء علي عماد عمار عمر عمرو عمير عناد عنان عوني عيسي غالب غسان غيث فؤاد فادي فارس فراس فرج فهد فواز فوزي فياض فيصل قاسم قتيبه قصي قيس كرم كريم لؤي ليث مؤمن مؤيد ماجد مازن مالك مامون ماهر محمد محمود مراد مروان مشعل مصطفي مصعب معاذ معاويه معتز معتصم ممدوح منيب منير مهدي مهند موسي نادر ناصر نايف نبيل نذير نزار نضال نمر نواف نوح هاشم هاني هشام همام هيثم وائل واثق وسيم وصفي وضاح وليد ياسر ياسين يحيي يزن يزيد يعقوب ينال يوسف').split(' '));
+const CH_FEMALE=new Set(('ابتسام ابرار احلام اروي اريج اسراء اسماء اسيل اسيه اشتياق اصاله افراح افنان الاء العنود امال اماني امجاد امل امنه امونه انسام انوار ايات اية ايمان ايناس ايه بتول بسمله بشري بلقيس بنان بيان بيداء بيسان بيلسان تالا تالين تسنيم تقوي تمارا تهاني تولين تيماء تيمه جمانا جمانه جميله جنات جنان جني جواهر جوري جيلان جيهان حلا حليمه حنان حنين حور ختام خديجه خلود دالين دانا دانه دانيا دانيه دعاء دلال دنيا ديما ديمه دينا ذكريات رؤي رادا راغده راما رانيا رايه ربي رحاب رحمه ردينه رزان رشا رغد رغده رفيده رقيه رماح رنا رناد رنيم رنين رها رهام رهف روابي روان رواند روعه رولا رويدا ريتاج ريتال ريم ريما ريماس ريناته ريناد ريهام زمزم زهره زينب زينه ساجده سارا ساميه ساندي سجود سجي سحر سديل سدين سراء سكينه سلسبيل سلمي سلوي سما سماح سمر سميره سميه سناء سنابل سندس سوار سوسن سيدرا سيرين سيما شذي شروق شفاء شهد شهندا شوفه شويكار شيرين شيماء صابرين صفا صفاء ضحي عائشه عاتكه عايشه عبير عرين عفاف عليا علياء عهد غاليه غدير غرام غزل غيداء فاتن فاديه فاطمه فجر فدوي فرح فيروز قدامه قمر كنانه كنده لؤلؤ لارا لاما لانا لبني لجين لجينه لطيفه لمي لميس ليالي ليان ليلي ليليان ليما لين لينا ماجده مارا ماريا ماريانا ماريه ماسه مايا مرام مرح مروه مروي مريم مشاعل منال منتهي مني مها مي ميار ميان ميرا ميرنا ميساء ميسم ميمونه نبا نجلاء نجوي نداء ندي نرمين نسرين نغم نهاد نهايه نهله نهي نهيل نوال نورا نيبال نيفين نيرمين هاجر هبه هدي هدير هديل هلا هناء هنادي هند هيا هيام هيفاء وئام وتين وسن وعد وفاء ولاء يارا ياسمين يسر يسري يقين يمامه').split(' '));
+// «عبد…» دائماً مذكّر. أي اسم مش بالقوائم = غير معروف (ما نخمّن)
+function chGender(name){
+  const w=chNormAr(String(name||'').trim().split(/\s+/)[0]||'').replace(/^ال(?=[ء-ي]{3,})/,'');
+  if(!w) return '';
+  const m=CH_MALE.has(w)||/^عبد/.test(w), f=CH_FEMALE.has(w);
+  return (m&&!f)?'M':(f&&!m)?'F':'';
+}
+// يرجّع {groom,bride} فقط لو واحد مذكّر والثاني مؤنّث بشكل مؤكد (والترتيب بحسب الجنس)، وإلا null
+function chOrderByGender(a,b){
+  const ga=chGender(a), gb=chGender(b);
+  if(ga==='M' && gb==='F') return {groom:a,bride:b};
+  if(ga==='F' && gb==='M') return {groom:b,bride:a};
+  return null;
+}
+// أدوار صريحة: «العروسه ذكريات والعريس احمد»
+function chRoleNames(text){
+  const t=String(text||'');
+  if(!/(اسم|اسماء|أسماء|باسم|بإسم|بسم)/.test(t) && !/(عريس|عروس)[^\n]{0,3}:/.test(t)) return null;
+  const STOP=/^(و|في|من|على|مع|عن|الي|اللي|هي|هو|بدي|يعني|بس|كمان|للمسكه|للمسكة|وتاريخ|تاريخ)$/;
+  const grab=role=>{
+    const re=new RegExp('(?:^|[^ء-ي]|و)(?:ال)?'+role+'[هة]?\\s*:?\\s*([^\\n]*)');
+    const m=t.match(re); if(!m) return '';
+    const words=m[1].trim().split(/\s+/); const out=[];
+    for(const w0 of words){
+      const w=w0.replace(/[.،,:؟?!]+$/,'');
+      if(!w || /\d/.test(w) || /^و?(ال)?(عريس|عروس)/.test(w) || /^وتاريخ|^تاريخ/.test(w) || STOP.test(w) || !/^[A-Za-z؀-ۿ]+$/.test(w)) break;
+      out.push(w); if(out.length===2 || /[.،,:؟?!]$/.test(w0)) break;
+    }
+    return chCleanName(out.join(' '));
+  };
+  const g=grab('عريس'), b=grab('عروس');
+  return (g && b) ? {groom:g,bride:b} : null;
+}
+function chOccasionDate(cust){
+  const DELIV=/(استلام|الاستلام|تسليم|التسليم|توصيل|التوصيل|توصل|يوصل|اوصل|وصول|بكره|بكرا)/;
+  const OCC=/(تاريخ|عرس|زفاف|زواج|مناسبه|خطوب|كتب\s*الكتاب|كتب كتاب|فرح)/;
+  const found=[];
+  for(let k=cust.length-1;k>=0;k--){
+    const t=chNormAr(cust[k].m.text);
+    const re=/(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})(?!\d)|(\d{1,2})\s*[\/\-.–—]\s*(\d{1,2})(?:\s*[\/\-.–—]\s*(\d{2,4}))?(?!\d)/g; let m;
+    while((m=re.exec(t))!==null){
+      const before=t.slice(Math.max(0,m.index-25),m.index), after=t.slice(m.index+m[0].length, m.index+m[0].length+12);
+      if(DELIV.test(before.slice(-20)) && !OCC.test(before.slice(-20))) continue;   // تاريخ استلام مو مناسبة
+      let d,mo,y;
+      if(m[1]){ y=+m[1]; mo=+m[2]; d=+m[3]; }
+      else { d=+m[4]; mo=+m[5]; y=m[6]?(+m[6]<100?2000+(+m[6]):+m[6]):0; if(!y && !OCC.test(before) && !OCC.test(after)) continue; }
+      if(d<1||d>31||mo<1||mo>12) continue;
+      const base=new Date(cust[k].m.t||Date.now());
+      if(!y){ y=base.getFullYear(); if(new Date(y,mo-1,d)<new Date(base.getTime()-30*86400000)) y++; }
+      const ds=y+'-'+pad(mo)+'-'+pad(d); if(found.indexOf(ds)<0) found.push(ds);
+    }
+  }
+  return found.length===1 ? found[0] : '';   // أكثر من تاريخ مناسبة = مش متأكدين → فاضي
+}
+function chCoupleRaw(msgs){
+  msgs=msgs||[];
+  const res={groom:'',bride:'',date:'',found:false,how:''};
+  const cust=msgs.map((m,i)=>({m,i})).filter(x=>x.m && !x.m.own && x.m.text);
+  res.date=chOccasionDate(cust);
+  const take=(pair,how)=>{ if(pair && pair.length===2){ res.groom=pair[0]; res.bride=pair[1]; res.found=true; res.how=how; } };
+  const KW=/(?<![ء-ي])و?(?:الأسماء|الاسماء|أسماء|اسماء|الأسامي|الاسامي|أسامي|اسامي|اسمين|باسم|بإسم|بسم|الاسم|إسم|اسم)(?![ء-ي])/;
+  // ١) «اسمي X واسمه Y» (الأول صاحب المحادثة — الترتيب يحتاج مراجعة)
+  for(let k=cust.length-1;k>=0 && !res.found;k--){
+    const o=String(cust[k].m.text).match(/اسمي\s+([ء-ي]+)\s+و?\s*اسمه\s+([ء-ي]+)/);
+    if(o) take([o[1],o[2]],'self');
+  }
+  // ٢) أدوار صريحة
+  for(let k=cust.length-1;k>=0 && !res.found;k--){
+    const r=chRoleNames(cust[k].m.text); if(r) take([r.groom,r.bride],'roles');
+  }
+  // ٣) سطر فيه كلمة اسماء (كلمة كاملة): نفس السطر أو الأسطر بعده (حتى التاريخ)
+  for(let k=cust.length-1;k>=0 && !res.found;k--){
+    const lines=String(cust[k].m.text).split('\n');
+    for(let li=0;li<lines.length && !res.found;li++){
+      const mm=lines[li].match(KW); if(!mm) continue;
+      const isBi=/^و?(?:باسم|بإسم|بسم)/.test(mm[0]);
+      const restLine=lines[li].slice(mm.index+mm[0].length);
+      const tk=chNameTokens(restLine, isBi?'vow':'plain');
+      if(tk.length===2){ take(tk,'kw'); break; }
+      if(tk.length===1 && !isBi && tk[0].split(/\s+/).length===1 && lines[li+1]!==undefined && !chIsDateLine(lines[li+1])){
+        const t2=chNameTokens(lines[li+1],false);
+        if(t2.length===1 && t2[0].split(/\s+/).length===1){ let b2=t2[0]; if(/^و/.test(b2) && b2.length>=4 && CH_VOW_EXC.indexOf(b2)<0) b2=b2.slice(1); take([tk[0],b2],'kw2'); break; }
+        const t3=chNameTokens(lines[li+1],'vow');
+        if(t3.length===2 && t3[0]===lines[li+1].trim().split(/\s+/)[0]){ take([tk[0],t3[1]],'kw2'); break; }
+        continue;
+      }
+      if(tk.length>0) continue;     // كلمة اسم + اسم واحد (باسم فلان) = غالباً المستلم، نتجاهله
+      const nxt=[]; for(let lj=li+1;lj<lines.length && nxt.length<2;lj++){ if(chIsDateLine(lines[lj])) break; if(String(lines[lj]).trim()) nxt.push(lines[lj]); }
+      take(chPairFromLines(nxt,'vow'),'kwlines');
+    }
+  }
+  // ٤) رسالة بتاريخ: الاسمين بالسطر/السطرين القريبين من سطر التاريخ (قبله أو بعده)
+  for(let k=cust.length-1;k>=0 && !res.found;k--){
+    const lines=String(cust[k].m.text).split('\n');
+    for(let li=0;li<lines.length && !res.found;li++){
+      if(!chIsDateLine(lines[li])) continue;
+      const before=lines.slice(Math.max(0,li-3),li), after=lines.slice(li+1,li+4);
+      const cands=[before.slice(-2), before.slice(-1), after.slice(0,1), after.slice(0,2), before.slice(-2,-1), before.slice(-3,-2), after.slice(1,2), after.slice(2,3)];
+      for(const c of cands){ if(c.length && !c.some(chIsDateLine)){ const pr=chPairFromLines(c, lines.length<=4?'plain':'vow'); if(pr){ take(pr,'dateline'); break; } } }
+      if(!res.found){ const same=chStripDates(lines[li]).replace(/تاريخ|التاريخ/g,' '); if(/[ء-ي]/.test(same)){ const pr=chPairFromLines([same],'plain'); if(pr) take(pr,'sameline'); } }
+    }
+  }
+  // ٥) ردّ الزبون بعد ما سألناه عن الأسماء (خلال ٤ رسائل)
+  for(let i=0;i<msgs.length-1 && !res.found;i++){
+    const a=msgs[i]; if(!(a && a.own && /(اسماء|اسمين|الاسم)/.test(chNormAr(a.text)))) continue;
+    const nxt=[]; for(let j=i+1;j<msgs.length && j<=i+4;j++){ if(msgs[j] && !msgs[j].own && msgs[j].text) nxt.push(String(msgs[j].text)); else if(msgs[j] && msgs[j].own) break; }
+    for(const t of nxt){ const ls=t.split('\n').filter(l=>!chIsDateLine(l)); const pr=chPairFromLines(ls); if(pr){ take(pr,'reply'); break; } }
+    if(!res.found && nxt.length>=2){ const a1=chNameTokens(nxt[0],false), b1=chNameTokens(nxt[1],false); if(a1.length===1 && b1.length===1 && !/\n/.test(nxt[0]) && !/\n/.test(nxt[1])) take([a1[0],b1[0]],'reply2'); }
+  }
+  // ٦) رسالة كلها اسمان فقط (سطرين، أو سطر فيه «أ و ب» صريح) وبدون أي كلام ثاني
+  for(let k=cust.length-1;k>=0 && !res.found;k--){
+    const ls=String(cust[k].m.text).split('\n').map(x=>x.trim()).filter(Boolean);
+    if(ls.length>2 || !ls.length) continue;
+    const pr=chPairFromLines(ls,'vow'); if(!pr) continue;
+    if(ls.length===1 && !/\sو|[&+\-.،,❤]/.test(ls[0])) continue;
+    take(pr,'only');
+  }
+  return res;
+}
+function chCoupleFromMsgs(msgs){
+  const r=chCoupleRaw(msgs);
+  if(!r.found) return r;
+  if(r.how==='roles') return r;                          // الزبون حدد العريس والعروس صراحةً
+  const o=chOrderByGender(r.groom,r.bride);
+  if(o){ r.groom=o.groom; r.bride=o.bride; r.certain=true; return r; }
+  r.unsure=[r.groom,r.bride].join(' ، ');
+  r.groom=''; r.bride=''; r.found=false; r.how='unsure';  // مش متأكدين من الجنس → ما نعبّي
+  return r;
+}
+function chTaliqaFromMsgs(msgs){
+  msgs=msgs||[];
+  let ci=-1;
+  msgs.forEach((m,i)=>{ if(m && m.own && /قيمه\s*الطلب/.test(chNormAr(m.text))) ci=i; });
+  if(ci<0 || !/تعليق/.test(chNormAr(msgs[ci].text))) return null;
+  return chCoupleFromMsgs(msgs);
+}
+// الأسماء والتاريخ (تاريخ المناسبة مو الاستلام) لأي منتج بيحتاج عريس وعروس: صينية/كتاب/بكج/برواز.
+// اسم المستلم مستقل تماماً (ممكن قريب) ولا يُستخدم هون أبداً.
+function chSwapNames(){
+  const g=document.getElementById('f-groom'), b=document.getElementById('f-bride'); if(!g||!b) return;
+  const t=g.value; g.value=b.value; b.value=t;
+  [g,b].forEach(el=>el.dispatchEvent(new Event('input',{bubbles:true})));
+  try{ autoFillBookFrameNames(); }catch(e){}
+  try{ const row=findAdditionRow('taliqa'); if(row){ const d=JSON.parse(row.dataset.fields.replace(/&#39;/g,"'")||'{}'); const x=d.groom; d.groom=d.bride; d.bride=x; updateAdditionRowInPlace('taliqa', d); } }catch(e){}
+  toast('⇄ تبدّل العريس والعروس');
+}
+function chSwapNote(show, hostId){
+  let n=document.getElementById('ch-swap-note');
+  if(!show){ if(n) n.remove(); return; }
+  const g=document.getElementById(hostId||'f-groom'); if(!g) return;
+  const grid=hostId?g:g.closest('.form-grid'); if(!grid || !grid.parentNode) return;
+  if(!n){ n=document.createElement('div'); n.id='ch-swap-note'; n.style.cssText='display:flex;gap:8px;align-items:center;justify-content:space-between;background:#FFF8E1;border:1px solid #F0D58A;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12.5px;font-weight:800;color:#6B4F00'; grid.parentNode.insertBefore(n, grid); }
+  n.innerHTML='<span>الأسماء من المحادثة (العريس = المذكّر) — تأكدي من الترتيب</span><button type="button" onclick="chSwapNames()" style="border:1.5px solid #C9A96E;background:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap">⇄ بدّلي</button>';
+}
+function chApplyCouple(msgs, type, setFn){
+  if(!['Tray','Guest Book','Package','Frame'].includes(type)) return null;
+  const c=chCoupleFromMsgs(msgs); if(!c.found && !c.date) return null;
+  if(c.found){ setFn('f-groom',c.groom); setFn('f-bride',c.bride); }
+  if(c.date){ setFn('f-date',c.date); }
+  try{ autoFillBookFrameNames(); }catch(e){}
+  return c;
+}
+function chApplyTaliqa(msgs){
+  const t=chTaliqaFromMsgs(msgs); if(!t) return;
+  const priceEl=document.getElementById('f-price'); const keep=priceEl?priceEl.value:'';
+  const data={groom:t.groom,bride:t.bride,date:t.date,notes:t.found?'':'الأسماء غير مؤكدة — راجعي المحادثة'+(t.date?'':' (والتاريخ)')};
+  if(!findAdditionRow('taliqa')) createAdditionRow('taliqa', data);
+  if(priceEl){ priceEl.value=keep; updatePriceHint(); }   // رقم التأكيد شامل التعليقة أصلاً
+  chSwapNote(!!t.found,'additions-list');
+  toast(t.found ? '🏷 أُضيفت التعليقة: '+t.groom+' ، '+t.bride+(t.date?' — '+t.date.split('-').reverse().join('/'):'')+' (حسب الجنس — راجعي)'
+                : '🏷 أُضيفت التعليقة بدون أسماء لأني مش متأكد منها — اكتبيها من المحادثة');
+}
 function chPrefill(c, r){
   const p = r.prefill||{};
   clearForm(); buildDelDateOptions();
@@ -6978,6 +7205,12 @@ function chPrefill(c, r){
   set('f-area',p.area); set('f-dnotes',p.deliveryNotes);
   if(p.price!=='' && p.price!=null) set('f-price',p.price);
   if(r.metaExact && r.metaLink) set('f-link',r.metaLink);
+  try{
+    const cp=chApplyCouple(r.messages, document.getElementById('f-type').value, set);
+    chSwapNote(!!(cp && cp.found));
+    if(cp && cp.found) toast('👰🤵 الأسماء من المحادثة: '+cp.groom+' ، '+cp.bride+(cp.date?' — مناسبة '+cp.date.split('-').reverse().join('/'):'')+' (حسب الجنس — راجعي)');
+    chApplyTaliqa(r.messages);
+  }catch(e){ console.warn('couple',e); }
   if(p.phone) checkDuplicatePhone(p.phone);
   updatePriceHint();
   CH.ctx = {convId:c.id, initial:filled, chatPrice:(filled['f-price']!==undefined?filled['f-price']:null)};
@@ -7039,6 +7272,7 @@ function chReleaseForm(){
   const addView=document.getElementById('view-add');
   if(CH.formEl && addView && CH.formEl.parentNode!==addView) addView.appendChild(CH.formEl);
   const note=document.getElementById('ch-missing'); if(note) note.innerHTML='';
+  try{ chSwapNote(false); }catch(e){}
   CH.ctx=null;
 }
 function chBack(){
