@@ -945,6 +945,8 @@ td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .ch-prog-t{margin-top:5px;font-size:12.5px;font-weight:800;color:#4A3728;text-align:center}
 .ch-refresh[disabled]{background:#E8D5B0;color:#8A6030;cursor:default;box-shadow:none}
 .ch-sub{font-size:12px;color:#8B7355;text-align:center;margin:7px 0 10px;min-height:16px}
+.ch-sd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.ch-sd-g{background:#2D8A4E;box-shadow:0 0 0 3px rgba(45,138,78,.18)}.ch-sd-a{background:#D9962B}.ch-sd-r{background:#C0392B}
 .ch-search input{width:100%;background:#fff;border:1.5px solid #E5D9C7;border-radius:12px;padding:12px 14px;font-family:Tajawal,sans-serif;font-size:15px;color:#1A1410;outline:none}
 .ch-search input:focus{border-color:#C9A96E}
 #ch-list{margin-top:10px;background:#fff;border:1px solid #E5D9C7;border-radius:14px;overflow:hidden}
@@ -1211,7 +1213,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 <!-- ══ CHATS TAB ══ -->
 <div class="view" id="view-chats">
   <div id="ch-list-screen">
-    <button class="ch-refresh" id="ch-refresh" onclick="chRefresh()">↻ تحديث المحادثات</button>
+    <button class="ch-refresh" id="ch-refresh" onclick="chRefresh()">↻ تحديث الآن</button>
     <div class="ch-prog" id="ch-prog" style="display:none"><div class="ch-prog-bar"><i id="ch-prog-i"></i></div><div class="ch-prog-t" id="ch-prog-t"></div></div>
     <div class="ch-sub" id="ch-sub"></div>
     <button class="ch-pbtn" id="ch-prot-btn" style="display:none;margin-bottom:8px" onclick="chProtToggle()">🛡 الحماية</button>
@@ -6507,7 +6509,7 @@ function toast(msg){
 // ═══════════════════════════════════════════════════════════════════════════
 //  تبويب المحادثات (الإنبوكس) — يستخدم نفس شاشة تأكيد/تثبيت الطلب الموجودة
 // ═══════════════════════════════════════════════════════════════════════════
-const CH = {list:[], ids:null, loaded:false, lastRefreshAt:0, cooldownSec:120, tentH:12, metaUrl:'',
+const CH = {list:[], ids:null, loaded:false, lastRefreshAt:0, syncedAt:0, dataV:0, syncErr:'', trig:false, cooldownSec:120, tentH:12, metaUrl:'',
   cur:null, ctx:null, tick:null, qTimer:null, busy:false, formEl:null, remaining:0, cache:{}};
 const CH_TYPE_AR = {Tray:'صينية','Guest Book':'كتاب',Package:'بكج',Frame:'برواز',Graduation:'تخرج',Bouquet:'مسكة عروس',MahrBox:'صندوق مهر'};
 const CH_LBL = {'f-rname':'اسم المستلم','f-phone':'رقم الهاتف','f-price':'الحساب','f-groom':'اسم العريس','f-bride':'اسم العروس','f-model':'الموديل','f-pkg':'نوع البكج','f-gradname':'اسم الخريج'};
@@ -6544,10 +6546,11 @@ function chDayLbl(ms){
 }
 function chAgo(ms){
   if(!ms) return 'لم يتم التحديث بعد';
-  const s=Math.floor((Date.now()-ms)/1000);
-  if(s<60) return 'الآن';
+  const s=Math.max(0,Math.floor((Date.now()-ms)/1000));
+  if(s<15) return 'الآن';
+  if(s<60) return 'قبل '+s+' ث';
   if(s<3600) return 'قبل '+Math.floor(s/60)+' د';
-  if(s<86400) return 'قبل '+Math.floor(s/3600)+' س';
+  if(s<86400){ const h=Math.floor(s/3600), m=Math.floor((s%3600)/60); return 'قبل '+h+' س'+(m?' و'+m+' د':''); }
   return 'قبل '+Math.floor(s/86400)+' يوم';
 }
 function chFmtNum(v){ return Number.isInteger(v)?String(v):String(Math.round(v*10)/10); }
@@ -6586,6 +6589,8 @@ async function chLoadList(){
     const r = await apiPost({action:'inboxList'});
     CH.list = r.chats||[]; CH.loaded = true;
     CH.lastRefreshAt = r.lastRefreshAt||0; CH.cooldownSec = r.cooldownSec||120;
+    CH.syncedAt = r.syncedAt||r.lastRefreshAt||0; CH.dataV = r.dataV||0; CH.syncErr = r.syncErr||''; CH.trig = !!r.trig;
+    CH.pausedMsg = r.syncOff ? 'الجلب موقوف من صاحب النظام' : (r.pausedUntil ? (r.pauseWhy ? 'إيقاف مؤقت لحماية الحساب' : 'إيقاف مؤقت لحماية الحساب')+' — باقي '+Math.max(1,Math.ceil((r.pausedUntil-Date.now())/60000))+' د' : '');
     CH.tentH = r.tentativeHours||12; CH.metaUrl = r.metaUrl||'';
     chRenderList(); chUpdateSub();
   }catch(e){
@@ -6594,16 +6599,19 @@ async function chLoadList(){
 }
 function chUpdateSub(){
   const el=document.getElementById('ch-sub'); if(!el) return;
-  let t = 'آخر تحديث '+chAgo(CH.lastRefreshAt);
-  if(CH.remaining>0) t += ' — بيكمل جلب القديم';
-  if(CH.pausedMsg) t += ' — 🛡 '+CH.pausedMsg;
-  el.textContent = t;
+  const sAt=CH.syncedAt||0, age=sAt?(Date.now()-sAt)/1000:Infinity;
+  let cls='g', txt;
+  if(CH.pausedMsg){ cls='r'; txt='🛡 '+CH.pausedMsg+(sAt?' — آخر تحديث '+chAgo(sAt):''); }
+  else if(CH.syncing){ cls='a'; txt='⏳ جاري التحديث...'; }
+  else if(!sAt){ cls='a'; txt='لم يتم التحديث بعد'; }
+  else if(age<180){ cls='g'; txt='محدّث '+chAgo(sAt); }
+  else if(age<600){ cls='a'; txt='آخر تحديث '+chAgo(sAt); }
+  else { cls='r'; txt='⚠ آخر تحديث '+chAgo(sAt)+' — اضغطي تحديث'; }
+  if(CH.syncErr && !CH.pausedMsg) txt+=' — '+CH.syncErr;
+  if(CH.remaining>0 || CH.deepP) txt+=' — يكمل قراءة القديم بالخلفية';
+  el.innerHTML='<span class="ch-sd ch-sd-'+cls+'"></span>'+chEsc(txt);
   const btn=document.getElementById('ch-refresh');
-  if(btn && !CH.busy){
-    const wait = Math.ceil(CH.cooldownSec-(Date.now()-CH.lastRefreshAt)/1000);
-    if(CH.lastRefreshAt && wait>0){ btn.disabled=true; btn.textContent='انتظري '+wait+' ث قبل التحديث التالي'; }
-    else { btn.disabled=false; btn.textContent='↻ تحديث المحادثات'; }
-  }
+  if(btn && !CH.busy){ btn.disabled=false; btn.textContent='↻ تحديث الآن'; }
 }
 function chRenderList(){
   const el=document.getElementById('ch-list'); if(!el) return;
@@ -6720,42 +6728,66 @@ async function chRunRefresh0(onProgress, auto, P){
   }
   return {done,conf,rem};
 }
-// الزر وحده يبيّن التحميل ويتعطّل لحد ما يخلص؛ الصفحة تضل شغّالة. opts.auto: بدون رسالة إذا ما في جديد
+// ───── المزامنة السريعة: تجيب الجديد فقط (ثوانٍ). القديم/الناقص يكمله المؤقّت على السيرفر، أو خلفية صامتة إذا المؤقّت مش مركّب ─────
+async function chFastSync(){
+  if(CH.fastP) return CH.fastP;
+  CH.fastP=(async()=>{
+    const r = await apiPost({action:'inboxRefresh', auto:'f'});
+    if(r.error) throw new Error(r.error);
+    CH.pausedMsg = r.paused ? (r.reason||'الجلب موقوف مؤقتاً لحماية الحساب') : '';
+    if(r.syncedAt) CH.syncedAt=r.syncedAt;
+    // نعيد تحميل القائمة فقط إذا تغيّرت البيانات (منّا، أو من مؤقّت السيرفر، أو من موظفة ثانية)
+    if(!CH.loaded || r.processed>0 || r.newConfirm || (r.dataV && r.dataV!==CH.dataV)) await chLoadList();
+    if(r.bf>0 && !CH.trig) chDeepBg();
+    return r;
+  })();
+  try{ return await CH.fastP; } finally { CH.fastP=null; }
+}
+// قراءة القديم/الناقص بالخلفية (فقط إذا المزامنة التلقائية بالسيرفر مش مركّبة) — لا تقفل الزر
+function chDeepBg(){
+  if(CH.deepP || Date.now()-(CH.deepAt||0)<300000) return;
+  CH.deepAt=Date.now();
+  CH.deepP=(async()=>{
+    try{ const r=await chRunRefresh(null,true); if(r.done) await chLoadList(); }
+    catch(e){ /* صامت */ }
+    finally{ CH.deepP=null; try{ chUpdateSub(); }catch(e){} }
+  })();
+}
+// الزر: تحديث سريع. opts.auto: بدون رسائل إذا ما في جديد
 async function chRefresh(opts){
   opts=(opts&&opts.auto!==undefined)?opts:{};
   if(CH.busy) return;
-  CH.busy=true;
+  CH.busy=true; CH.syncing=true;
   const btn=document.getElementById('ch-refresh');
-  btn.disabled=true; btn.textContent='⏳ جاري جلب المحادثات...';
+  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التحديث...'; }
+  chUpdateSub();
   try{
-    if(CH.bgP){ try{ await CH.bgP; }catch(e){} }  // تحديث الخلفية شغّال: نستناه بدل ما نصطدم فيه
-    const res = await chRunRefresh((rem,seen)=>{
-      const t = rem ? 'جاري جلب المحادثات... تم فحص '+(seen||0)+' (يكمل تلقائياً)' : 'جاري تحديث المحادثات...';
-      btn.textContent='⏳ '+t;
-      if(rem && !CH._midLoad){ CH._midLoad=true; chLoadList().catch(()=>{}).finally(()=>{CH._midLoad=false; if(CH.busy){btn.disabled=true;btn.textContent='⏳ '+t;}}); } // تظهر المحادثات الجديدة أول بأول
-    }, false);   // الطلب اليدوي/عند دخول التبويب: فاصل الموظفة العادي (opts.auto هنا = بدون رسائل فقط)
-    if(res.paused){ if(!opts.auto) toast('🛡 '+res.reason); }
-    else if(res.throttled){ if(!opts.auto) toast('⏳ المحادثات محدّثة قبل لحظات'); }
-    else if(res.done||res.conf) toast('✅ تم تحديث '+res.done+' محادثة'+(res.conf?' — '+res.conf+' تأكيد جديد':''));
-    else if(!opts.auto) toast('✅ ما في جديد');
-  }catch(e){ toast('❌ '+e.message); }
-  CH.busy=false;
-  try{ await chLoadList(); }catch(e){}
+    const r = await chFastSync();
+    if(r.paused){ if(!opts.auto) toast('🛡 '+(r.reason||'الجلب موقوف مؤقتاً')); }
+    else if(r.newConfirm) toast('✅ '+r.newConfirm+' تأكيد جديد');
+    else if(r.processed) toast('✅ تم تحديث '+r.processed+' محادثة');
+    else if(!opts.auto) toast(r.throttled ? '✅ محدّثة '+chAgo(r.syncedAt) : '✅ ما في جديد');
+  }catch(e){ if(!opts.auto) toast('❌ '+e.message); }
+  CH.busy=false; CH.syncing=false;
+  try{ chUpdateSub(); }catch(e){}
 }
 // تحديث صامت بالخلفية: ما يقفل الصفحة ولا يطلع رسائل
 function chBgRun(){
-  if(!chCanUse()||CH.busy||CH.bgP) return;
-  const bb=document.getElementById('ch-refresh'); if(bb){ bb.disabled=true; bb.textContent='⏳ جاري التحديث...'; }
-  CH.bgP=(async()=>{
-    try{ const r=await chRunRefresh(null,true); if(r.done||!CH.loaded) await chLoadList(); }
-    catch(e){ /* صامت */ }
-    finally{ CH.bgP=null; try{ chUpdateSub(); }catch(e){} }
-  })();
+  if(!chCanUse()||CH.busy||CH.fastP) return;
+  CH.lastTry=Date.now(); CH.syncing=true; try{ chUpdateSub(); }catch(e){}
+  chFastSync().catch(()=>{}).finally(()=>{ CH.syncing=false; try{ chUpdateSub(); }catch(e){} });
 }
 function chBackgroundStart(){
   if(!chCanUse()||CH._bgOn) return; CH._bgOn=true;
   setTimeout(chBgRun, 2500);                                   // أول ما يفتح السيستم
-  setInterval(()=>{ if(document.visibilityState==='visible') chBgRun(); }, 120000); // وكل دقيقتين طالما الصفحة مفتوحة
+  // كل 60 ث وهي على تبويب المحادثات، وكل 3 د لو على تبويب ثاني (الفاصل العام بالسيرفر يحمي الحساب من التكرار)
+  setInterval(()=>{
+    if(document.visibilityState!=='visible') return;
+    const onChats=document.getElementById('view-chats') && document.getElementById('view-chats').classList.contains('on');
+    if(Date.now()-(CH.lastTry||0) >= (onChats?60000:180000)) chBgRun();
+  }, 15000);
+  // رجعت للتطبيق/الشاشة: حدّث فوراً إذا آخر محاولة أقدم من 30 ث
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && Date.now()-(CH.lastTry||0)>30000) chBgRun(); });
 }
 function chProtToggle(){ const w=document.getElementById('ch-prot-wrap'); if(w.innerHTML){ w.innerHTML=''; return; } chProtLoad(); }
 async function chProtLoad(op){
