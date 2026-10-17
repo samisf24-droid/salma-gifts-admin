@@ -6801,6 +6801,7 @@ async function chProtLoad(op){
       row('جلب المحادثات من ميتا: <b>'+(r.syncOff?'موقوف 🔴':'شغّال 🟢')+'</b>', r.syncOff?b('تشغيل','syncOn'):b('إيقاف طوارئ','syncOff'))+
       row('الإرسال من النظام: <b>'+(r.sendOff?'موقوف 🔴':'شغّال 🟢')+'</b>', r.sendOff?b('تشغيل','sendOn'):b('إيقاف','sendOff'))+
       row('الإيقاف التلقائي: <b>'+(left>0?'فعّال — باقي '+left+' د':'لا')+'</b>'+(r.pauseWhy?'<br><span style="font-weight:600;color:#7A6A5A;font-size:12px">'+chEsc(r.pauseWhy)+'</span>':''), left>0?b('رفع الإيقاف','resume'):'')+
+      row('آخر مزامنة: <b>'+(r.lastSyncAt?chAgo(r.lastSyncAt):'—')+'</b>'+(r.lastSyncMs?' — استغرقت <b>'+(r.lastSyncMs/1000).toFixed(1)+' ث</b>':''))+
       row('طلبات القراءة اليوم: <b>'+r.callsToday+(r.callCap?' / '+r.callCap:' (بدون سقف)')+'</b>')+
       row('رسائل مرسلة اليوم: <b>'+r.sendsToday+' / '+r.sendCap+'</b>')+
       row('ضغطات تحديث انمنعت (محمية): <b>'+r.throttledToday+'</b>')+
