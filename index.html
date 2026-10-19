@@ -6784,10 +6784,10 @@ function chBackgroundStart(){
   setInterval(()=>{
     if(document.visibilityState!=='visible') return;
     const onChats=document.getElementById('view-chats') && document.getElementById('view-chats').classList.contains('on');
-    if(Date.now()-(CH.lastTry||0) >= (onChats?60000:180000)) chBgRun();
-  }, 15000);
+    if(Date.now()-(CH.lastTry||0) >= (onChats?240000:600000)) chBgRun();   // 4 د على المحادثات، 10 د على غيرها (السيرفر يفحص بطلبين فقط ويحمي الحساب بسقف يومي)
+  }, 30000);
   // رجعت للتطبيق/الشاشة: حدّث فوراً إذا آخر محاولة أقدم من 30 ث
-  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && Date.now()-(CH.lastTry||0)>30000) chBgRun(); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && Date.now()-(CH.lastTry||0)>180000) chBgRun(); });
 }
 function chProtToggle(){ const w=document.getElementById('ch-prot-wrap'); if(w.innerHTML){ w.innerHTML=''; return; } chProtLoad(); }
 async function chProtLoad(op){
