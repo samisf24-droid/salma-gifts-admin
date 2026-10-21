@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v141</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v143</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v141<br>
+       <strong>الإصدار:</strong> v143<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v141 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v143 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -3459,6 +3459,7 @@ function openEdit(id, overrideType){
       <div class="fg"><label>التخصص</label><input type="text" id="e-model" value="${o['Model']||''}"></div>
     </div>`:''}
 
+    ${type==='Bouquet'?`<div class="fg"><label>موديل المسكة واليد</label><input type="text" id="e-model" value="${(o['Model']||'').replace(/"/g,'&quot;')}" placeholder="مثال: توليب + كريستال — اليد: لؤلؤ"></div>`:''}
     <div class="sec-lbl">العبارة والملاحظات</div>
     <div class="fg"><label>العبارة</label><input type="text" id="e-phrase" value="${(o['Phrase']||'').replace(/"/g,'&quot;')}"></div>
     <div class="fg"><label>ملاحظات التصميم</label><textarea id="e-notes" style="min-height:70px;width:100%;background:#FFFFFF;border:1.5px solid #E5D9C7;border-radius:8px;padding:10px 14px;font-family:Tajawal,sans-serif;font-size:14px;color:#1A1410;outline:none;resize:none">${o['Notes']||''}</textarea></div>
@@ -3569,6 +3570,8 @@ async function applyEdit(id){
   const newDeliveryDay = dayNamesEdit[deldateObj.getDay()];
   const newDeliveryDate = fmtFull(deldateObj);
   const getVal = (id) => { const el=document.getElementById(id); return el ? el.value.trim() : ''; };
+  // حقول مش موجودة بنافذة هالنوع من الأوردر: undefined = ما نلمس القيمة المخزّنة (قبل كانت تنمسح لأنها ترجع '')
+  const getOpt = (id) => { const el=document.getElementById(id); return el ? el.value.trim() : undefined; };
   const data={
     Status:         getVal('e-status'),
     ShippedAt:      (()=>{
@@ -3584,12 +3587,12 @@ async function applyEdit(id){
     'Delivery Day':  newDeliveryDay,
     Total:          parseFloat(document.getElementById('e-price').value)||0,
     Paid:           document.getElementById('e-paid').checked ? 'Yes' : '',
-    Groom:          getVal('e-groom'),
-    Bride:          getVal('e-bride'),
-    'Occasion Date': (() => { const el=document.getElementById('e-occdate'); if(!el||!el.value) return ''; const d=new Date(el.value+'T00:00:00'); return fmtFull(d); })(),
-    Model:          getVal('e-model'),
-    Color:          getVal('e-color'),
-    PkgType:        getVal('e-pkg'),
+    Groom:          getOpt('e-groom'),
+    Bride:          getOpt('e-bride'),
+    'Occasion Date': (() => { const el=document.getElementById('e-occdate'); if(!el) return undefined; if(!el.value) return ''; const d=new Date(el.value+'T00:00:00'); return fmtFull(d); })(),
+    Model:          getOpt('e-model'),
+    Color:          getOpt('e-color'),
+    PkgType:        getOpt('e-pkg'),
     Phrase:         getVal('e-phrase'),
     Notes:          document.getElementById('e-notes') ? document.getElementById('e-notes').value.trim() : '',
     Additions:      getVal('e-add'),
@@ -7719,8 +7722,21 @@ function chApplyTaliqa(msgs, notes){
     else notes.push({w:1,t:'🏷 أُضيفت التعليقة (+2 شاملة بالحساب) لكن بدون أسماء'+(t.unsure?' — قرأت «'+t.unsure+'» بس مش متأكد منها':' — ما لقيتها بالمحادثة')+(t.date?'':' وبدون تاريخ مؤكد')+'. اكتبيها بالإضافات بعد ما تتأكدي من المحادثة.'});
   }
 }
+// قيمة مستلم مش اسم فعلي (القالب نفسه أو كلام عام) — نتجاهلها
+function chJunkRecipient(v){ const s=String(v||'').trim(); return !s || /📱|رقم\s*الهاتف|رقم\s*الجوال|احرف|اههه/.test(s) || /\d{6,}/.test(s); }
+// اسم الحساب لو بيشبه اسم شخص (مش يوزر فيه _ أو نقط أو أرقام، ومش نفس اليوزر)
+function chRealName(c){
+  const n=String(c&&c.customer||'').trim(), hd=String(c&&c.handle||'').trim();
+  if(!n || n===hd || n==='زبون' || /[_.\d@]/.test(n)) return '';
+  const w=n.split(/\s+/); if(w.length>4) return '';
+  if(w.length<2 && !/[؀-ۿ]/.test(n)) return '';
+  return n;
+}
 function chPrefill(c, r){
   const p = r.prefill||{};
+  if(chJunkRecipient(p.recipient)) p.recipient='';
+  let recFromAcct='';
+  if(!p.recipient){ recFromAcct=chRealName(c); if(recFromAcct) p.recipient=recFromAcct; }
   clearForm(); buildDelDateOptions();
   const filled={};
   const set=(id,v)=>{ const el=document.getElementById(id); if(!el||v===''||v==null) return; el.value=v; filled[id]=String(el.value).trim(); };
@@ -7741,6 +7757,7 @@ function chPrefill(c, r){
   try{
     const ty=document.getElementById('f-type').value;
     const notes=[];
+    if(recFromAcct) notes.push({w:1,t:'اسم المستلم انعبّى من اسم الحساب («'+recFromAcct+'») لأنه ما انذكر مستلم بالمحادثة — غالباً بيطلع المستلم شخص ثاني (قريب/صديقة)، تأكدي منه.'});
     const cp=chApplyCouple(r.messages, ty, set);
     chSwapNote(!!(cp && cp.found));
     if(['Tray','Guest Book','Package','Frame'].includes(ty)){
