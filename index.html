@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v139</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v141</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v139<br>
+       <strong>الإصدار:</strong> v141<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v139 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v141 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2735,7 +2735,7 @@ function statusPayload(status){
 // ── موديلات المسكات: قائمة جاهزة + «أخرى» يدوي. القيمة النهائية تنحفظ نصاً بحقل f-bouquet-model (نفس العمود القديم) ──
 const BQ_MODELS=['توليب + كريستال + لولو + تل','توليب + كريستال','توليب + كريستال + لولو','توليب + جبسوفيل + تل','توليب + جبسوفيل','توليب لحاله','توليب + كالا','توليب + كالا + كريستال','كالا لحاله','جوري أبيض + جبسوفيل','بيوني'];
 const BQ_TULLE=['كامل','طبقتين','نص'];
-const BQ_HANDS=['لولو','دانتيل','ستراس','ساتان'];
+const BQ_HANDS=['لؤلؤ','دانتيل','ستراس لؤلؤ','ساتان'];
 function bqInitPickers(){
   const fill=(id,first,list,other)=>{ const el=document.getElementById(id); if(!el||el.options.length) return;
     el.innerHTML='<option value="">'+first+'</option>'+list.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+(other?'<option value="__other">أخرى (اكتبي يدوي)</option>':''); };
@@ -2750,9 +2750,9 @@ function bqPickChange(){
   if(pick==='__other'){ inp.style.display='block'; tw.style.display='none'; hw.style.display='none'; return; }   // يدوي: النص يبقى متل ما كتبته
   inp.style.display='none';
   if(!pick){ inp.value=''; tw.style.display='none'; hw.style.display='none'; return; }
-  const hasTul=/(^| )تل($| )/.test(pick); tw.style.display=hasTul?'block':'none'; hw.style.display='block';
+  tw.style.display='none'; hw.style.display='block';   // نوع التل (طبقة/طبقتين) ما عاد يُسأل — بيندوّن بالملاحظات
   ho.style.display = hand==='__other' ? 'block' : 'none';
-  let t=pick; const tu=hasTul?$('f-bq-tulle').value:''; if(tu) t+=' (تل '+tu+')';
+  let t=pick;
   const h = hand==='__other' ? ho.value.trim() : hand; if(h) t+=' — اليد: '+h;
   inp.value=t;
 }
