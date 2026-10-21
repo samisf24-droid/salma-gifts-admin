@@ -1227,6 +1227,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
       <button class="ch-back" onclick="chBack()" aria-label="رجوع">→ رجوع</button>
       <div class="ch-av" id="ch-d-av" style="display:none"></div>
       <div class="ch-main"><div class="ch-name" id="ch-d-name"></div><div class="ch-l3" id="ch-d-chip" style="margin-top:2px"></div></div>
+      <button class="ch-meta-btn" id="ch-meta-ig" onclick="chOpenMeta()" title="فتح المحادثة مباشرة">💬 فتح</button>
       <span id="ch-stat"></span>
     </div>
     <button class="ch-more" id="ch-more" onclick="chMore()" style="display:none">⬆ عرض الرسائل الأقدم</button>
@@ -1362,7 +1363,15 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 
     <div id="bouquet-fields" style="display:none">
       <div class="sec-lbl">بيانات مسكة العروس</div>
-      <div class="fg"><label>موديل المسكة <span class="opt">(اختياري)</span></label><input type="text" id="f-bouquet-model" placeholder="مثال: توليب مع تل..."></div>
+      <div class="fg"><label>موديل المسكة <span class="opt">(اختياري)</span></label>
+        <select id="f-bq-pick" onchange="bqPickChange()"></select>
+        <input type="text" id="f-bouquet-model" placeholder="اكتبي الموديل يدوياً (مثال: توليب مع تل...)" style="display:none;margin-top:8px">
+      </div>
+      <div class="fg" id="bq-tulle-wrap" style="display:none"><label>نوع التل <span class="opt">(اختياري)</span></label><select id="f-bq-tulle" onchange="bqPickChange()"></select></div>
+      <div class="fg" id="bq-hand-wrap" style="display:none"><label>مسكة اليد <span class="opt">(اختياري)</span></label>
+        <select id="f-bq-hand" onchange="bqPickChange()"></select>
+        <input type="text" id="f-bq-hand-o" placeholder="اكتبي نوع مسكة اليد" style="display:none;margin-top:8px" oninput="bqPickChange()">
+      </div>
 
       <div class="fg">
         <label>إرفاق صورة المسكة <span class="opt">(اختياري)</span></label>
@@ -2006,6 +2015,7 @@ function canEditOrder(o){
   return o && String(o['CreatedBy']||'') === currentUser.username;
 }
 
+document.addEventListener('visibilitychange', ()=>{ try{ if(document.visibilityState==='visible' && currentUser && Date.now()-(window._ordersLoadedAt||0) > 180000) loadOrders(true, true); }catch(e){} });
 function startApp(){
   applyRoleUI();
   // عرض فوري لآخر بيانات معروفة محلياً (لو موجودة) — بدل شاشة فاضية لحد ما يوصل الرد من جوجل،
@@ -2056,11 +2066,11 @@ async function writeToSheet(params, usePost){
 }
 
 // silent=true عند إعادة القراءة الداخلية بعد عملية كتابة (لتفادي ازدواج الإشعارات)
-async function loadOrders(silent){
-  const btn = document.getElementById('refresh-btn');
+async function loadOrders(silent, quiet){
+  const btn = quiet ? null : document.getElementById('refresh-btn');
   if(btn){ btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; }
-  // أي تحديث (يدوي أو تلقائي) يصفّر فلتر النوع من قائمة النقاط الثلاث
-  if(typeof typeFilterSet !== 'undefined'){ typeFilterSet.clear(); }
+  // أي تحديث يدوي يصفّر فلتر النوع من قائمة النقاط الثلاث (التحديث الصامت quiet ما يمسّ الفلاتر)
+  if(!quiet && typeof typeFilterSet !== 'undefined'){ typeFilterSet.clear(); }
 
   // مرحلة ١: الاتصال الفعلي بالشيت — أي فشل هنا هو خطأ اتصال حقيقي
   let data;
@@ -2068,13 +2078,14 @@ async function loadOrders(silent){
     data = await apiPost({action:'getOrders'});
   } catch(e){
     setConn(false);
-    toast('❌ تعذّر الاتصال بقاعدة البيانات — البيانات المعروضة قد تكون قديمة');
+    if(!quiet) toast('❌ تعذّر الاتصال بقاعدة البيانات — البيانات المعروضة قد تكون قديمة');
     if(btn){ btn.disabled = false; btn.textContent = '↻ تحديث'; }
     return;
   }
 
   // مرحلة ٢: البيانات وصلت بنجاح — أي خطأ من هون فصاعداً هو خطأ برمجي بالمعالجة، مو خطأ اتصال
   allOrders = data.orders || [];
+  window._ordersLoadedAt = Date.now();
   setConn(true);
   try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(e){ /* لو التخزين ممتلئ أو غير متاح، نتجاهل بهدوء */ }
   try {
@@ -2653,6 +2664,47 @@ function statusPayload(status){
   return p;
 }
 
+// ── موديلات المسكات: قائمة جاهزة + «أخرى» يدوي. القيمة النهائية تنحفظ نصاً بحقل f-bouquet-model (نفس العمود القديم) ──
+const BQ_MODELS=['توليب + كريستال + لولو + تل','توليب + كريستال','توليب + كريستال + لولو','توليب + جبسوفيل + تل','توليب + جبسوفيل','توليب لحاله','توليب + كالا','توليب + كالا + كريستال','كالا لحاله','جوري أبيض + جبسوفيل','بيوني'];
+const BQ_TULLE=['كامل','طبقتين','نص'];
+const BQ_HANDS=['لولو','دانتيل','ستراس','ساتان'];
+function bqInitPickers(){
+  const fill=(id,first,list,other)=>{ const el=document.getElementById(id); if(!el||el.options.length) return;
+    el.innerHTML='<option value="">'+first+'</option>'+list.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+(other?'<option value="__other">أخرى (اكتبي يدوي)</option>':''); };
+  fill('f-bq-pick','اختاري الموديل...',BQ_MODELS,true);
+  fill('f-bq-tulle','بدون تحديد',BQ_TULLE,false);
+  fill('f-bq-hand','بدون تحديد',BQ_HANDS,true);
+}
+function bqPickChange(){
+  bqInitPickers();
+  const $=id=>document.getElementById(id);
+  const pick=$('f-bq-pick').value, inp=$('f-bouquet-model'), tw=$('bq-tulle-wrap'), hw=$('bq-hand-wrap'), ho=$('f-bq-hand-o'), hand=$('f-bq-hand').value;
+  if(pick==='__other'){ inp.style.display='block'; tw.style.display='none'; hw.style.display='none'; return; }   // يدوي: النص يبقى متل ما كتبته
+  inp.style.display='none';
+  if(!pick){ inp.value=''; tw.style.display='none'; hw.style.display='none'; return; }
+  const hasTul=/(^| )تل($| )/.test(pick); tw.style.display=hasTul?'block':'none'; hw.style.display='block';
+  ho.style.display = hand==='__other' ? 'block' : 'none';
+  let t=pick; const tu=hasTul?$('f-bq-tulle').value:''; if(tu) t+=' (تل '+tu+')';
+  const h = hand==='__other' ? ho.value.trim() : hand; if(h) t+=' — اليد: '+h;
+  inp.value=t;
+}
+// من النص المخزّن (مسوّدة/إعادة تعيين) إلى القوائم
+function bqPickSync(){
+  bqInitPickers();
+  const $=id=>document.getElementById(id), inp=$('f-bouquet-model'); if(!inp) return;
+  const v=inp.value.trim();
+  $('f-bq-tulle').value=''; $('f-bq-hand').value=''; $('f-bq-hand-o').value='';
+  if(!v){ $('f-bq-pick').value=''; bqPickChange(); return; }
+  const m=v.match(/^(.*?)(?: \(تل (.+?)\))?(?: — اليد: (.+))?$/);
+  const base=m?m[1]:v, tu=m&&m[2]||'', hd=m&&m[3]||'';
+  if(m && BQ_MODELS.indexOf(base)>=0 && (!tu||BQ_TULLE.indexOf(tu)>=0)){
+    $('f-bq-pick').value=base; $('f-bq-tulle').value=tu;
+    if(hd){ if(BQ_HANDS.indexOf(hd)>=0) $('f-bq-hand').value=hd; else { $('f-bq-hand').value='__other'; $('f-bq-hand-o').value=hd; } }
+    bqPickChange();
+  } else { $('f-bq-pick').value='__other'; bqPickChange(); inp.value=v; }
+}
+document.addEventListener('DOMContentLoaded', bqInitPickers);
+
 // ── SEARCH ──
 function doSearch(q){
   const quickBox = document.getElementById('search-results');
@@ -2664,6 +2716,7 @@ function doSearch(q){
     return;
   }
 
+  searchFreshen(q);
   const results = searchOrders(q);
 
   if(!results.length){
@@ -2681,13 +2734,26 @@ function doSearch(q){
   showSearchPanel(results, q);
 }
 
+// قبل ما نقول «لا توجد نتائج»: لو بيانات الأوردرات عندنا أقدم من دقيقة نجيب نسخة جديدة بصمت ونعيد البحث (أوردر سجّلته موظفة ثانية أو جهاز ثاني)
+let _ordFresh = {at:0, busy:false};
+function searchFreshen(q){
+  if(_ordFresh.busy || Date.now()-(window._ordersLoadedAt||0) < 60000 || Date.now()-_ordFresh.at < 60000) return;
+  _ordFresh.busy=true; _ordFresh.at=Date.now();
+  loadOrders(true, true).catch(()=>{}).finally(()=>{
+    _ordFresh.busy=false;
+    const inp=document.getElementById('search-inp');
+    if(inp && inp.value && inp.value===q) doSearch(q);
+  });
+}
 // تطبيع عربي: يوحّد أشكال الألف والهمزة والتاء المربوطة حتى البحث ما يتأثر باختلافات الكتابة الشائعة
 // (مثال: "احمد" بدون همزة لازم تلاقي "أحمد" المخزّنة بالهمزة)
 function normalizeArabicSearch(s){
-  return String(s||'')
-    .replace(/[أإآا]/g, 'ا')
+  return String(s==null?'':s)
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')            // تشكيل + شدّة + تطويل ("عمّان" = "عمان")
+    .replace(/[أإآٱا]/g, 'ا')
     .replace(/ة/g, 'ه')
-    .replace(/ى/g, 'ي')
+    .replace(/[ىيی]/g, 'ي')
+    .replace(/ک/g, 'ك')
     .replace(/[ؤئ]/g, 'ء')
     // أرقام عربية-هندية وفارسية → أرقام لاتينية، حتى البحث برقم يشتغل مهما كانت صيغة التخزين
     .replace(/[٠-٩]/g, d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
@@ -2703,27 +2769,58 @@ function parseCreatedAtStamp(s){
   return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0)).getTime();
 }
 
-function searchOrders(q){
-  const raw = normalizeArabicSearch(q.trim());
-  if(!raw) return [];
-  // بحث شامل: يمر على كل حقول الأوردر بدون استثناء (بدل قائمة حقول محددة يدوياً)،
-  // فيلتقط أي تفصيل — قصاصة، ملاحظة توصيل، نوع بكج، لون، عبارة، أو أي عمود جديد يُضاف مستقبلاً
-  const matches = allOrders.filter(o=>{
-    const allValues = Object.values(o).filter(v=>v!==null && v!==undefined).join(' ');
-    return normalizeArabicSearch(allValues).includes(raw);
+// ── فهرس البحث: يُبنى مرة وتُعاد قراءته كل 20 ثانية أو عند تغيّر القائمة (بدل تجميع كل حقول كل أوردر مع كل ضغطة) ──
+let ORD_IX = {src:null, len:-1, t:0, arr:[]};
+const AR_WEEK = ['الاحد','الاثنين','الثلاثاء','الاربعاء','الخميس','الجمعة','السبت'];
+function ordIndex(){
+  if(ORD_IX.src===allOrders && ORD_IX.len===allOrders.length && Date.now()-ORD_IX.t<20000) return ORD_IX.arr;
+  const arr = allOrders.map(o=>{
+    const vals=[]; let digits=' ';
+    for(const k in o){
+      const v=o[k]; if(v===null||v===undefined||v==='') continue;
+      const sv=String(v); vals.push(sv);
+      if(/phone|mobile|tel|هاتف|جوال/i.test(k) || /^[\d\s+\-()٠-٩]{7,}$/.test(sv)){ const dg=normalizeArabicSearch(sv).replace(/\D/g,''); if(dg.length>=6) digits+=dg+' '; }
+    }
+    // صيغ التاريخ الشائعة + اليوم + الحالة/النوع/الموديل بالعربي، عشان يلاقيها البحث
+    const ex=[]; ['Delivery Date','Created At'].forEach(k=>{ const d=parseDate(o[k]); if(d){ const dd=d.getDate(), mm=d.getMonth()+1, yy=d.getFullYear(), p=n=>String(n).padStart(2,'0'); ex.push(p(dd)+'/'+p(mm)+'/'+yy, dd+'/'+mm+'/'+yy, p(dd)+'/'+p(mm), dd+'/'+mm, yy+'-'+p(mm)+'-'+p(dd)); if(k==='Delivery Date') ex.push(AR_WEEK[d.getDay()]); } });
+    const st=STATUSES[normStatus(o)]; if(st) ex.push(st.lbl);
+    const ty=o['Product Type']; if(ty && TYPE_AR[ty]) ex.push(TYPE_AR[ty]);
+    const md=o['Model']; if(md && MODEL_AR[md]) ex.push(MODEL_AR[md]);
+    return {o, hay:normalizeArabicSearch(vals.join(' | ')+' | '+ex.join(' | ')), digits};
   });
-  // أولوية: مطابقة اسم العريس/العروس أولاً، وداخل كل مجموعة الأحدث تسجيلاً أولاً
-  return matches
-    .map(o=>({
-      o,
-      nameMatch: normalizeArabicSearch(o['Groom']).includes(raw) || normalizeArabicSearch(o['Bride']).includes(raw),
-      ts: parseCreatedAtStamp(o['Created At'])
-    }))
-    .sort((a,b)=>{
-      if(a.nameMatch !== b.nameMatch) return a.nameMatch ? -1 : 1;
-      return b.ts - a.ts;
-    })
-    .map(x=>x.o);
+  ORD_IX = {src:allOrders, len:allOrders.length, t:Date.now(), arr};
+  return arr;
+}
+function ordDateKey(o){ const d=parseDate(o['Delivery Date']); return d? d.getTime() : null; }
+function searchOrders(q){
+  const toks = [];
+  normalizeArabicSearch(String(q||'').trim()).split(/\s+/).filter(Boolean).forEach(t=>{      // أجزاء رقم متجاورة (079 123 4567 أو +962 79 ...) نضمّها برقم واحد
+    if(/^[\d+\-()]+$/.test(t) && toks.length && /^[\d+\-()]+$/.test(toks[toks.length-1])) toks[toks.length-1]+=t; else toks.push(t);
+  });
+  if(!toks.length) return [];
+  const ix = ordIndex();
+  const hit = ix.filter(e=>toks.every(t=>{
+    if(e.hay.includes(t)) return true;
+    if(t.length>4 && t.startsWith('ال') && e.hay.includes(t.slice(2))) return true;      // "الحسين" تلاقي "حسين"
+    if(/^[\d+\-()]+$/.test(t)){                                                           // رقم/جزء رقم: نقارن بالأرقام فقط (يتجاهل 0 و962 و + والمسافات)
+      let dg=t.replace(/\D/g,''); if(dg.length<2) return false;
+      if(e.digits.includes(dg)) return true;
+      dg=dg.replace(/^0+/,''); if(dg.length>=3 && e.digits.includes(dg)) return true;
+      if(dg.startsWith('962')){ const r=dg.slice(3); if(r.length>=3 && e.digits.includes(r)) return true; }
+    }
+    return false;
+  }));
+  // الأولوية: مع التوصيل ← طلب جديد/جاري التجهيز ← بقية غير المسلّمة ← تم التسليم ← ملغي؛ وداخل كل مجموعة حسب التاريخ
+  // (غير المسلّم: اليوم ثم الأقرب القادم، ثم الفايت الأقرب، ثم بلا موعد؛ المسلّم/الملغي: الأحدث أولاً)
+  const RANK={Shipped:0,New:1,Preparing:1,Waiting:2,Other:2,Done:3,Cancelled:4};
+  const t0=new Date(); t0.setHours(0,0,0,0); const T=t0.getTime();
+  return hit.map(e=>{
+    const o=e.o, r=RANK[normStatus(o)]; const rank=(r===undefined?2:r), dt=ordDateKey(o);
+    let g, k;
+    if(rank<=2){ if(dt===null){ g=2; k=0; } else if(dt>=T){ g=0; k=dt; } else { g=1; k=-dt; } }
+    else { if(dt===null){ g=2; k=0; } else { g=0; k=-dt; } }
+    return {o, rank, g, k, ts:parseCreatedAtStamp(o['Created At'])};
+  }).sort((a,b)=> a.rank-b.rank || a.g-b.g || a.k-b.k || b.ts-a.ts).map(x=>x.o);
 }
 
 function searchItemHTML(o, q){
@@ -3714,6 +3811,7 @@ function toggleFields(){
     }
     if(!isBouquet){
       ['f-bouquet-model','f-bouquet-notes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+      bqPickSync();
     }
     if(!isMahr){
       ['mn-groom','mn-bride','mp-text'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
@@ -4523,6 +4621,7 @@ function clearForm(){
    'f-rname','f-phone','f-prov','f-area','f-dnotes','f-price','f-link',
    'f-bouquet-notes','f-bouquet-model','f-bf-groom','f-bf-bride','f-bf-notes'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  bqPickSync();
   // Reset hidden sections
   ['eng-fields','grad-fields','model-fields','bouquet-fields','model-other-f','bookframe-section'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
@@ -6386,6 +6485,7 @@ function loadDraft(draftId){
     set('f-date', d.date);
     if(d.type==='Bouquet'){
       set('f-bouquet-model', d.model);
+      bqPickSync();
       set('f-bouquet-notes', d.notes);
     } else {
       set('f-model', d.model);
@@ -6563,6 +6663,7 @@ function chChip(c){
   if(k!=='wait') return '';
   return '<span class="ch-chip ch-tent">بانتظار التثبيت</span>';
 }
+function chTodayPlus(plus){ const n=new Date(); n.setDate(n.getDate()+(plus||0)); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); }
 function chDateLbl(ymd){
   const m=String(ymd||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return '';
   const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
@@ -6584,10 +6685,18 @@ function chSubline(c){
 }
 
 // ───── القائمة ─────
-async function chLoadList(){
+async function chLoadList(full){
   try{
-    const r = await apiPost({action:'inboxList'});
-    CH.list = r.chats||[]; CH.loaded = true;
+    // تحديث جزئي: نطلب فقط المحادثات اللي تغيّرت منذ آخر تحميل (وكل 10 دقائق تحميل كامل للتصحيح الذاتي)
+    const since = (!full && CH.loaded && CH.maxUpd && Date.now()-(CH.fullAt||0)<600000) ? CH.maxUpd : 0;
+    const r = await apiPost({action:'inboxList', since: since||''});
+    if(r.delta && since){
+      const m=new Map(CH.list.map(c=>[c.id,c])); (r.chats||[]).forEach(c=>m.set(c.id,c));
+      if((r.ids||[]).some(id=>!m.has(id))) return chLoadList(true);
+      CH.list=(r.ids||[]).map(id=>m.get(id));
+    } else { CH.list = r.chats||[]; CH.fullAt=Date.now(); }
+    CH.maxUpd = CH.list.reduce((mx,c)=>Math.max(mx,c.upd||0), 0);
+    CH.loaded = true;
     CH.lastRefreshAt = r.lastRefreshAt||0; CH.cooldownSec = r.cooldownSec||120;
     CH.syncedAt = r.syncedAt||r.lastRefreshAt||0; CH.dataV = r.dataV||0; CH.syncErr = r.syncErr||''; CH.trig = !!r.trig;
     CH.pausedMsg = r.syncOff ? 'الجلب موقوف من صاحب النظام' : (r.pausedUntil ? (r.pauseWhy ? 'إيقاف مؤقت لحماية الحساب' : 'إيقاف مؤقت لحماية الحساب')+' — باقي '+Math.max(1,Math.ceil((r.pausedUntil-Date.now())/60000))+' د' : '');
@@ -6603,24 +6712,32 @@ function chUpdateSub(){
   let cls='g', txt;
   if(CH.pausedMsg){ cls='r'; txt='🛡 '+CH.pausedMsg+(sAt?' — آخر تحديث '+chAgo(sAt):''); }
   else if(CH.syncing){ cls='a'; txt='⏳ جاري التحديث...'; }
+  else if(!CH.checked){ cls='a'; txt='⏳ جاري التحقق من الجديد...'; }           // قبل أول رد بهالجلسة: ما نعرض وقتاً قديماً مضلّلاً
+  else if(CH.offHours){ cls='a'; txt='🌙 التحديث التلقائي واقف بعد منتصف الليل — اضغطي «تحديث الآن» لو بدك آخر الرسائل'; }
   else if(!sAt){ cls='a'; txt='لم يتم التحديث بعد'; }
-  else if(age<180){ cls='g'; txt='محدّث '+chAgo(sAt); }
-  else if(age<600){ cls='a'; txt='آخر تحديث '+chAgo(sAt); }
+  else if(age<480){ cls='g'; txt=age<45?'✅ محدّث الآن':'✅ محدّث '+chAgo(sAt); }
+  else if(age<1200){ cls='a'; txt='آخر تحديث '+chAgo(sAt); }
   else { cls='r'; txt='⚠ آخر تحديث '+chAgo(sAt)+' — اضغطي تحديث'; }
-  if(CH.syncErr && !CH.pausedMsg) txt+=' — '+CH.syncErr;
-  if(CH.remaining>0 || CH.deepP) txt+=' — يكمل قراءة القديم بالخلفية';
+  if(CH.syncErr && !CH.pausedMsg && !CH.syncing) txt+=' — '+CH.syncErr;
+  if(CH.note && !CH.pausedMsg && !CH.syncing) txt+=' — '+CH.note;
   el.innerHTML='<span class="ch-sd ch-sd-'+cls+'"></span>'+chEsc(txt);
   const btn=document.getElementById('ch-refresh');
   if(btn && !CH.busy){ btn.disabled=false; btn.textContent='↻ تحديث الآن'; }
 }
 function chRenderList(){
   const el=document.getElementById('ch-list'); if(!el) return;
+  CH._renderDay=chTodayPlus(0);
   CH._ix=null; // نعيد بناء فهرس الأوردرات كل عرض (الأوردرات ممكن تتغير)
   let f=CH.filter||'all';
   const q = chNorm(document.getElementById('ch-q').value).trim();
   const kinds=new Map(), dels=new Set(); let nWait=0, nPin=0, nCan=0, nAct=0;
   const isOwnerCh = !!currentUser && currentUser.role==='owner';
-  CH.list.forEach(c=>{ const k=chKind(c); kinds.set(c.id,k); if(k==='pinned' && chDelivered(c)){ dels.add(c.id); return; } nAct++; if(k==='wait') nWait++; else if(k==='pinned') nPin++; else if(k==='cancelled') nCan++; });
+  const _n=new Date(), _tod=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
+  CH.list.forEach(c=>{ const k=chKind(c); kinds.set(c.id,k); if(k==='pinned' && chDelivered(c)){ dels.add(c.id); return; }
+    // تنظيف تلقائي: المثبّتة يلي موعدها فات، والملغية يلي صار لها أكثر من يومين، ما تظهر (إلا من «جميع المحادثات» للمالك)
+    if(k==='pinned' && /^\d{4}-\d{2}-\d{2}$/.test(c.deliveryDate||'') && c.deliveryDate<_tod){ dels.add(c.id); return; }
+    if(k==='cancelled' && (Number(c.lastMsgAt)||0) < Date.now()-2*86400000){ dels.add(c.id); return; }
+    nAct++; if(k==='wait') nWait++; else if(k==='pinned') nPin++; else if(k==='cancelled') nCan++; });
   if(f==='everything' && !isOwnerCh){ f='all'; CH.filter='all'; }
   const empOf=c=>(c.employeeName && c.employeeName!=='غير محدد')?c.employeeName:'غير محدد';
   // بانتظار التأكيد: لسامي كمان المحادثات اللي الزبون بعت فيها رقم ولسه ما حدا أخذ الطلب (غير محدد)
@@ -6646,6 +6763,54 @@ function chRenderList(){
   if(f!=='everything') arr = arr.filter(c=>!dels.has(c.id));
   if(f==='wait') arr = arr.filter(c=>inWait(c) && (!isOwnerCh || !CH.empF || empOf(c)===CH.empF));
   else if(f!=='all' && f!=='everything') arr = arr.filter(c=>kinds.get(c.id)===f);
+  // فلتر اليوم: أول 4 تواريخ قادمة فيها محادثات ضمن الفلتر الحالي + «أخرى» للباقي
+  {
+    const cnt={}, cp={}, cw={}; let nUnd=0;
+    arr.forEach(c=>{ const d=c.deliveryDate; if(/^\d{4}-\d{2}-\d{2}$/.test(d||'')){ cnt[d]=(cnt[d]||0)+1; const k=kinds.get(c.id); if(k==='pinned') cp[d]=(cp[d]||0)+1; else if(inWait(c)) cw[d]=(cw[d]||0)+1; } else nUnd++; });
+    const tod=chTodayPlus(0), tom=chTodayPlus(1);
+    const all=Object.keys(cnt).sort();
+    const up=all.filter(d=>d>=tod), past=all.filter(d=>d<tod);
+    const chipD=up.slice(0,4), rest=up.slice(4).concat(past.slice().reverse());
+    if(CH.dayF && CH.dayF!=='none' && !cnt[CH.dayF]) CH.dayF='';
+    if(CH.dayF==='none' && !nUnd) CH.dayF='';
+    // مجموع أوردرات اليوم (كل الأوردرات المسجّلة بهالتاريخ) — للمالك فقط
+    let tot=null; if(isOwnerCh){ tot={}; (allOrders||[]).forEach(o=>{ if(normStatus(o)==='Cancelled') return; const d=parseDate(o['Delivery Date']); if(!d) return; const y=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); tot[y]=(tot[y]||0)+1; }); }
+    const nm=d=>chDateLbl(d);                                    // دائماً تاريخ صريح: «الخميس 22/10»
+    const cap=d=>{ let t; if(f==='all'||f==='everything'){ const a=[]; if(cp[d]) a.push('✅'+cp[d]); if(cw[d]) a.push('⏳'+cw[d]); t=a.length?a.join(' '):String(cnt[d]); } else t=String(cnt[d]); if(tot) t+=' · 📦'+(tot[d]||0); return t; };
+    let df=document.getElementById('ch-dfilters');
+    const anchor=document.getElementById('ch-efilters')||fb;
+    if(!df && anchor){ df=document.createElement('div'); df.id='ch-dfilters'; df.className='ch-filters chips'; anchor.parentNode.insertBefore(df, anchor.nextSibling); }
+    if(df){
+      if(all.length>0 && all.length+nUnd>1){
+        const dfv=CH.dayF||'';
+        const sig=[dfv,f,chipD.join(','),rest.join(','),nUnd,chipD.concat(rest).map(d=>cap(d)).join('|')].join('#');
+        if(df.dataset.sig!==sig){                                  // لا نعيد بناء الصف إذا ما تغيّر شي (حتى ما تنسكّر القائمة المنسدلة)
+          let h='<button class="ch-ebtn'+(dfv===''?' on':'')+'" data-day="" onclick="chSetDay(this.dataset.day)">كل الأيام</button>';
+          h+=chipD.map(d=>'<button class="ch-ebtn'+(dfv===d?' on':'')+'" data-day="'+d+'" onclick="chSetDay(this.dataset.day)">'+chEsc(nm(d))+' ('+cap(d)+')</button>').join('');
+          if(rest.length||nUnd){
+            const inRest=dfv && chipD.indexOf(dfv)<0;
+            h+='<select class="ch-ebtn'+(inRest?' on':'')+'" onchange="chSetDay(this.value)"><option value="">'+(inRest?'أخرى':'أخرى ▾')+'</option>'+
+              rest.map(d=>'<option value="'+d+'"'+(dfv===d?' selected':'')+'>'+chEsc(chDateLbl(d))+(d<tod?' (سابق)':'')+' ('+cap(d)+')</option>').join('')+
+              (nUnd?'<option value="none"'+(dfv==='none'?' selected':'')+'>بلا موعد ('+nUnd+')</option>':'')+'</select>';
+          }
+          df.innerHTML=h; df.dataset.sig=sig;
+        }
+        df.style.display='flex';
+      } else { df.style.display='none'; df.innerHTML=''; df.dataset.sig=''; CH.dayF=''; }
+    }
+    if(CH.dayF==='none') arr=arr.filter(c=>!/^\d{4}-\d{2}-\d{2}$/.test(c.deliveryDate||''));
+    else if(CH.dayF) arr=arr.filter(c=>c.deliveryDate===CH.dayF);
+  }
+  // ترتيب القائمة: انتظار ثم مثبّت ثم غيره ثم ملغي؛ داخل كل مجموعة الأقرب موعداً أولاً (القادم، ثم الفايت، ثم بلا موعد)، وبعدها الأحدث رسالة
+  {
+    const todS=chTodayPlus(0), rk={wait:0,pinned:1,other:2,cancelled:3};
+    const dk=c=>{ const d=c.deliveryDate; if(!/^\d{4}-\d{2}-\d{2}$/.test(d||'')) return [2,0]; return d>=todS ? [0, +d.replace(/-/g,'')] : [1, -(+d.replace(/-/g,''))]; };
+    arr=arr.slice().sort((a,b)=>{
+      const ra=rk[kinds.get(a.id)]??2, rb=rk[kinds.get(b.id)]??2; if(ra!==rb) return ra-rb;
+      const da=dk(a), db=dk(b); if(da[0]!==db[0]) return da[0]-db[0]; if(da[1]!==db[1]) return da[1]-db[1];
+      return (Number(b.lastMsgAt)||0)-(Number(a.lastMsgAt)||0);
+    });
+  }
   if(q){
     arr = arr.filter(c=>{
       const hay = chNorm([c.customer,c.handle,c.phone,CH_TYPE_AR[c.type]||'',c.employeeName,c.preview].join(' '));
@@ -6661,7 +6826,7 @@ function chRenderList(){
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
     const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const chips = chChannel(c) + chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (dels.has(c.id)?'<span class="ch-chip ch-emp">تم التسليم</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'') + (()=>{const w=chWhy(c); return w?'<span class="ch-chip ch-why">'+chEsc(w)+'</span>':'';})();
+    const chips = chChannel(c) + chChip(c) + (c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'') + (dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'') + (ord?'<span class="ch-chip ch-pinned">'+chEsc(ord['Order ID'])+'</span>':'') + (()=>{const w=chWhy(c); return w?'<span class="ch-chip ch-why">'+chEsc(w)+'</span>':'';})();
     const kk=kinds.get(c.id);
     return '<div class="ch-row" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
       chDayBlk(c.deliveryDate,kk)+
@@ -6674,14 +6839,16 @@ function chSearchInput(){
   chRenderList();
   clearTimeout(CH.qTimer);
   const q=document.getElementById('ch-q').value.trim();
-  if(q.length<2){ CH.ids=null; return; }
+  if(q.length<3){ CH.ids=null; return; }
+  CH.sc=CH.sc||{};
+  const hit=CH.sc[q]; if(hit && Date.now()-hit.t<120000){ CH.ids=hit.ids; chRenderList(); return; }
   CH.qTimer=setTimeout(async ()=>{
     try{
       const r=await apiPost({action:'inboxSearch', q});
       if(document.getElementById('ch-q').value.trim()!==q) return;
-      CH.ids=new Set(r.ids||[]); chRenderList();
+      CH.ids=new Set(r.ids||[]); CH.sc[q]={t:Date.now(),ids:CH.ids}; chRenderList();
     }catch(e){ /* البحث المحلي يكفي */ }
-  }, 450);
+  }, 700);
 }
 function chCanUse(){ return !!currentUser && currentUser.role!=='prep'; }
 // يكرر طلب التحديث لحد ما يخلص كل المحادثات (كل دفعة بحدود وقت السيرفر)
@@ -6729,16 +6896,17 @@ async function chRunRefresh0(onProgress, auto, P){
   return {done,conf,rem};
 }
 // ───── المزامنة السريعة: تجيب الجديد فقط (ثوانٍ). القديم/الناقص يكمله المؤقّت على السيرفر، أو خلفية صامتة إذا المؤقّت مش مركّب ─────
-async function chFastSync(){
+async function chFastSync(manual){
   if(CH.fastP) return CH.fastP;
   CH.fastP=(async()=>{
-    const r = await apiPost({action:'inboxRefresh', auto:'f'});
+    const r = await apiPost({action:'inboxRefresh', auto: manual?'fm':'f'});
     if(r.error) throw new Error(r.error);
+    CH.offHours=!!r.offHours; CH.note=r.note||''; CH.checked=true;
     CH.pausedMsg = r.paused ? (r.reason||'الجلب موقوف مؤقتاً لحماية الحساب') : '';
     if(r.syncedAt) CH.syncedAt=r.syncedAt;
     // نعيد تحميل القائمة فقط إذا تغيّرت البيانات (منّا، أو من مؤقّت السيرفر، أو من موظفة ثانية)
     if(!CH.loaded || r.processed>0 || r.newConfirm || (r.dataV && r.dataV!==CH.dataV)) await chLoadList();
-    if(r.bf>0 && !CH.trig) chDeepBg();
+    /* قراءة القديم التلقائية من الواجهة ملغاة (تقليل طلبات ميتا) */
     return r;
   })();
   try{ return await CH.fastP; } finally { CH.fastP=null; }
@@ -6762,20 +6930,20 @@ async function chRefresh(opts){
   if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التحديث...'; }
   chUpdateSub();
   try{
-    const r = await chFastSync();
+    const r = await chFastSync(!opts.auto);
     if(r.paused){ if(!opts.auto) toast('🛡 '+(r.reason||'الجلب موقوف مؤقتاً')); }
     else if(r.newConfirm) toast('✅ '+r.newConfirm+' تأكيد جديد');
     else if(r.processed) toast('✅ تم تحديث '+r.processed+' محادثة');
     else if(!opts.auto) toast(r.throttled ? '✅ محدّثة '+chAgo(r.syncedAt) : '✅ ما في جديد');
   }catch(e){ if(!opts.auto) toast('❌ '+e.message); }
-  CH.busy=false; CH.syncing=false;
+  CH.busy=false; CH.syncing=false; CH.checked=true;
   try{ chUpdateSub(); }catch(e){}
 }
 // تحديث صامت بالخلفية: ما يقفل الصفحة ولا يطلع رسائل
 function chBgRun(){
   if(!chCanUse()||CH.busy||CH.fastP) return;
   CH.lastTry=Date.now(); CH.syncing=true; try{ chUpdateSub(); }catch(e){}
-  chFastSync().catch(()=>{}).finally(()=>{ CH.syncing=false; try{ chUpdateSub(); }catch(e){} });
+  chFastSync(false).catch(()=>{}).finally(()=>{ CH.syncing=false; CH.checked=true; try{ chUpdateSub(); }catch(e){} });
 }
 function chBackgroundStart(){
   if(!chCanUse()||CH._bgOn) return; CH._bgOn=true;
@@ -6784,15 +6952,24 @@ function chBackgroundStart(){
   setInterval(()=>{
     if(document.visibilityState!=='visible') return;
     const onChats=document.getElementById('view-chats') && document.getElementById('view-chats').classList.contains('on');
-    if(Date.now()-(CH.lastTry||0) >= (onChats?240000:600000)) chBgRun();   // 4 د على المحادثات، 10 د على غيرها (السيرفر يفحص بطلبين فقط ويحمي الحساب بسقف يومي)
+    if(Date.now()-(CH.lastAct||Date.now()) > 600000) return;   // ما في أي لمس/حركة منذ 10 د: الشاشة متروكة، لا نسحب
+    if(Date.now()-(CH.lastTry||0) >= (onChats?300000:900000)) chBgRun();   // 5 د على المحادثات، 15 د على غيرها
   }, 30000);
+  CH.lastAct=Date.now();
+  ['pointerdown','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,()=>{ const was=CH.lastAct||0; CH.lastAct=Date.now(); if(was && Date.now()-was>600000 && Date.now()-(CH.lastTry||0)>300000) chBgRun(); },{passive:true,capture:true}));   // رجعت بعد خمول: نحدّث فوراً
   // رجعت للتطبيق/الشاشة: حدّث فوراً إذا آخر محاولة أقدم من 30 ث
-  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && Date.now()-(CH.lastTry||0)>180000) chBgRun(); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible'){ CH.lastAct=Date.now(); if(Date.now()-(CH.lastTry||0)>300000) chBgRun(); } });
 }
 function chProtToggle(){ const w=document.getElementById('ch-prot-wrap'); if(w.innerHTML){ w.innerHTML=''; return; } chProtLoad(); }
 async function chProtLoad(op){
   const w=document.getElementById('ch-prot-wrap');
   try{
+    if(op==='activity'){
+      const a=await apiPost({action:'inboxProtect', op:'activity'});
+      const rows=(a.activity||[]).map(x=>'<div style="padding:6px 0;border-bottom:1px solid #F0E6D6;font-size:12.5px"><b>'+chEsc(x.u)+'</b> — '+chEsc(x.a)+' <span style="color:#7A6A5A">'+chEsc(x.d)+'</span><div style="font-size:11px;color:#9A8A7A">'+chEsc(x.t)+'</div></div>').join('')||'<div style="padding:8px;color:#7A6A5A">ما في نشاط مسجّل بعد</div>';
+      w.innerHTML='<div style="background:#FBF6EC;border:1px solid #E5D9C7;border-radius:14px;padding:8px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-bottom:4px"><span>📋 سجل النشاط (آخر 80)</span><button class="ch-sbtn" onclick="chProtLoad()">رجوع</button></div><div style="max-height:320px;overflow-y:auto">'+rows+'</div></div>';
+      return;
+    }
     const r=await apiPost({action:'inboxProtect', op:op||'status'});
     const left=r.pausedUntil?Math.ceil((r.pausedUntil-Date.now())/60000):0;
     const row=(t,btn)=>'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #F0E6D6;font-size:13px;font-weight:700"><span>'+t+'</span>'+(btn||'')+'</div>';
@@ -6802,7 +6979,10 @@ async function chProtLoad(op){
       row('الإرسال من النظام: <b>'+(r.sendOff?'موقوف 🔴':'شغّال 🟢')+'</b>', r.sendOff?b('تشغيل','sendOn'):b('إيقاف','sendOff'))+
       row('الإيقاف التلقائي: <b>'+(left>0?'فعّال — باقي '+left+' د':'لا')+'</b>'+(r.pauseWhy?'<br><span style="font-weight:600;color:#7A6A5A;font-size:12px">'+chEsc(r.pauseWhy)+'</span>':''), left>0?b('رفع الإيقاف','resume'):'')+
       row('آخر مزامنة: <b>'+(r.lastSyncAt?chAgo(r.lastSyncAt):'—')+'</b>'+(r.lastSyncMs?' — استغرقت <b>'+(r.lastSyncMs/1000).toFixed(1)+' ث</b>':''))+
-      row('طلبات القراءة اليوم: <b>'+r.callsToday+(r.callCap?' / '+r.callCap:' (بدون سقف)')+'</b>')+
+      row('طلبات القراءة اليوم: <b>'+r.callsToday+(r.callCap?' / '+r.callCap:' (بدون سقف يومي)')+'</b>'+(r.hourCap?' <span style="font-weight:600;color:#7A6A5A;font-size:12px">— حد الساعة '+r.hourCap+'</span>':''))+
+      (r.days?row('آخر 7 أيام: <span style="font-weight:700;font-size:12px">'+r.days.map(d=>{const s=String(d.d); return s.slice(6)+'/'+s.slice(4,6)+': <b>'+d.calls+'</b>';}).join(' · ')+'</span>'):'')+
+      (r.hours?(()=>{ const mx=Math.max(1,...r.hours); const pk=r.hours.indexOf(Math.max(...r.hours)); return row('اليوم بالساعة (الذروة '+(Math.max(...r.hours)?pk+':00 — '+r.hours[pk]+' طلب':'—')+')<div style="display:flex;align-items:flex-end;gap:2px;height:34px;margin-top:6px;direction:ltr">'+r.hours.map((v,h)=>'<i title="'+h+':00 — '+v+'" style="flex:1;background:#C9A96E;border-radius:2px;height:'+Math.max(2,Math.round(v/mx*34))+'px;opacity:'+(v?1:.25)+'"></i>').join('')+'</div>'); })():'')+
+      row('سجل نشاط الفريق (تأكيد/إلغاء/ربط/إرسال)', b('عرض','activity'))+
       row('رسائل مرسلة اليوم: <b>'+r.sendsToday+' / '+r.sendCap+'</b>')+
       row('ضغطات تحديث انمنعت (محمية): <b>'+r.throttledToday+'</b>')+
       row('ضغطات التحديث اليوم: '+((r.users||[]).length?(r.users||[]).map(u=>'<b>'+chEsc(u.user)+'</b> '+u.presses).join(' · '):'<b>—</b>'))+
@@ -6812,8 +6992,8 @@ async function chProtLoad(op){
 function chOnTabOpen(){
   const pb=document.getElementById('ch-prot-btn'); if(pb) pb.style.display=(currentUser&&currentUser.role==='owner')?'inline-block':'none';
   if(!CH.loaded) chLoadList(); else { chRenderList(); chUpdateSub(); }
-  chRefresh({auto:true});   // كل دخول للتبويب: يحدّث والزر يبيّن التحميل (الصفحة ما بتنقفل)
-  if(!CH._sub) CH._sub=setInterval(()=>{ if(document.getElementById('view-chats').classList.contains('on')){ chUpdateSub(); if(document.getElementById('ch-list-screen').style.display!=='none') chRenderList(); } }, 30000);
+  if(Date.now()-(CH.lastTry||0)>180000){ CH.lastTry=Date.now(); chRefresh({auto:true}); }   // دخول التبويب: يحدّث فقط إذا آخر محاولة أقدم من 3 د
+  if(!CH._sub) CH._sub=setInterval(()=>{ if(document.getElementById('view-chats').classList.contains('on')){ chUpdateSub(); const ae=document.activeElement; const busy=ae&&(ae.tagName==='SELECT'||ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'); if(!busy && CH._renderDay!==chTodayPlus(0) && document.getElementById('ch-list-screen').style.display!=='none') chRenderList(); } }, 30000);   // نعيد رسم القائمة فقط إذا تغيّر اليوم (التحديثات الباقية تعيد الرسم لحالها)
 }
 
 // ───── المحادثة ─────
@@ -6879,11 +7059,12 @@ function chKind(c){
   if(c.status==='tentative'||c.status==='pinned') return 'wait';
   return 'other';
 }
-function chSetFilter(f){ CH.filter=f; if(f!=='wait') CH.empF=''; chRenderList(); }
-function chSetEmp(e){ CH.empF=e||''; chRenderList(); }
+function chSetFilter(f){ CH.filter=f; CH.dayF=''; if(f!=='wait') CH.empF=''; chRenderList(); }
+function chSetDay(d){ CH.dayF=d||''; chRenderList(); }
+function chSetEmp(e){ CH.empF=e||''; CH.dayF=''; chRenderList(); }
 function chChannel(c){ return (c&&c.ch==='fb')?'<span class="ch-chip" style="background:rgba(24,119,242,.15);color:#1877F2">ماسنجر</span>':''; }
 function chSyncHdr(){ try{ const d=document.getElementById('ch-detail-screen'); document.body.classList.toggle('ch-in-detail', !!(d && d.offsetParent!==null)); }catch(e){} }
-setInterval(chSyncHdr, 400);
+setInterval(()=>{ if(document.visibilityState==='visible') chSyncHdr(); }, 2500);   // + استدعاء فوري عند فتح/إغلاق المحادثة
 async function chOpen(id){
   const c = CH.list.find(x=>x.id===id); if(!c) return;
   CH.cur = id;
@@ -6892,11 +7073,11 @@ async function chOpen(id){
   const av=document.getElementById('ch-d-av'); av.textContent=chInit(c); av.style.background=chColor(c.handle||c.customer);
   document.getElementById('ch-d-name').textContent=c.customer;
   document.getElementById('ch-d-chip').innerHTML=chChannel(c)+chChip(c)+(c.employeeName?'<span class="ch-chip ch-emp">'+chEsc(c.employeeName)+'</span>':'');
-  document.getElementById('ch-msgs').innerHTML='<div class="ch-skel">⏳ جاري تحميل المحادثة...</div>';
+  { const cc=CH.cache[id]; const mb0=document.getElementById('ch-msgs'); if(cc&&cc.messages){ mb0.innerHTML=chMsgsHTML(cc.messages); mb0.scrollTop=mb0.scrollHeight; } else mb0.innerHTML='<div class="ch-skel">⏳ جاري تحميل المحادثة...</div>'; }
   document.getElementById('ch-warns').innerHTML='';
   document.getElementById('ch-order-banner').innerHTML='';
   document.getElementById('ch-form-wrap').style.display='none';
-  window.scrollTo(0,0);
+  window.scrollTo(0,0); chSyncHdr();
   try{
     const r = await apiPost({action:'inboxGetChat', convId:id});
     if(CH.cur!==id) return;
@@ -7376,7 +7557,7 @@ function chPrefill(c, r){
   const sb=document.getElementById('save-btn');
   if(sb && CH.ctx.origLabel===undefined) CH.ctx.origLabel=sb.innerHTML;
   chTick();
-  clearInterval(CH.tick); CH.tick=setInterval(chTick, 600);
+  clearInterval(CH.tick); CH.tick=setInterval(chTick, 2500);   // احتياطي؛ التحديث الفوري يجي من أحداث الكتابة والتغيير
 }
 function chRequired(){
   const type=document.getElementById('f-type').value;
@@ -7397,6 +7578,7 @@ function chMissing(){
   });
   return m;
 }
+['input','change','click'].forEach(ev=>document.addEventListener(ev,()=>{ if(CH.ctx){ clearTimeout(CH._tk); CH._tk=setTimeout(chTick,60); } },true));
 function chTick(){
   if(!CH.ctx) return;
   const {type, ids}=chRequired();
@@ -7443,12 +7625,16 @@ function chBack(){
   CH.cur=null;
   document.getElementById('ch-detail-screen').style.display='none';
   document.getElementById('ch-list-screen').style.display='block';
-  chRenderList(); chUpdateSub();
+  chSyncHdr(); chRenderList(); chUpdateSub();
 }
-function chOpenMeta(){
+function chOpenMeta(biz){
   const r=CH.cache[CH.cur]; const c=CH.list.find(x=>x.id===CH.cur);
-  const url=(r&&r.metaLink)||CH.metaUrl||'https://business.facebook.com/latest/inbox/instagram_direct';
-  if(c && c.handle && !(r&&r.metaExact)){ try{ navigator.clipboard.writeText(c.handle); toast('📋 نُسخ @'+c.handle+' — الصقيه ببحث ميتا'); }catch(e){} }
+  // إنستغرام: رابط ig.me/m/<الحساب> يفتح محادثة هذا الزبون مباشرة؛ ماسنجر: رابط ميتا بيزنس الدقيق. وإذا ما توفّر شي: صندوق ميتا العام ونسخ اسم الحساب
+  let url=(!biz && r && r.directLink) || (r&&r.metaExact&&r.metaLink) || '';
+  if(!url){
+    url=(r&&r.metaLink)||CH.metaUrl||'https://business.facebook.com/latest/inbox/instagram_direct';
+    if(c && c.handle){ try{ navigator.clipboard.writeText(c.handle); toast('📋 نُسخ @'+c.handle+' — الصقيه ببحث ميتا'); }catch(e){} }
+  }
   window.open(url,'_blank','noopener');
 }
 // تُستدعى من saveOrder عند نجاح الحفظ لأوردر مفتوح من محادثة
