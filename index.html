@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v144</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v145</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v144<br>
+       <strong>الإصدار:</strong> v145<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v144 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v145 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2673,21 +2673,21 @@ async function applyBulk(){
   const status=document.getElementById('bulk-st').value;
   if(!status){toast('❌ اختاري الحالة');return;}
   const ids=[...selectedIds];
-  let ok=0;
-  let failed=[];
-  showFullscreenLoading('⏳ جاري تحديث '+ids.length+' أوردر...');
-  for(let i=0;i<ids.length;i++){
-    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+ids.length+')...');
-    try{
-      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(statusPayload(status))});
-      ok++;
-    }catch(e){ failed.push(ids[i]); }
-    await new Promise(r=>setTimeout(r,150));
-  }
+  const payload=statusPayload(status);
+  const patches={};
+  ids.forEach(id=>{ patches[id]=localPatch(id,payload); });
   clearSel();
-  await loadOrders(true);
-  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
-  else showFullscreenSuccess('تم تحديث '+ok+' أوردر ✅');
+  refreshLocal();
+  toast('✅ تم تحديث '+ids.length+' أوردر');
+  let ok=0, failed=[];
+  for(let i=0;i<ids.length;i++){
+    try{
+      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(payload)});
+      ok++;
+    }catch(e){ failed.push(ids[i]); localUndo(patches[ids[i]]); }
+    if(i<ids.length-1) await new Promise(r=>setTimeout(r,100));
+  }
+  if(failed.length){ refreshLocal(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت حالتها القديمة)'); }
 }
 
 // ── STATS ──
@@ -3221,23 +3221,49 @@ async function deleteOrder(id){
     'موافق (OK) = حذف نهائي\n' +
     'إلغاء (Cancel) = وضع الأوردر كـ "ملغي" فقط'
   );
-  showFullscreenLoading('⏳ جاري حذف الطلب...');
-  try{
-    if(choice){
-      await writeToSheet({action:'deleteOrder', id});
-      closePanel();
-      await loadOrders(true);
-      showFullscreenSuccess('تم حذف الطلب ✅');
-    } else {
-      await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
-      closePanel();
-      await loadOrders(true);
-      showFullscreenSuccess('تم إلغاء الطلب ✅');
-    }
-  }catch(e){ showFullscreenError('فشل الحذف ❌\n'+e.message); }
+  if(!o) return;
+  const idx=allOrders.indexOf(o);
+  closePanel();
+  if(choice){
+    allOrders.splice(idx,1);
+    refreshLocal();
+    toast('✅ تم حذف الطلب');
+    try{ await writeToSheet({action:'deleteOrder', id}); }
+    catch(e){ allOrders.splice(Math.min(idx,allOrders.length),0,o); refreshLocal(); showFullscreenError('فشل الحذف ❌ رجع الأوردر\n'+e.message); }
+  } else {
+    const r=localPatch(id,{Status:'Cancelled'});
+    refreshLocal();
+    toast('✅ تم إلغاء الطلب');
+    try{ await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})}); }
+    catch(e){ localUndo(r); refreshLocal(); showFullscreenError('فشل الإلغاء ❌ رجع الأوردر\n'+e.message); }
+  }
 }
 function closePanel(){ document.getElementById('panel').classList.remove('open'); }
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
+
+// ── تحديث فوري (Optimistic): تعديل النسخة المحلية فوراً + حفظ بالخلفية + تراجع تلقائي لو فشل ──
+function localPatch(id, patch){
+  const o=allOrders.find(x=>x['Order ID']===id); if(!o) return null;
+  const prev={}, had={};
+  Object.keys(patch).forEach(k=>{ if(patch[k]===undefined) return; had[k]=(k in o); prev[k]=o[k]; o[k]=patch[k]; });
+  return {o,prev,had};
+}
+function localUndo(r){
+  if(!r) return;
+  Object.keys(r.prev).forEach(k=>{ if(r.had[k]) r.o[k]=r.prev[k]; else delete r.o[k]; });
+}
+function refreshLocal(){
+  try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(e){}
+  try{
+    renderCal(); updateStats();
+    const dashApp=document.getElementById('dash-app');
+    if(dashApp && dashApp.style.display==='block') applyDashFilters();
+  }catch(e){ console.error(e); }
+}
+function reopenPanelIf(id){
+  const panel=document.getElementById('panel');
+  if(panel && panel.classList.contains('open') && allOrders.some(o=>o['Order ID']===id)) openPanel(id);
+}
 
 async function changeStatus(id,status){
   // تحديث فوري (Optimistic): الواجهة تتغير بنفس اللحظة، والحفظ بالشيت يصير بالخلفية بدون شاشة تحميل
@@ -3616,16 +3642,17 @@ async function applyEdit(id){
   };
   const editBtn = document.getElementById('edit-save-btn');
   if(editBtn) editBtn.disabled=true;
-  showFullscreenLoading('⏳ جاري تعديل الطلب...');
+  const r=localPatch(id,data);
+  closeEdit();
+  refreshLocal(); reopenPanelIf(id);
+  toast('✅ تم تعديل الطلب');
+  if(editBtn) editBtn.disabled=false;
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
-    closeEdit();
-    await loadOrders(true);
-    if(editBtn) editBtn.disabled=false;
-    showFullscreenSuccess('تم تعديل الطلب ✅');
+    loadOrders(true,true); // مزامنة صامتة بالخلفية (بدون شاشة تحميل) لتثبيت القيم المحسوبة من الشيت
   }catch(e){
-    if(editBtn) editBtn.disabled=false;
-    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
+    localUndo(r); refreshLocal(); reopenPanelIf(id);
+    showFullscreenError('لم يُحفظ التعديل ❌ رجعت القيم القديمة\n'+e.message);
   }
 }
 
@@ -3684,17 +3711,17 @@ async function applyReschedule(id){
   }
   const rBtn = document.getElementById('resched-save-btn');
   if(rBtn) rBtn.disabled=true;
-  showFullscreenLoading('⏳ جاري تغيير الموعد...');
+  const r=localPatch(id,Object.assign({},data,reasonData||{}));
+  closeEdit();
+  refreshLocal(); reopenPanelIf(id);
+  toast('✅ تم تغيير الموعد — '+data['Delivery Date']);
+  if(rBtn) rBtn.disabled=false;
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     if(reasonData){ try{ await writeToSheet({action:'updateOrder',id,data:JSON.stringify(reasonData)}); }catch(e){} }
-    closeEdit();
-    await loadOrders(true);
-    if(rBtn) rBtn.disabled=false;
-    showFullscreenSuccess('تم تغيير الموعد ✅\n'+data['Delivery Date']);
   }catch(e){
-    if(rBtn) rBtn.disabled=false;
-    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
+    localUndo(r); refreshLocal(); reopenPanelIf(id);
+    showFullscreenError('لم يُحفظ التعديل ❌ رجع الموعد القديم\n'+e.message);
   }
 }
 
@@ -5084,20 +5111,20 @@ async function setNamesPrintedState(markAsPrinted, skipConfirm){
   const stamp = markAsPrinted ? nowStamp() : '';
   // وضع الكتب له عمود تتبّع منفصل — البكج يظهر بوضعَي صواني وكتب معاً ولا يصح خلطهما
   const col = document.getElementById('names-mode').value === 'books' ? 'BookPrinted' : 'NamePrinted';
-  showFullscreenLoading('⏳ جاري التحديث...');
+  const payload = {}; payload[col] = stamp;
+  const patches = {};
+  targets.forEach(t=>{ patches[t.id]=localPatch(t.id,payload); });
+  refreshLocal();
+  generateNamesList();
+  toast((markAsPrinted?'✅ تم تحديد ':'✅ تم إلغاء العلامة عن ')+targets.length+' اسم');
   let ok=0, failed=[];
   for(let i=0;i<targets.length;i++){
-    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+targets.length+')...');
     try{
-      const payload = {}; payload[col] = stamp;
       await writeToSheet({action:'updateOrder', id:targets[i].id, data:JSON.stringify(payload)});
       ok++;
-    }catch(e){ failed.push(targets[i].id); }
+    }catch(e){ failed.push(targets[i].id); localUndo(patches[targets[i].id]); }
   }
-  await loadOrders(true);
-  generateNamesList();
-  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
-  else showFullscreenSuccess((markAsPrinted?'تم تحديد ':'تم إلغاء العلامة عن ')+ok+' اسم ✅');
+  if(failed.length){ refreshLocal(); generateNamesList(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت)'); }
 }
 
 async function copyNamesList(alsoMarkPrinted){
