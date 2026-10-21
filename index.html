@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v146</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v145</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v146<br>
+       <strong>الإصدار:</strong> v145<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v146 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v145 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2674,19 +2674,20 @@ async function applyBulk(){
   if(!status){toast('❌ اختاري الحالة');return;}
   const ids=[...selectedIds];
   const payload=statusPayload(status);
-  let ok=0, failed=[];
-  showFullscreenLoading('⏳ جاري تحديث '+ids.length+' أوردر...');
-  for(let i=0;i<ids.length;i++){
-    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+ids.length+')...');
-    try{
-      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(payload)});
-      localPatch(ids[i],payload); ok++;
-    }catch(e){ failed.push(ids[i]); }
-  }
+  const patches={};
+  ids.forEach(id=>{ patches[id]=localPatch(id,payload); });
   clearSel();
   refreshLocal();
-  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
-  else showFullscreenSuccess('تم تحديث '+ok+' أوردر ✅');
+  toast('✅ تم تحديث '+ids.length+' أوردر');
+  let ok=0, failed=[];
+  for(let i=0;i<ids.length;i++){
+    try{
+      await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(payload)});
+      ok++;
+    }catch(e){ failed.push(ids[i]); localUndo(patches[ids[i]]); }
+    if(i<ids.length-1) await new Promise(r=>setTimeout(r,100));
+  }
+  if(failed.length){ refreshLocal(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت حالتها القديمة)'); }
 }
 
 // ── STATS ──
@@ -3221,22 +3222,21 @@ async function deleteOrder(id){
     'إلغاء (Cancel) = وضع الأوردر كـ "ملغي" فقط'
   );
   if(!o) return;
-  showFullscreenLoading('⏳ جاري حذف الطلب...');
-  try{
-    if(choice){
-      await writeToSheet({action:'deleteOrder', id});
-      closePanel();
-      const i=allOrders.indexOf(o); if(i>=0) allOrders.splice(i,1);
-      refreshLocal();
-      showFullscreenSuccess('تم حذف الطلب ✅');
-    } else {
-      await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
-      closePanel();
-      localPatch(id,{Status:'Cancelled'});
-      refreshLocal();
-      showFullscreenSuccess('تم إلغاء الطلب ✅');
-    }
-  }catch(e){ showFullscreenError('فشل الحذف ❌\n'+e.message); }
+  const idx=allOrders.indexOf(o);
+  closePanel();
+  if(choice){
+    allOrders.splice(idx,1);
+    refreshLocal();
+    toast('✅ تم حذف الطلب');
+    try{ await writeToSheet({action:'deleteOrder', id}); }
+    catch(e){ allOrders.splice(Math.min(idx,allOrders.length),0,o); refreshLocal(); showFullscreenError('فشل الحذف ❌ رجع الأوردر\n'+e.message); }
+  } else {
+    const r=localPatch(id,{Status:'Cancelled'});
+    refreshLocal();
+    toast('✅ تم إلغاء الطلب');
+    try{ await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})}); }
+    catch(e){ localUndo(r); refreshLocal(); showFullscreenError('فشل الإلغاء ❌ رجع الأوردر\n'+e.message); }
+  }
 }
 function closePanel(){ document.getElementById('panel').classList.remove('open'); }
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
@@ -3266,17 +3266,27 @@ function reopenPanelIf(id){
 }
 
 async function changeStatus(id,status){
-  // شاشة تحميل سريعة: كتابة وحدة للشيت، وبعدها تحديث محلي فوري بدون إعادة تحميل كل الأوردرات
-  showFullscreenLoading('⏳ جاري تحديث الحالة...');
+  // تحديث فوري (Optimistic): الواجهة تتغير بنفس اللحظة، والحفظ بالشيت يصير بالخلفية بدون شاشة تحميل
+  const o=allOrders.find(x=>x['Order ID']===id);
+  if(!o) return;
+  const prev={Status:o['Status'], ShippedAt:o['ShippedAt']};
   const payload=statusPayload(status);
+  Object.keys(payload).forEach(k=>{ o[k]=payload[k]; });
+  try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(e){}
+  try{ renderCal(); updateStats(); }catch(e){ console.error(e); }
+  const panel=document.getElementById('panel');
+  if(panel.classList.contains('open')) openPanel(id);
+  toast('✅ تم تحديث الحالة');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(payload)});
-    localPatch(id,payload);
-    refreshLocal(); reopenPanelIf(id);
-    showFullscreenSuccess('تم تحديث الحالة ✅');
+    window._ordersLoadedAt = Date.now();
   }catch(e){
-    reopenPanelIf(id);
-    showFullscreenError('لم يتم التحديث ❌\n'+e.message);
+    // فشل الحفظ: رجّع الحالة القديمة وبلّغ المستخدم
+    Object.keys(prev).forEach(k=>{ if(prev[k]===undefined) delete o[k]; else o[k]=prev[k]; });
+    try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(_){}
+    try{ renderCal(); updateStats(); }catch(_){}
+    if(panel.classList.contains('open')) openPanel(id);
+    showFullscreenError('لم يتم التحديث ❌ رجعت الحالة القديمة\n'+e.message);
   }
 }
 
@@ -3632,18 +3642,17 @@ async function applyEdit(id){
   };
   const editBtn = document.getElementById('edit-save-btn');
   if(editBtn) editBtn.disabled=true;
-  showFullscreenLoading('⏳ جاري تعديل الطلب...');
+  const r=localPatch(id,data);
+  closeEdit();
+  refreshLocal(); reopenPanelIf(id);
+  toast('✅ تم تعديل الطلب');
+  if(editBtn) editBtn.disabled=false;
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
-    closeEdit();
-    localPatch(id,data);
-    refreshLocal(); reopenPanelIf(id);
-    if(editBtn) editBtn.disabled=false;
-    showFullscreenSuccess('تم تعديل الطلب ✅');
-    loadOrders(true,true); // مزامنة صامتة بالخلفية لتثبيت القيم المحسوبة
+    loadOrders(true,true); // مزامنة صامتة بالخلفية (بدون شاشة تحميل) لتثبيت القيم المحسوبة من الشيت
   }catch(e){
-    if(editBtn) editBtn.disabled=false;
-    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
+    localUndo(r); refreshLocal(); reopenPanelIf(id);
+    showFullscreenError('لم يُحفظ التعديل ❌ رجعت القيم القديمة\n'+e.message);
   }
 }
 
@@ -3702,18 +3711,17 @@ async function applyReschedule(id){
   }
   const rBtn = document.getElementById('resched-save-btn');
   if(rBtn) rBtn.disabled=true;
-  showFullscreenLoading('⏳ جاري تغيير الموعد...');
+  const r=localPatch(id,Object.assign({},data,reasonData||{}));
+  closeEdit();
+  refreshLocal(); reopenPanelIf(id);
+  toast('✅ تم تغيير الموعد — '+data['Delivery Date']);
+  if(rBtn) rBtn.disabled=false;
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     if(reasonData){ try{ await writeToSheet({action:'updateOrder',id,data:JSON.stringify(reasonData)}); }catch(e){} }
-    closeEdit();
-    localPatch(id,Object.assign({},data,reasonData||{}));
-    refreshLocal(); reopenPanelIf(id);
-    if(rBtn) rBtn.disabled=false;
-    showFullscreenSuccess('تم تغيير الموعد ✅\n'+data['Delivery Date']);
   }catch(e){
-    if(rBtn) rBtn.disabled=false;
-    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
+    localUndo(r); refreshLocal(); reopenPanelIf(id);
+    showFullscreenError('لم يُحفظ التعديل ❌ رجع الموعد القديم\n'+e.message);
   }
 }
 
@@ -5104,19 +5112,19 @@ async function setNamesPrintedState(markAsPrinted, skipConfirm){
   // وضع الكتب له عمود تتبّع منفصل — البكج يظهر بوضعَي صواني وكتب معاً ولا يصح خلطهما
   const col = document.getElementById('names-mode').value === 'books' ? 'BookPrinted' : 'NamePrinted';
   const payload = {}; payload[col] = stamp;
-  showFullscreenLoading('⏳ جاري التحديث...');
-  let ok=0, failed=[];
-  for(let i=0;i<targets.length;i++){
-    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+targets.length+')...');
-    try{
-      await writeToSheet({action:'updateOrder', id:targets[i].id, data:JSON.stringify(payload)});
-      localPatch(targets[i].id,payload); ok++;
-    }catch(e){ failed.push(targets[i].id); }
-  }
+  const patches = {};
+  targets.forEach(t=>{ patches[t.id]=localPatch(t.id,payload); });
   refreshLocal();
   generateNamesList();
-  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
-  else showFullscreenSuccess((markAsPrinted?'تم تحديد ':'تم إلغاء العلامة عن ')+ok+' اسم ✅');
+  toast((markAsPrinted?'✅ تم تحديد ':'✅ تم إلغاء العلامة عن ')+targets.length+' اسم');
+  let ok=0, failed=[];
+  for(let i=0;i<targets.length;i++){
+    try{
+      await writeToSheet({action:'updateOrder', id:targets[i].id, data:JSON.stringify(payload)});
+      ok++;
+    }catch(e){ failed.push(targets[i].id); localUndo(patches[targets[i].id]); }
+  }
+  if(failed.length){ refreshLocal(); generateNamesList(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت)'); }
 }
 
 async function copyNamesList(alsoMarkPrinted){
@@ -6409,7 +6417,7 @@ function showFullscreenSuccess(text, onDone){
   setTimeout(()=>{
     document.getElementById('fullscreen-result').style.display = 'none';
     if(onDone) onDone();
-  }, 700);
+  }, 1400);
 }
 function showFullscreenError(text){
   hideFullscreenLoading();
