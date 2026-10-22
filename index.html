@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v148</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v149</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v148<br>
+       <strong>الإصدار:</strong> v149<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v148 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v149 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -7952,7 +7952,11 @@ async function chPanelPreload(orderId){
   try{
     const r=await chFetchOrderChat(orderId);
     const h=document.getElementById('panel-chat-handle');
-    if(h && r && r.found && r.chat && r.chat.handle) h.textContent='['+String(r.chat.handle).replace(/^@/,'')+']';
+    if(h && r && r.found && r.chat){
+      // إنستغرام: اسم المستخدم. ماسنجر ما إله يوزر → نعرض اسم الزبون (ولو ما في أي اسم ما نعرض شي)
+      const nm = String(r.chat.handle||'').replace(/^@/,'').trim() || (r.chat.ch==='fb' ? String(r.chat.customer||'').trim() : '');
+      if(nm && nm!=='زبون'){ h.textContent='['+nm+']'; if(r.chat.ch==='fb'){ h.dir='auto'; } }
+    }
   }catch(e){ /* سيرفر قديم أو بدون اتصال: الزر يرجع للبحث المحلي */ }
 }
 async function chShowInPanel(orderId){
