@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v145</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v148</span>
   </div>
 </div>
 <div class="tabs">
@@ -2203,7 +2203,7 @@ async function fetchWithRetry(doFetch, maxAttempts){
 // أكشنز لازم لها جلسة صحيحة — تُرفَق هوية المستخدم الحالي تلقائياً بأي طلب منها
 const AUTH_REQUIRED_ACTIONS = ['getOrders','getDrafts','addOrder','updateOrder','deleteOrder',
   'uploadPhoto','deletePhoto','getInventory','addInventoryPurchase','saveDraft','deleteDraft','clearAllDrafts',
-  'inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead'];
+  'inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead','inboxOrderChat'];
 function withAuth(params){
   if(currentUser && AUTH_REQUIRED_ACTIONS.includes(params.action)){
     return Object.assign({}, params, {authUsername: currentUser.username, authToken: currentUser.token});
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v145<br>
+       <strong>الإصدار:</strong> v148<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v145 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v148 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2674,20 +2674,19 @@ async function applyBulk(){
   if(!status){toast('❌ اختاري الحالة');return;}
   const ids=[...selectedIds];
   const payload=statusPayload(status);
-  const patches={};
-  ids.forEach(id=>{ patches[id]=localPatch(id,payload); });
-  clearSel();
-  refreshLocal();
-  toast('✅ تم تحديث '+ids.length+' أوردر');
   let ok=0, failed=[];
+  showFullscreenLoading('⏳ جاري تحديث '+ids.length+' أوردر...');
   for(let i=0;i<ids.length;i++){
+    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+ids.length+')...');
     try{
       await writeToSheet({action:'updateOrder',id:ids[i],data:JSON.stringify(payload)});
-      ok++;
-    }catch(e){ failed.push(ids[i]); localUndo(patches[ids[i]]); }
-    if(i<ids.length-1) await new Promise(r=>setTimeout(r,100));
+      localPatch(ids[i],payload); ok++;
+    }catch(e){ failed.push(ids[i]); }
   }
-  if(failed.length){ refreshLocal(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت حالتها القديمة)'); }
+  clearSel();
+  refreshLocal();
+  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
+  else showFullscreenSuccess('تم تحديث '+ok+' أوردر ✅');
 }
 
 // ── STATS ──
@@ -3222,21 +3221,22 @@ async function deleteOrder(id){
     'إلغاء (Cancel) = وضع الأوردر كـ "ملغي" فقط'
   );
   if(!o) return;
-  const idx=allOrders.indexOf(o);
-  closePanel();
-  if(choice){
-    allOrders.splice(idx,1);
-    refreshLocal();
-    toast('✅ تم حذف الطلب');
-    try{ await writeToSheet({action:'deleteOrder', id}); }
-    catch(e){ allOrders.splice(Math.min(idx,allOrders.length),0,o); refreshLocal(); showFullscreenError('فشل الحذف ❌ رجع الأوردر\n'+e.message); }
-  } else {
-    const r=localPatch(id,{Status:'Cancelled'});
-    refreshLocal();
-    toast('✅ تم إلغاء الطلب');
-    try{ await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})}); }
-    catch(e){ localUndo(r); refreshLocal(); showFullscreenError('فشل الإلغاء ❌ رجع الأوردر\n'+e.message); }
-  }
+  showFullscreenLoading('⏳ جاري حذف الطلب...');
+  try{
+    if(choice){
+      await writeToSheet({action:'deleteOrder', id});
+      closePanel();
+      const i=allOrders.indexOf(o); if(i>=0) allOrders.splice(i,1);
+      refreshLocal();
+      showFullscreenSuccess('تم حذف الطلب ✅');
+    } else {
+      await writeToSheet({action:'updateOrder', id, data:JSON.stringify({Status:'Cancelled'})});
+      closePanel();
+      localPatch(id,{Status:'Cancelled'});
+      refreshLocal();
+      showFullscreenSuccess('تم إلغاء الطلب ✅');
+    }
+  }catch(e){ showFullscreenError('فشل الحذف ❌\n'+e.message); }
 }
 function closePanel(){ document.getElementById('panel').classList.remove('open'); }
 document.getElementById('panel').addEventListener('click',function(e){if(e.target===this)closePanel();});
@@ -3266,27 +3266,17 @@ function reopenPanelIf(id){
 }
 
 async function changeStatus(id,status){
-  // تحديث فوري (Optimistic): الواجهة تتغير بنفس اللحظة، والحفظ بالشيت يصير بالخلفية بدون شاشة تحميل
-  const o=allOrders.find(x=>x['Order ID']===id);
-  if(!o) return;
-  const prev={Status:o['Status'], ShippedAt:o['ShippedAt']};
+  // شاشة تحميل سريعة: كتابة وحدة للشيت، وبعدها تحديث محلي فوري بدون إعادة تحميل كل الأوردرات
+  showFullscreenLoading('⏳ جاري تحديث الحالة...');
   const payload=statusPayload(status);
-  Object.keys(payload).forEach(k=>{ o[k]=payload[k]; });
-  try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(e){}
-  try{ renderCal(); updateStats(); }catch(e){ console.error(e); }
-  const panel=document.getElementById('panel');
-  if(panel.classList.contains('open')) openPanel(id);
-  toast('✅ تم تحديث الحالة');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(payload)});
-    window._ordersLoadedAt = Date.now();
+    localPatch(id,payload);
+    refreshLocal(); reopenPanelIf(id);
+    showFullscreenSuccess('تم تحديث الحالة ✅');
   }catch(e){
-    // فشل الحفظ: رجّع الحالة القديمة وبلّغ المستخدم
-    Object.keys(prev).forEach(k=>{ if(prev[k]===undefined) delete o[k]; else o[k]=prev[k]; });
-    try{ localStorage.setItem('sg_cached_orders', JSON.stringify(allOrders)); }catch(_){}
-    try{ renderCal(); updateStats(); }catch(_){}
-    if(panel.classList.contains('open')) openPanel(id);
-    showFullscreenError('لم يتم التحديث ❌ رجعت الحالة القديمة\n'+e.message);
+    reopenPanelIf(id);
+    showFullscreenError('لم يتم التحديث ❌\n'+e.message);
   }
 }
 
@@ -3642,17 +3632,18 @@ async function applyEdit(id){
   };
   const editBtn = document.getElementById('edit-save-btn');
   if(editBtn) editBtn.disabled=true;
-  const r=localPatch(id,data);
-  closeEdit();
-  refreshLocal(); reopenPanelIf(id);
-  toast('✅ تم تعديل الطلب');
-  if(editBtn) editBtn.disabled=false;
+  showFullscreenLoading('⏳ جاري تعديل الطلب...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
-    loadOrders(true,true); // مزامنة صامتة بالخلفية (بدون شاشة تحميل) لتثبيت القيم المحسوبة من الشيت
+    closeEdit();
+    localPatch(id,data);
+    refreshLocal(); reopenPanelIf(id);
+    if(editBtn) editBtn.disabled=false;
+    showFullscreenSuccess('تم تعديل الطلب ✅');
+    loadOrders(true,true); // مزامنة صامتة بالخلفية لتثبيت القيم المحسوبة
   }catch(e){
-    localUndo(r); refreshLocal(); reopenPanelIf(id);
-    showFullscreenError('لم يُحفظ التعديل ❌ رجعت القيم القديمة\n'+e.message);
+    if(editBtn) editBtn.disabled=false;
+    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
   }
 }
 
@@ -3711,17 +3702,18 @@ async function applyReschedule(id){
   }
   const rBtn = document.getElementById('resched-save-btn');
   if(rBtn) rBtn.disabled=true;
-  const r=localPatch(id,Object.assign({},data,reasonData||{}));
-  closeEdit();
-  refreshLocal(); reopenPanelIf(id);
-  toast('✅ تم تغيير الموعد — '+data['Delivery Date']);
-  if(rBtn) rBtn.disabled=false;
+  showFullscreenLoading('⏳ جاري تغيير الموعد...');
   try{
     await writeToSheet({action:'updateOrder',id,data:JSON.stringify(data)});
     if(reasonData){ try{ await writeToSheet({action:'updateOrder',id,data:JSON.stringify(reasonData)}); }catch(e){} }
+    closeEdit();
+    localPatch(id,Object.assign({},data,reasonData||{}));
+    refreshLocal(); reopenPanelIf(id);
+    if(rBtn) rBtn.disabled=false;
+    showFullscreenSuccess('تم تغيير الموعد ✅\n'+data['Delivery Date']);
   }catch(e){
-    localUndo(r); refreshLocal(); reopenPanelIf(id);
-    showFullscreenError('لم يُحفظ التعديل ❌ رجع الموعد القديم\n'+e.message);
+    if(rBtn) rBtn.disabled=false;
+    showFullscreenError('لم يُحفظ التعديل ❌\n'+e.message);
   }
 }
 
@@ -5112,19 +5104,19 @@ async function setNamesPrintedState(markAsPrinted, skipConfirm){
   // وضع الكتب له عمود تتبّع منفصل — البكج يظهر بوضعَي صواني وكتب معاً ولا يصح خلطهما
   const col = document.getElementById('names-mode').value === 'books' ? 'BookPrinted' : 'NamePrinted';
   const payload = {}; payload[col] = stamp;
-  const patches = {};
-  targets.forEach(t=>{ patches[t.id]=localPatch(t.id,payload); });
-  refreshLocal();
-  generateNamesList();
-  toast((markAsPrinted?'✅ تم تحديد ':'✅ تم إلغاء العلامة عن ')+targets.length+' اسم');
+  showFullscreenLoading('⏳ جاري التحديث...');
   let ok=0, failed=[];
   for(let i=0;i<targets.length;i++){
+    showFullscreenLoading('⏳ جاري التحديث ('+(i+1)+'/'+targets.length+')...');
     try{
       await writeToSheet({action:'updateOrder', id:targets[i].id, data:JSON.stringify(payload)});
-      ok++;
-    }catch(e){ failed.push(targets[i].id); localUndo(patches[targets[i].id]); }
+      localPatch(targets[i].id,payload); ok++;
+    }catch(e){ failed.push(targets[i].id); }
   }
-  if(failed.length){ refreshLocal(); generateNamesList(); showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', ')+' (رجعت)'); }
+  refreshLocal();
+  generateNamesList();
+  if(failed.length) showFullscreenError('نجح '+ok+' — فشل: '+failed.join(', '));
+  else showFullscreenSuccess((markAsPrinted?'تم تحديد ':'تم إلغاء العلامة عن ')+ok+' اسم ✅');
 }
 
 async function copyNamesList(alsoMarkPrinted){
@@ -6417,7 +6409,7 @@ function showFullscreenSuccess(text, onDone){
   setTimeout(()=>{
     document.getElementById('fullscreen-result').style.display = 'none';
     if(onDone) onDone();
-  }, 1400);
+  }, 700);
 }
 function showFullscreenError(text){
   hideFullscreenLoading();
@@ -7941,22 +7933,54 @@ chKeepPriceWrap('onPkgTypeChange');
 // ───── محادثة الأوردر داخل لوحة تفاصيل الأوردر (التقويم) ─────
 function chOrderSection(id){
   if(!currentUser || currentUser.role==='prep') return '';
-  return '<div style="margin-top:12px" id="panel-chat"><div class="psec-ttl" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>💬 المحادثة</span>'+
+  setTimeout(()=>chPanelPreload(id),0);
+  return '<div style="margin-top:12px" id="panel-chat"><div class="psec-ttl" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>💬 المحادثة <bdi id="panel-chat-handle" dir="ltr" style="color:#C9A96E;font-weight:800"></bdi></span>'+
     '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="chShowInPanel(\''+chEsc(id)+'\')">عرض المحادثة</button></div><div id="panel-chat-body"></div></div>';
+}
+// جلب محادثة الأوردر من السيرفر (أي موظفة تقدر تقرأ محادثة أي أوردر من جواه) مع تخزين مؤقت
+CH.orderChat = CH.orderChat || {};
+async function chFetchOrderChat(orderId){
+  const hit=CH.orderChat[orderId]; if(hit && Date.now()-hit._t<60000) return hit;
+  const o=allOrders.find(x=>x['Order ID']===orderId);
+  const phs=o?phonesOf(o['Phone']):[];
+  const r=await apiPost({action:'inboxOrderChat', orderId:orderId, phones:phs.join(',')});
+  if(r) r._t=Date.now();
+  CH.orderChat[orderId]=r;
+  return r;
+}
+async function chPanelPreload(orderId){
+  try{
+    const r=await chFetchOrderChat(orderId);
+    const h=document.getElementById('panel-chat-handle');
+    if(h && r && r.found && r.chat && r.chat.handle) h.textContent='['+String(r.chat.handle).replace(/^@/,'')+']';
+  }catch(e){ /* سيرفر قديم أو بدون اتصال: الزر يرجع للبحث المحلي */ }
 }
 async function chShowInPanel(orderId){
   const box=document.getElementById('panel-chat-body'); if(!box) return;
   box.innerHTML='<div class="ch-skel">⏳ جاري البحث عن المحادثة...</div>';
   try{
+    let r=null;
+    try{ r=await chFetchOrderChat(orderId); }catch(e){ r=null; }
+    if(r && r.found){
+      const c=r.chat||{};
+      const who = c.employeeName && c.employeeName!=='غير محدد' ? '<div style="font-size:12px;color:#8B7355;margin-bottom:6px">ثبّتتها: '+chEsc(c.employeeName)+'</div>' : '';
+      const own = currentUser.role==='owner' || (CH.list||[]).some(x=>x.id===c.id);
+      box.innerHTML=who+'<div class="ch-msgs ch-compact" id="panel-chat-msgs">'+chMsgsHTML((r.messages||[]).slice(-40))+'</div>'+
+        (own?'<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" style="width:auto" onclick="chJump(\''+chEsc(c.id)+'\')">فتح في تبويب المحادثات</button></div>':'');
+      const m=document.getElementById('panel-chat-msgs'); if(m) m.scrollTop=m.scrollHeight;
+      return;
+    }
+    if(r && r.found===false){ box.innerHTML='<div class="ch-skel">ما لقيت محادثة مرتبطة بهذا الأوردر (حسب رقم الأوردر أو رقم الهاتف)</div>'; return; }
+    // سيرفر قديم (الإجراء الجديد مش منشور بعد): البحث المحلي القديم
     if(!CH.loaded) await chLoadList();
     const o=allOrders.find(x=>x['Order ID']===orderId); const phs=o?phonesOf(o['Phone']):[];
     const c=CH.list.find(x=>x.orderId===orderId) || CH.list.find(x=>{const f=chFindOrder(x);return f&&f['Order ID']===orderId;}) || CH.list.find(x=>x.phone && phs.indexOf(normalizePhone(x.phone))>=0);
     if(!c){ box.innerHTML='<div class="ch-skel">ما لقيت محادثة مرتبطة بهذا الأوردر (حسب رقم الهاتف)</div>'; return; }
-    const r=await apiPost({action:'inboxGetChat', convId:c.id});
-    CH.cache[c.id]=r;
-    box.innerHTML='<div class="ch-msgs ch-compact" id="panel-chat-msgs">'+chMsgsHTML((r.messages||[]).slice(-40))+'</div>'+
+    const r2=await apiPost({action:'inboxGetChat', convId:c.id});
+    CH.cache[c.id]=r2;
+    box.innerHTML='<div class="ch-msgs ch-compact" id="panel-chat-msgs">'+chMsgsHTML((r2.messages||[]).slice(-40))+'</div>'+
       '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" style="width:auto" onclick="chJump(\''+chEsc(c.id)+'\')">فتح في تبويب المحادثات</button></div>';
-    const m=document.getElementById('panel-chat-msgs'); if(m) m.scrollTop=m.scrollHeight;
+    const m2=document.getElementById('panel-chat-msgs'); if(m2) m2.scrollTop=m2.scrollHeight;
   }catch(e){ box.innerHTML='<div class="ch-skel">❌ '+chEsc(e.message)+'</div>'; }
 }
 function chJump(id){ closePanel(); switchTab('chats'); setTimeout(()=>chOpen(id),50); }
