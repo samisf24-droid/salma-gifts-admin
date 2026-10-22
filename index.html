@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v149</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v150</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v149<br>
+       <strong>الإصدار:</strong> v150<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v149 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v150 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -7900,6 +7900,10 @@ function chOnOrderSaved(orderId){
   const c=CH.list.find(x=>x.id===ctx.convId);
   if(c){ c.orderId=orderId; if(c.status==='tentative') c.status='tentative'; }
   apiPost({action:'inboxLink', convId:ctx.convId, orderId:orderId}).catch(()=>{});
+  try{
+    const lab = c ? chChatLabel(c) : '';
+    if(lab) writeToSheet({action:'updateOrder', id:orderId, data:JSON.stringify({ChatHandle:lab})}).catch(()=>{});
+  }catch(e){}
   CH.cur=null;
   document.getElementById('ch-detail-screen').style.display='none';
   document.getElementById('ch-list-screen').style.display='block';
@@ -7934,7 +7938,8 @@ chKeepPriceWrap('onPkgTypeChange');
 function chOrderSection(id){
   if(!currentUser || currentUser.role==='prep') return '';
   setTimeout(()=>chPanelPreload(id),0);
-  return '<div style="margin-top:12px" id="panel-chat"><div class="psec-ttl" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>💬 المحادثة <bdi id="panel-chat-handle" dir="ltr" style="color:#C9A96E;font-weight:800"></bdi></span>'+
+  const _ho=allOrders.find(x=>x['Order ID']===id); const _hn=_ho?String(_ho['ChatHandle']||'').trim():'';
+  return '<div style="margin-top:12px" id="panel-chat"><div class="psec-ttl" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>💬 المحادثة <bdi id="panel-chat-handle" dir="auto" style="color:#C9A96E;font-weight:800">'+(_hn?'['+chEsc(_hn)+']':'')+'</bdi></span>'+
     '<button class="btn btn-ghost btn-sm" style="width:auto" onclick="chShowInPanel(\''+chEsc(id)+'\')">عرض المحادثة</button></div><div id="panel-chat-body"></div></div>';
 }
 // جلب محادثة الأوردر من السيرفر (أي موظفة تقدر تقرأ محادثة أي أوردر من جواه) مع تخزين مؤقت
@@ -7948,16 +7953,26 @@ async function chFetchOrderChat(orderId){
   CH.orderChat[orderId]=r;
   return r;
 }
+function chChatLabel(chat){
+  // إنستغرام: اسم المستخدم. ماسنجر ما إله يوزر → اسم الزبون
+  const nm = String(chat.handle||'').replace(/^@/,'').trim() || (chat.ch==='fb' ? String(chat.customer||'').trim() : '');
+  return (nm && nm!=='زبون') ? nm : '';
+}
 async function chPanelPreload(orderId){
   try{
+    const o=allOrders.find(x=>x['Order ID']===orderId);
+    if(o && String(o['ChatHandle']||'').trim()) return;   // مخزّن بالأوردر: ما في داعي نسأل السيرفر
     const r=await chFetchOrderChat(orderId);
+    if(!(r && r.found && r.chat)) return;
+    const nm=chChatLabel(r.chat); if(!nm) return;
     const h=document.getElementById('panel-chat-handle');
-    if(h && r && r.found && r.chat){
-      // إنستغرام: اسم المستخدم. ماسنجر ما إله يوزر → نعرض اسم الزبون (ولو ما في أي اسم ما نعرض شي)
-      const nm = String(r.chat.handle||'').replace(/^@/,'').trim() || (r.chat.ch==='fb' ? String(r.chat.customer||'').trim() : '');
-      if(nm && nm!=='زبون'){ h.textContent='['+nm+']'; if(r.chat.ch==='fb'){ h.dir='auto'; } }
+    if(h && !h.textContent) h.textContent='['+nm+']';
+    // تخزين دائم بالأوردر (مرة وحدة) — فقط إذا عمود ChatHandle موجود بالشيت وهاي المستخدمة تملك صلاحية تعديل الأوردر
+    if(o && allOrders.some(x=>'ChatHandle' in x) && canEditOrder(o)){
+      localPatch(orderId,{ChatHandle:nm});
+      writeToSheet({action:'updateOrder',id:orderId,data:JSON.stringify({ChatHandle:nm})}).catch(()=>{});
     }
-  }catch(e){ /* سيرفر قديم أو بدون اتصال: الزر يرجع للبحث المحلي */ }
+  }catch(e){ console.warn('chPanelPreload', e); }
 }
 async function chShowInPanel(orderId){
   const box=document.getElementById('panel-chat-body'); if(!box) return;
