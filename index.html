@@ -1143,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v151</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v153</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2360,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v151<br>
+       <strong>الإصدار:</strong> v153<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2384,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v151 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v153 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5198,15 +5198,13 @@ function courierBuildRows(orders){
   const rows=orders.map(o=>{
     const rec=o['Recipient']||'';
     const gov=_cMatch(o['Governorate'],COURIER_GOV,false);
-    const areaRaw=o['Area']||'';
+    const areaRaw=String(o['Area']||'').trim();
     const area=_cMatch(areaRaw,COURIER_AREAS,true);
     if(!gov) warn.push((rec||o['Order ID'])+' — المحافظة "'+(o['Governorate']||'فاضية')+'" مش بقائمتهم');
-    else if(areaRaw&&!area) warn.push((rec||o['Order ID'])+' — المنطقة "'+areaRaw+'" مش بقائمتهم (انكتبت بالعنوان)');
-    const notes=[o['Delivery Notes']].filter(Boolean).join(' | ');
-    let prod=(TYPE_AR[o['Product Type']]||o['Product Type']||'');
-    try{const nm=getOrderNames(o); if(nm) prod+=' — '+String(nm).replace(/\s*\n\s*/g,' ');}catch(e){}
-    const addr=[o['Governorate'],areaRaw].filter(Boolean).join(' — ');
-    return [String(o['Order ID']||''),rec,normalizePhone(o['Phone'])||'',  '',gov,area,addr,prod,notes,amountToCollect(o)];
+    // المنطقة: إذا معرّفة عندهم تنحط بخانتها، وإذا لا تنحط بالملاحظات
+    const notes=[o['Delivery Notes'], (areaRaw&&!area)?('المنطقة: '+areaRaw):''].filter(Boolean).join(' | ');
+    // الرقم المرجعي لهم (مش رقمنا) + بدون ملاحظات منتج/عنوان: يتركوا فاضيين
+    return ['',rec,normalizePhone(o['Phone'])||'','',gov,area,'','',notes,amountToCollect(o)];
   });
   return {rows,warn};
 }
@@ -5233,18 +5231,40 @@ async function courierMakeXlsx(rows){
   return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',compression:'DEFLATE'});
 }
 async function doCourierExcel(){
+  const box=document.getElementById('courier-warn');
+  const show=(h)=>{ if(box){ box.innerHTML=h; box.style.display='block'; } };
   const orders=courierPickOrders(); if(!orders) return;
-  if(!orders.length){toast('❌ ما في أوردرات تطابق الفلاتر المحددة');return;}
+  if(!orders.length){
+    const dates=new Set([...document.querySelectorAll('input[name="print-day"]:checked')].map(c=>c.value));
+    const sts=new Set([...document.querySelectorAll('input[name="print-status"]:checked')].map(c=>c.value));
+    const byDay=allOrders.filter(o=>(!dates.size||dates.has(String(o['Delivery Date']||'').trim())));
+    const SL={New:'طلب جديد',Preparing:'جاري التجهيز',Shipped:'مع التوصيل',Done:'تم التسليم',Waiting:'بانتظار تأكيد',Cancelled:'ملغي'};
+    const cnt={}; byDay.forEach(o=>{const k=o['Status']||'New'; cnt[k]=(cnt[k]||0)+1;});
+    const parts=Object.keys(cnt).map(k=>(SL[k]||k)+': '+cnt[k]);
+    show('<b>❌ ما في أوردرات تطابق الاختيار.</b><br>'+(byDay.length?('بالأيام المحددة في '+byDay.length+' أوردر بحالات: '+parts.join('، ')+'<br>فعّلي الحالة المناسبة (مثلاً «جاري التجهيز» أو «مع التوصيل») وجرّبي من جديد.'):'ما في أوردرات بالأيام المحددة — اختاري اليوم الصحيح من «الأيام».'));
+    toast('❌ ما في أوردرات تطابق الاختيار');
+    return;
+  }
   try{
     const {rows,warn}=courierBuildRows(orders);
     const blob=await courierMakeXlsx(rows);
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='order_template.xls'; document.body.appendChild(a); a.click();
-    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+    const fname='order_template.xlsx';
+    let shared=false;
+    try{
+      const f=new File([blob],fname,{type:blob.type});
+      if(/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({files:[f]})){
+        await navigator.share({files:[f],title:'ملف شركة التوصيل'}); shared=true;
+      }
+    }catch(e){ if(e&&e.name==='AbortError') shared=true; }
+    if(!shared){
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download=fname; document.body.appendChild(a); a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+    }
     toast('✅ تم تجهيز ملف التوصيل — '+rows.length+' أوردر');
-    const box=document.getElementById('courier-warn');
-    if(box){ box.innerHTML = warn.length ? ('<b>⚠️ تحتاج مراجعة قبل الرفع ('+warn.length+'):</b><br>'+warn.map(w=>'• '+_cEsc(w)).join('<br>')) : '✅ كل المحافظات والمناطق مطابقة لقائمتهم'; box.style.display='block'; }
-  }catch(e){ toast('❌ '+(e.message||e)); console.error(e); }
+    const list=rows.map((r,i)=>(i+1)+'. '+_cEsc(r[1]||'—')+' — '+_cEsc(r[4]||'')+(r[5]?' / '+_cEsc(r[5]):'')+' — '+_cEsc(r[9])+' د').join('<br>');
+    show('<b>📦 ضمن الملف ('+rows.length+' أوردر):</b><br>'+list+'<br><br>'+(warn.length ? ('<b>⚠️ تحتاج مراجعة قبل الرفع ('+warn.length+'):</b><br>'+warn.map(w=>'• '+_cEsc(w)).join('<br>')) : '✅ كل المحافظات والمناطق مطابقة لقائمتهم'));
+  }catch(e){ toast('❌ '+(e.message||e)); show('<b>❌ صار خطأ:</b> '+_cEsc(e.message||e)); console.error(e); }
 }
 
 function doPrint(){
