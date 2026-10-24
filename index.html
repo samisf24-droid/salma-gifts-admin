@@ -276,6 +276,11 @@ body.staff-view:not(.prep-view) .cal-day-block-cnt{display:none}
 .mc-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .mc-type{font-size:10px;font-weight:700;color:#6B5240;background:#F0E8DC;border-radius:4px;padding:2px 6px}
 .mc-price{font-size:11px;font-weight:900;color:#8A6030;margin-right:auto}
+.mc-thumbs{position:absolute;left:8px;top:50%;transform:translateY(-50%);display:flex;gap:5px;direction:ltr}
+.mc-thumb{position:relative;width:46px;height:46px;border-radius:7px;overflow:hidden;border:1.5px solid rgba(0,0,0,.08);background:#EEE;flex:none}
+.mc-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.mc-thumb .mc-more{position:absolute;inset:0;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mc.has-thumbs{min-height:62px}
 .mc-by{display:block;font-size:9.5px;color:#B8A898;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-st{font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
 .mc-st.s-New{background:#EAF3DE;color:#3B6D11}
@@ -1143,7 +1148,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v153</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v154</span>
   </div>
 </div>
 <div class="tabs">
@@ -2360,7 +2365,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v153<br>
+       <strong>الإصدار:</strong> v154<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2384,7 +2389,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v153 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v154 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -2511,7 +2516,7 @@ function renderCalMobile(weeksData){
           <button class="day-dots" onclick="openDayMenu('${key}', event)">⋮</button>
         </div>
         <div class="cal-day-block-body">
-          ${list.length ? list.map(o=>miniCard(o)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
+          ${list.length ? list.map(o=>miniCard(o,true)).join('') : '<div class="mc-empty">لا يوجد أوردرات</div>'}
           <button class="mc-add no-print" onclick="event.stopPropagation();openAddForDate('${key}')">+ إضافة</button>
         </div>
       </div>`;
@@ -2570,7 +2575,7 @@ function typeClass(t){
            Graduation:'t-grad',Bouquet:'t-bouquet',MahrBox:'t-mahr'})[t] || 't-other';
 }
 
-function miniCard(o){
+function miniCard(o, withThumbs){
   const id = o['Order ID']||'';
   const type = o['Product Type']||'';
   const groom=o['Groom']||''; const bride=o['Bride']||'';
@@ -2591,14 +2596,26 @@ function miniCard(o){
   const sel = selectedIds.has(id);
   const createdBy = o['CreatedBy']||'';
   const byTag = createdBy ? `<span class="mc-by">👤 ${createdBy}</span>` : '';
-  return `<div class="mc ${st.cls} ${tc} ${sel?'selected':''}" id="mc-${id}" onclick="handleMC('${id}')">
-    <div class="mc-names">${names||id}</div>
-    <div class="mc-row">
+  // للموظفات (إدخال/تجهيز): صور الأوردر مكان السعر — 2 على الموبايل و3 على الشاشات الواسعة، والباقي من تفاصيل الأوردر
+  let thumbs='', hasT=false;
+  if(withThumbs && currentUser && currentUser.role!=='owner'){
+    const ph=getPhotos(o);
+    if(ph.length){
+      const maxT = window.innerWidth>=700 ? 3 : 2;
+      const shown=ph.slice(0,maxT), extra=ph.length-shown.length;
+      thumbs='<div class="mc-thumbs">'+shown.map((u,k)=>'<div class="mc-thumb" onclick="event.stopPropagation();openLightbox(\''+u.replace(/\\/g,'\\\\').replace(/\'/g,"\\'")+'\')"><img src="'+u+'" loading="lazy" alt="">'+((k===shown.length-1&&extra>0)?'<span class="mc-more">+'+extra+'</span>':'')+'</div>').join('')+'</div>';
+      hasT=true;
+    }
+  }
+  return `<div class="mc ${st.cls} ${tc} ${sel?'selected':''} ${hasT?'has-thumbs':''}" id="mc-${id}" onclick="handleMC('${id}')">
+    <div class="mc-names" ${hasT?'style="margin-left:'+((window.innerWidth>=700?3:2)*51+4)+'px"':''}>${names||id}</div>
+    <div class="mc-row" ${hasT?'style="margin-left:'+((window.innerWidth>=700?3:2)*51+4)+'px"':''}>
       <span class="mc-type ${tc}">${typeAr}</span>
       <span class="mc-st ${st.cls}">${st.lbl}</span>
-      <span class="mc-price">${grandTotal}د.أ${paidMark}</span>
+      ${hasT?'':`<span class="mc-price">${grandTotal}د.أ${paidMark}</span>`}
     </div>
     ${byTag}
+    ${thumbs}
   </div>`;
 }
 
