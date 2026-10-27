@@ -1148,7 +1148,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v154</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v155</span>
   </div>
 </div>
 <div class="tabs">
@@ -1607,6 +1607,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
       <div class="fg"><label>الاسم الظاهر <span class="req">*</span></label><input type="text" id="emp-displayname" placeholder="سماح"></div>
       <div class="fg"><label>كلمة المرور <span class="req">*</span></label><input type="text" id="emp-password" dir="ltr" style="text-align:right"></div>
       <div class="fg"><label>العمولة لكل أوردر (د.أ) <span class="req">*</span></label><input type="number" id="emp-rate" step="0.1" min="0" placeholder="0.5"></div>
+      <div class="fg"><label>رموز التثبيت <span class="opt">(إيموجي تحطه برسالة التأكيد — بيربط المحادثة فيها. افصلي بمسافة)</span></label><input type="text" id="emp-symbols" placeholder="💯 ✔ ❤"></div>
       <div class="fg">
         <label>الدور <span class="req">*</span></label>
         <select id="emp-role" onchange="onEmpRoleChange()">
@@ -2365,7 +2366,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v154<br>
+       <strong>الإصدار:</strong> v155<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2389,7 +2390,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v154 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v155 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5545,6 +5546,7 @@ function renderEmployees(list){
         <div>
           <div style="font-weight:800;color:#1A1410;font-size:14px">${esc(emp.displayName)} <span style="font-weight:400;color:#8B7355;font-size:12px">(${esc(emp.username)})</span> ${emp.active?'':'<span style="color:#C0392B;font-size:11px">— موقوف</span>'}</div>
           <div style="font-size:12px;color:#8B7355;margin-top:2px">${emp.role==='prep' ? '👁️ مسؤول تجهيز — اطّلاع فقط' : ('✍️ مسؤول إدخال · العمولة: '+emp.commissionRate+' د.أ / أوردر')}</div>
+          <div style="font-size:12px;color:#8B7355;margin-top:2px">🏷️ رموز التثبيت: ${emp.symbols?esc(emp.symbols):'<span style="color:#B8A898">— ما إلها رموز</span>'}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div style="text-align:left">
@@ -5597,6 +5599,7 @@ async function openEmployeeFullEdit(username){
       </select>
     </div>
     <div class="fg"><label>العمولة لكل أوردر (د.أ)</label><input type="number" id="fe-rate" step="0.1" min="0" value="${emp.commissionRate}"></div>
+    <div class="fg"><label>رموز التثبيت <span class="opt">(إيموجي برسالة التأكيد بيربط المحادثة فيها — افصلي بمسافة)</span></label><input type="text" id="fe-symbols" value="${String(emp.symbols||'').replace(/"/g,'&quot;')}" placeholder="💯 ✔ ❤"></div>
     <div class="fg"><label>كلمة المرور <span class="opt">(اتركي هذا الحقل فارغاً في حال عدم الرغبة بتغييره)</span></label><input type="text" id="fe-pass" dir="ltr" style="text-align:right" placeholder="${emp.password?('الحالية: '+emp.password):''}"></div>
     <div class="fg">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
@@ -5619,7 +5622,7 @@ async function submitEmployeeFullEdit(username){
   const active = document.getElementById('fe-active').checked;
   if(!name){ toast('❌ الاسم ما يقدر يكون فاضي'); return; }
   if(isNaN(rate) || rate<0){ toast('❌ قيمة عمولة غير صالحة'); return; }
-  const data = {displayName:name, commissionRate:rate, active};
+  const data = {displayName:name, commissionRate:rate, active, symbols:(document.getElementById('fe-symbols').value||'').trim()};
   if(role) data.role = role;
   if(pass) data.password = pass;
   try{
@@ -5703,10 +5706,10 @@ async function addEmployeeSubmit(){
   btn.disabled = true; btn.textContent = '⏳ جاري الإضافة...';
   try{
     const res = await apiPost({action:'addEmployee', username: currentUser.username, token: currentUser.token,
-      data: JSON.stringify({username, displayName, password, commissionRate: rate, role})});
+      data: JSON.stringify({username, displayName, password, commissionRate: rate, role, symbols: (document.getElementById('emp-symbols').value||'').trim()})});
     if(!res || res.error) throw new Error((res&&res.error)||'خطأ');
     toast('✅ تمت إضافة الموظف');
-    ['emp-username','emp-displayname','emp-password','emp-rate'].forEach(id=>document.getElementById(id).value='');
+    ['emp-username','emp-displayname','emp-password','emp-rate','emp-symbols'].forEach(id=>document.getElementById(id).value='');
     loadEmployees();
   }catch(e){ toast('❌ '+e.message); }
   btn.disabled = false; btn.textContent = '💾 إضافة الموظف';
