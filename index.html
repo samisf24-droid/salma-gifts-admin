@@ -1146,7 +1146,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v156</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v157</span>
   </div>
 </div>
 <div class="tabs">
@@ -2364,7 +2364,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v156<br>
+       <strong>الإصدار:</strong> v157<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2388,7 +2388,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v156 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v157 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -4932,7 +4932,9 @@ function generateNamesList(){
       if(!m) return;
       const names = m[1].split(/[,،]/).map(s=>s.trim()).filter(Boolean).join(' ');
       const dateStr = m[2] ? toDashDate(m[2]) : '';
-      if(names) entries.push({id:o['Order ID'], line1:names, line2:dateStr, printed:isNamePrinted(o), label:'مسكة'});
+      // ملاحظات التعليقة (مثل: ستان / لون أسود / عبارة): إذا موجودة تنطبع تحت التاريخ بكلمة «ملاحظة»، وإذا فاضية ما ينضاف شي
+      let tNotes=''; try{ const pt=parseTaliqaText(add); tNotes=((pt&&pt.notes)||'').replace(/\s+/g,' ').trim(); }catch(e){}
+      if(names) entries.push({id:o['Order ID'], line1:names, line2:dateStr, line3:(tNotes?('ملاحظة: '+tNotes):''), printed:isNamePrinted(o), label:'مسكة'});
     });
   } else if(mode==='books'){
     // الكتب — كتاب منفصل، أو بكج يحتوي كتاب فعلياً (حسب PkgType أو الملاحظات للأوردرات القديمة)
@@ -5047,6 +5049,7 @@ function renderNamesList(entries){
       <label for="ncb-${i}" style="flex:1;min-width:0;cursor:pointer">
         <div style="font-weight:800;font-size:15px;color:#1A1410">${e.line1}</div>
         ${e.line2?`<div style="font-size:13px;color:#8B7355;margin-top:2px">${e.line2}</div>`:''}
+        ${e.line3?`<div style="font-size:13px;color:#8A6030;margin-top:2px;font-weight:700">${e.line3}</div>`:''}
       </label>
       ${e.label?`<span style="font-size:10px;font-weight:800;color:#8A6030;background:#FAF5EC;border:1px solid #E8D5B0;border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0;align-self:center">${e.label}</span>`:''}
       ${e.printed?'<span title="تمت طباعته" style="font-size:16px;flex-shrink:0;align-self:center">🖨️</span>':''}
@@ -5142,7 +5145,7 @@ async function copyNamesList(alsoMarkPrinted){
   // وضع القصاصات: النسخ يطلع نص القصاصات الصافي بس (بدون أسماء الزبون) — جاهز للصق مباشرة على Canva
   const text = mode==='qassasat'
     ? sel.map(e=>(e.qsItems||[]).join('\n')).join('\n\n')
-    : sel.map(e=> e.line2 ? (e.line1+'\n'+e.line2) : e.line1).join('\n\n');
+    : sel.map(e=> [e.line1, e.line2, e.line3].filter(Boolean).join('\n')).join('\n\n');
 
   let copied = true;
   try{ await navigator.clipboard.writeText(text); }
@@ -5170,6 +5173,7 @@ function printNamesList(){
       <div class="names-print-item">
         <div class="names-print-l1">${e.line1}</div>
         ${e.line2?`<div class="names-print-l2">${e.line2}</div>`:''}
+        ${e.line3?`<div class="names-print-l2">${e.line3}</div>`:''}
       </div>`).join('');
   document.getElementById('print-container').innerHTML = ''; // تفضية حاوية الكاردات لتفادي التداخل
   document.getElementById('names-print-container').innerHTML = html;
