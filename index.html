@@ -975,6 +975,28 @@ select.ch-dbox{text-align:center;text-align-last:center;padding:0 4px}
 .ch-dbox u{text-decoration:none;font-size:10px;color:#8B7355}
 .ch-dbox.on{background:#8A5200;border-color:#8A5200}.ch-dbox.on small,.ch-dbox.on b,.ch-dbox.on i,.ch-dbox.on u{color:#fff}
 select.ch-dbox{appearance:none;-webkit-appearance:none;font-size:12px;font-weight:800}
+.ch-src{display:inline-block;font-size:10.5px;font-weight:800;border-radius:99px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
+.shb{background:#FFFDF8;border:1.5px solid #E8D5B0;border-radius:14px;padding:10px 12px;margin:0 0 10px;font-family:Tajawal,sans-serif}
+.shb-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.shb-l{font-size:12.5px;font-weight:800;color:#8B7355}
+.shb-n{font-size:16px;font-weight:900;color:#1A1410}
+.shb-rem{margin-inline-start:auto;font-size:12px;font-weight:800;color:#8A5200;background:#FFF1D6;border-radius:99px;padding:2px 10px}
+.shb-off .shb-n{color:#8B7355}
+.shb-tl{position:relative;display:flex;gap:3px;margin-top:9px;height:12px;direction:rtl}
+.shb-seg{position:relative;border-radius:99px;overflow:hidden;background:#E8DFCF}
+.shb-seg i{position:absolute;top:0;bottom:0;inset-inline-end:0;border-radius:99px}
+.shb-mk{position:absolute;top:-3px;width:3px;height:18px;border-radius:2px;background:#C0392B;box-shadow:0 0 0 2px #FFFDF8;transform:translateX(50%)}
+.shb-lb{display:flex;gap:3px;margin-top:4px;direction:rtl}
+.shb-lb div{min-width:0;text-align:center;font-size:10.5px;font-weight:700;color:#9A8870;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shb-lb div.cur{color:#1A1410;font-weight:900}
+.shb-lb small{display:block;font-size:9.5px;font-weight:700;opacity:.8}
+.shb-pend{margin-top:8px;font-size:12.5px;font-weight:800;border-radius:10px;padding:6px 10px;cursor:pointer}
+.shb-pend.g{background:#EAF5EA;color:#1A4D1A;cursor:default}.shb-pend.a{background:#FFF3E0;color:#8A5200}.shb-pend.r{background:#FBE3E0;color:#9B2C1F}
+.shb-pl{margin-top:6px;display:flex;flex-direction:column;gap:4px}
+.shb-pl div{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:700;color:#4A3728;background:#fff;border:1px solid #F0E6D6;border-radius:8px;padding:4px 8px}
+.shb-pl b{margin-inline-start:auto}
+.ch-wt{display:inline-block;font-size:10.5px;font-weight:800;border-radius:99px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
+.ch-wt.g{background:#EAF5EA;color:#1A4D1A}.ch-wt.a{background:#FFF3E0;color:#8A5200}.ch-wt.r{background:#FBE3E0;color:#9B2C1F}
 .ch-emp-in{font-size:10.5px;font-weight:700;color:#8B7355;background:#F1ECE3;border-radius:99px;padding:1px 7px;margin-inline-start:6px;vertical-align:middle}
 .ch-sdot{align-self:center;flex:none;width:10px;height:10px;border-radius:50%;background:#D98A1F}.ch-sdot.pin{background:#3E8E5A}.ch-sdot.can{background:#B9AFA3}.ch-sdot.oth{background:#C9C0B4}
 .ch-fbtn{border:1.5px solid #E5D9C7;background:#fff;color:#4A3728;border-radius:99px;padding:7px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
@@ -1146,7 +1168,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v158</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v163</span>
   </div>
 </div>
 <div class="tabs">
@@ -1163,6 +1185,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 
 <!-- ══ CALENDAR TAB ══ -->
 <div class="view on" id="view-cal">
+  <div class="shb-host"></div>
 
   <div class="stats" id="stats-grid">
     <div class="stat stat-all"><div class="stat-n" id="st-all">—</div><div class="stat-l" id="st-all-label">أقرب يوم تسليم</div></div>
@@ -1270,6 +1293,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 <!-- ══ CHATS TAB ══ -->
 <div class="view" id="view-chats">
   <div id="ch-list-screen">
+    <div class="shb-host"></div>
     <div class="ch-prog" id="ch-prog" style="display:none"><div class="ch-prog-bar"><i id="ch-prog-i"></i></div><div class="ch-prog-t" id="ch-prog-t"></div></div>
     <div class="ch-toprow"><div class="ch-sub" id="ch-sub"></div><button class="ch-refresh" id="ch-refresh" onclick="chRefresh()" title="تحديث">↻ تحديث</button></div>
     <div id="ch-prot-wrap"></div>
@@ -2207,7 +2231,7 @@ async function fetchWithRetry(doFetch, maxAttempts){
 // أكشنز لازم لها جلسة صحيحة — تُرفَق هوية المستخدم الحالي تلقائياً بأي طلب منها
 const AUTH_REQUIRED_ACTIONS = ['getOrders','getDrafts','addOrder','updateOrder','deleteOrder',
   'uploadPhoto','deletePhoto','getInventory','addInventoryPurchase','saveDraft','deleteDraft','clearAllDrafts',
-  'inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead','inboxOrderChat'];
+  'shiftInfo','inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead','inboxOrderChat'];
 function withAuth(params){
   if(currentUser && AUTH_REQUIRED_ACTIONS.includes(params.action)){
     return Object.assign({}, params, {authUsername: currentUser.username, authToken: currentUser.token});
@@ -2364,7 +2388,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v158<br>
+       <strong>الإصدار:</strong> v163<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2388,7 +2412,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v158 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v163 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6931,7 +6955,8 @@ async function chLoadList(full){
     CH.syncedAt = r.syncedAt||r.lastRefreshAt||0; CH.dataV = r.dataV||0; CH.syncErr = r.syncErr||''; CH.trig = !!r.trig;
     CH.pausedMsg = r.syncOff ? 'الجلب موقوف من صاحب النظام' : (r.pausedUntil ? (r.pauseWhy ? 'إيقاف مؤقت لحماية الحساب' : 'إيقاف مؤقت لحماية الحساب')+' — باقي '+Math.max(1,Math.ceil((r.pausedUntil-Date.now())/60000))+' د' : '');
     CH.tentH = r.tentativeHours||12; CH.metaUrl = r.metaUrl||'';
-    chRenderList(); chUpdateSub();
+    CH.pending = Array.isArray(r.pending)?r.pending:[]; CH.pendMap = {}; CH.pending.forEach(p=>{ CH.pendMap[p.id]=p; });
+    chRenderList(); chUpdateSub(); try{ shRender(); }catch(e){}
   }catch(e){
     document.getElementById('ch-list').innerHTML='<div class="ch-empty">❌ تعذّر تحميل المحادثات<br><span style="font-size:12px">'+chEsc(e.message)+'</span></div>';
   }
@@ -6954,6 +6979,77 @@ function chUpdateSub(){
   const btn=document.getElementById('ch-refresh');
   if(btn && !CH.busy){ btn.disabled=false; btn.textContent='↻ تحديث'; }
 }
+
+/* ── الأدمن الحالي: جدول استلام الصفحة (توقيت عمان). يُقرأ من تبويب «Shifts» بالشيت (shiftInfo) — والجدول هون احتياطي لو فشل التحميل.
+   s/e = دقائق من منتصف الليل (e>1440 = بعد منتصف الليل)، d = أيام الأسبوع (0=الأحد) أو null = كل الأيام ── */
+let SHIFT_ROWS=[{n:'إيمان العطار',s:480,e:780,d:null},{n:'أم عبود',s:780,e:1020,d:null},{n:'حورية',s:1020,e:1260,d:null},{n:'إيمان العدوان',s:1260,e:1560,d:null}];
+let SHIFT_FETCHED=0, SHIFT_BUSY=false;
+const SHIFT_COL=['#D9A441','#C98A4B','#B26B52','#7C4E3C'];
+const SH_WARN=10, SH_LATE=25;   // دقائق: أخضر لحد 10، برتقالي لحد 25، أحمر بعدها
+async function shLoad(){
+  if(SHIFT_BUSY || !currentUser || Date.now()-SHIFT_FETCHED<600000) return;
+  SHIFT_BUSY=true;
+  try{ const r=await apiPost({action:'shiftInfo'}); if(r && Array.isArray(r.shifts) && r.shifts.length){ SHIFT_ROWS=r.shifts; } SHIFT_FETCHED=Date.now(); }
+  catch(e){ SHIFT_FETCHED=Date.now()-540000; }   // فشل: نجرّب بعد دقيقة
+  SHIFT_BUSY=false; try{ shRender(); }catch(e){}
+}
+function shParts(ms){ const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Amman',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date(ms)); const g=t=>(p.find(x=>x.type===t)||{}).value; return {wd:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')), m:(+g('hour')%24)*60+(+g('minute'))+(+g('second'))/60}; }
+function shMinOf(ms){ return shParts(ms).m; }
+function shDur(m){ m=Math.max(0,Math.round(m)); const h=Math.floor(m/60), mm=m%60; return h?(h+'س'+(mm?' '+mm+'د':'')):(mm+'د'); }
+function shHr(m){ m=m%1440; const h=Math.floor(m/60), ap=h>=12?'م':'ص', h12=h%12||12; return h12+(m%60?':'+String(m%60).padStart(2,'0'):'')+ap; }
+// جدول اليوم: بعد منتصف الليل (قبل 2:00) لسا نفس يوم الدوام السابق
+function shToday(now){
+  const pr=shParts(now), after=pr.m<120, wd=after?(pr.wd+6)%7:pr.wd, mm=after?pr.m+1440:pr.m;
+  let rows=SHIFT_ROWS.filter(x=>!x.d||x.d.indexOf(wd)>=0);
+  if(!rows.length) rows=SHIFT_ROWS.filter(x=>!x.d);
+  rows=rows.slice().sort((a,b)=>a.s-b.s);
+  const i=rows.findIndex(x=>mm>=x.s&&mm<x.e);
+  return {rows, mm, m:pr.m, i, cur:i>=0?rows[i]:null};
+}
+function shWaitMin(t,now){ return Math.max(0,(now-t)/60000); }
+function shCls(min){ return min>=SH_LATE?'r':(min>=SH_WARN?'a':'g'); }
+function shRender(){
+  const hosts=document.querySelectorAll('.shb-host'); if(!hosts.length) return;
+  shLoad();
+  const now=Date.now(), st=shToday(now), S=st.rows, cur=st.cur;
+  if(!S.length){ hosts.forEach(h=>{ h.innerHTML=''; h.dataset.h=''; }); return; }
+  const T0=S[0].s, T1=Math.max.apply(null,S.map(x=>x.e)), span=T1-T0;
+  let top;
+  if(cur){ top='<span class="shb-l">👤 الأدمن الحالي</span><b class="shb-n">'+chEsc(cur.n)+'</b><span class="shb-rem">باقي '+shDur(cur.e-st.mm)+'</span>'; }
+  else { const nx=S.find(x=>x.s>st.mm)||S[0], toNext=(nx.s-st.mm+1440)%1440; top='<span class="shb-l">⏸ خارج جدول الاستلام</span><b class="shb-n">الجاية: '+chEsc(nx.n)+' '+shHr(nx.s)+'</b><span class="shb-rem">بعد '+shDur(toNext)+'</span>'; }
+  let segs='', lbs='', prevE=T0;
+  S.forEach((x,k)=>{
+    if(x.s>prevE){ segs+='<div style="flex:'+(x.s-prevE)+'"></div>'; lbs+='<div style="flex:'+(x.s-prevE)+'"></div>'; }
+    const w=x.e-x.s, isCur=k===st.i, past=cur?k<st.i:(st.mm>=x.e);
+    let inner='', bg='#E8DFCF', op=1;
+    if(isCur){ inner='<i style="width:'+Math.max(0,Math.min(100,(x.e-st.mm)/w*100)).toFixed(1)+'%;background:'+SHIFT_COL[k%SHIFT_COL.length]+'"></i>'; }
+    else if(!past){ bg=SHIFT_COL[k%SHIFT_COL.length]; op=.38; }
+    segs+='<div class="shb-seg" style="flex:'+w+';background:'+bg+';opacity:'+op+'">'+inner+'</div>';
+    lbs+='<div class="'+(isCur?'cur':'')+'" style="flex:'+w+'">'+chEsc(x.n)+'<small>'+shHr(x.s)+'–'+shHr(x.e)+'</small></div>';
+    prevE=x.e;
+  });
+  const pos=(st.mm>=T0&&st.mm<=T1)?(st.mm-T0)/span*100:null;
+  const mk=pos===null?'':'<div class="shb-mk" style="inset-inline-start:'+pos.toFixed(2)+'%"></div>';
+  let pend='';
+  const isOwner=!!currentUser && currentUser.role==='owner';
+  if(isOwner && CH.loaded && Array.isArray(CH.pending)){
+    const rows=CH.pending.map(p=>Object.assign({min:shWaitMin(p.t,now)},p)).filter(p=>p.min>=SH_WARN).sort((a,b)=>b.min-a.min);
+    const red=rows.filter(p=>p.min>=SH_LATE), amb=rows.filter(p=>p.min<SH_LATE);
+    const stale=CH.syncedAt?Math.round((now-CH.syncedAt)/60000):0, sn=stale>=20?' · ⏱ البيانات من قبل '+shDur(stale):'';
+    if(!rows.length) pend='<div class="shb-pend g">✅ ما في رسائل بانتظار رد'+sn+'</div>';
+    else {
+      const txt=(red.length?'⚠️ '+red.length+' بانتظار رد +'+SH_LATE+' د (أطولها '+shDur(rows[0].min)+')':'')+(red.length&&amb.length?' · ':'')+(amb.length?'🟠 '+amb.length+' بانتظار '+SH_WARN+'–'+SH_LATE+' د':'')+sn;
+      const open=!!CH._shOpen;
+      pend='<div class="shb-pend '+(red.length?'r':'a')+'" onclick="CH._shOpen=!CH._shOpen;shRender()">'+txt+' <span style="float:left">'+(open?'▲':'▼')+'</span></div>'
+        +(open?'<div class="shb-pl">'+rows.slice(0,12).map(p=>{ const m=CH_SRC[p.ch]||CH_SRC.ig; return '<div><span>'+chEsc(p.n)+'</span><span class="ch-wt" style="background:'+m[1]+';color:'+m[2]+'">'+m[0]+'</span><b class="ch-wt '+shCls(p.min)+'">'+shDur(p.min)+'</b></div>'; }).join('')+'</div>':'');
+    }
+  }
+  const html='<div class="shb'+(cur?'':' shb-off')+'"><div class="shb-top">'+top+'</div><div class="shb-tl">'+segs+mk+'</div><div class="shb-lb">'+lbs+'</div>'+pend+'</div>';
+  hosts.forEach(h=>{ if(h.dataset.h!==html){ h.innerHTML=html; h.dataset.h=html; } });
+}
+setInterval(()=>{ try{ if(document.visibilityState==='visible') shRender(); }catch(e){} }, 30000);
+setTimeout(()=>{ try{ shRender(); }catch(e){} }, 400);
+
 function chRenderList(){
   const el=document.getElementById('ch-list'); if(!el) return;
   CH._renderDay=chTodayPlus(0);
@@ -7084,11 +7180,13 @@ function chRenderList(){
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
     const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const chips = (dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'');
+    const pw = CH.pendMap && CH.pendMap[c.id], pm = pw ? shWaitMin(pw.t, Date.now()) : 0;
+    const wchip = (pw && pm>=5) ? '<span class="ch-wt '+shCls(pm)+'">⏳ بانتظار رد '+shDur(pm)+'</span>' : '';
+    const chips = wchip+(dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'');
     const kk=kinds.get(c.id);
     return '<div class="ch-row" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
       chDayBlk(c.deliveryDate,kk)+
-      '<div class="ch-main"><div class="ch-l1"><span class="ch-name">'+chEsc(c.customer)+(c.employeeName?'<span class="ch-emp-in">'+chEsc(c.employeeName)+'</span>':'')+'</span><span class="ch-time">'+chTimeLbl(c.lastMsgAt)+'</span></div>'+
+      '<div class="ch-main"><div class="ch-l1"><span class="ch-name">'+chEsc(c.customer)+'<span class="ch-src" style="background:'+CH_SRC[chSrcKey(c)][1]+';color:'+CH_SRC[chSrcKey(c)][2]+'">'+CH_SRC[chSrcKey(c)][0]+'</span>'+(c.employeeName?'<span class="ch-emp-in">'+chEsc(c.employeeName)+'</span>':'')+'</span><span class="ch-time">'+chTimeLbl(c.lastMsgAt)+'</span></div>'+
       (sub?'<div class="ch-l2">'+chEsc(sub)+'</div>':'')+
       (chips?'<div class="ch-l3">'+chips+'</div>':'')+'</div><span class="ch-sdot '+(kk==='pinned'?'pin':kk==='wait'?'':kk==='cancelled'?'can':'oth')+'" title="'+(kk==='pinned'?'مثبّتة':kk==='wait'?'بانتظار التثبيت':'')+'"></span></div>';
   }).join('');
@@ -7325,7 +7423,9 @@ function chEselChange(v){ CH.empF=v||''; CH.dayF=''; if(CH.filter==='prot') CH.f
 function chSetFilter(f){ CH.filter=f; CH.dayF=''; if(f!=='wait') CH.empF=''; chRenderList(); }
 function chSetDay(d){ CH.dayF=d||''; chRenderList(); }
 function chSetEmp(e){ CH.empF=e||''; CH.dayF=''; chRenderList(); }
-function chChannel(c){ return (c&&c.ch==='fb')?'<span class="ch-chip" style="background:rgba(24,119,242,.15);color:#1877F2">ماسنجر</span>':''; }
+const CH_SRC={ig:['📸 سلمى · إنستغرام','rgba(193,53,132,.13)','#B02A78'],fb:['💬 سلمى · ماسنجر','rgba(24,119,242,.14)','#1877F2'],mr:['📸 ميرورز · إنستغرام','rgba(138,82,0,.14)','#8A5200'],mf:['💬 ميرورز · ماسنجر','rgba(0,128,128,.14)','#0A6E6E']};
+function chSrcKey(c){ const k=c&&c.ch; return CH_SRC[k]?k:'ig'; }
+function chChannel(c){ const m=CH_SRC[chSrcKey(c)]; return '<span class="ch-chip" style="background:'+m[1]+';color:'+m[2]+'">'+m[0]+'</span>'; }
 function chSyncHdr(){ try{ const d=document.getElementById('ch-detail-screen'); document.body.classList.toggle('ch-in-detail', !!(d && d.offsetParent!==null)); }catch(e){} }
 setInterval(()=>{ if(document.visibilityState==='visible') chSyncHdr(); }, 2500);   // + استدعاء فوري عند فتح/إغلاق المحادثة
 async function chOpen(id){
