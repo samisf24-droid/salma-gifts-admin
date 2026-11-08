@@ -988,15 +988,23 @@ select.ch-dbox{appearance:none;-webkit-appearance:none;font-size:12px;font-weigh
 .shb-mk{position:absolute;top:-3px;width:3px;height:18px;border-radius:2px;background:#C0392B;box-shadow:0 0 0 2px #FFFDF8;transform:translateX(50%)}
 .shb-lb{display:flex;gap:3px;margin-top:4px;direction:rtl}
 .shb-lb div{min-width:0;text-align:center;font-size:10.5px;font-weight:700;color:#9A8870;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shb-arr{font-size:10px;color:#B8A898;margin-inline-start:4px}
+.shw{margin-top:10px;overflow-x:auto}.shw table{width:100%;border-collapse:collapse;font-size:11.5px;text-align:center}
+.shw th,.shw td{border:1px solid #F0E6D6;padding:5px 4px;white-space:nowrap}.shw th{background:#FBF5EA;color:#8B7355;font-weight:800}
+.shw tr.td td,.shw tr.td th{background:#FFF1D6;font-weight:900;color:#1A1410}
+.shw-ed{margin-top:8px;border:1.5px solid #C9A96E;background:#fff;color:#8A5200;border-radius:10px;padding:6px 12px;font-family:Tajawal,sans-serif;font-weight:800;font-size:12.5px;cursor:pointer}
+.shed{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:none;align-items:center;justify-content:center;padding:12px;font-family:Tajawal,sans-serif}
+.shed-box{background:#FFFDF8;border-radius:16px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;padding:14px;gap:8px}
+.shed-h{display:flex;justify-content:space-between;align-items:center;font-size:16px;color:#1A1410}
+.shed-n{font-size:11.5px;color:#8B7355;line-height:1.5}
+.shed-sc{overflow:auto;border:1px solid #F0E6D6;border-radius:10px}
+.shed table{border-collapse:collapse;width:100%}.shed th,.shed td{border:1px solid #F0E6D6;padding:4px;text-align:center;font-size:12px}
+.shed th{background:#FBF5EA;color:#8B7355;font-weight:800;white-space:nowrap}.shed th a{color:#9B2C1F;font-size:10.5px;cursor:pointer}
+.shed input{width:100%;min-width:92px;box-sizing:border-box;border:1px solid #E8D5B0;border-radius:8px;padding:6px;font-family:Tajawal,sans-serif;font-size:13px;text-align:center;background:#fff}
+.shed-f{display:flex;gap:8px;align-items:center}.shed-f button{border:1.5px solid #E8D5B0;background:#fff;border-radius:10px;padding:8px 14px;font-family:Tajawal,sans-serif;font-weight:800;cursor:pointer}
+.shed-f button.pri{background:#1A1410;color:#fff;border-color:#1A1410}.shed-f button:disabled{opacity:.5}
 .shb-lb div.cur{color:#1A1410;font-weight:900}
 .shb-lb small{display:block;font-size:9.5px;font-weight:700;opacity:.8}
-.shb-pend{margin-top:8px;font-size:12.5px;font-weight:800;border-radius:10px;padding:6px 10px;cursor:pointer}
-.shb-pend.g{background:#EAF5EA;color:#1A4D1A;cursor:default}.shb-pend.a{background:#FFF3E0;color:#8A5200}.shb-pend.r{background:#FBE3E0;color:#9B2C1F}
-.shb-pl{margin-top:6px;display:flex;flex-direction:column;gap:4px}
-.shb-pl div{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:700;color:#4A3728;background:#fff;border:1px solid #F0E6D6;border-radius:8px;padding:4px 8px}
-.shb-pl b{margin-inline-start:auto}
-.ch-wt{display:inline-block;font-size:10.5px;font-weight:800;border-radius:99px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
-.ch-wt.g{background:#EAF5EA;color:#1A4D1A}.ch-wt.a{background:#FFF3E0;color:#8A5200}.ch-wt.r{background:#FBE3E0;color:#9B2C1F}
 .ch-emp-in{font-size:10.5px;font-weight:700;color:#8B7355;background:#F1ECE3;border-radius:99px;padding:1px 7px;margin-inline-start:6px;vertical-align:middle}
 .ch-sdot{align-self:center;flex:none;width:10px;height:10px;border-radius:50%;background:#D98A1F}.ch-sdot.pin{background:#3E8E5A}.ch-sdot.can{background:#B9AFA3}.ch-sdot.oth{background:#C9C0B4}
 .ch-fbtn{border:1.5px solid #E5D9C7;background:#fff;color:#4A3728;border-radius:99px;padding:7px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
@@ -1168,7 +1176,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v163</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v164</span>
   </div>
 </div>
 <div class="tabs">
@@ -2231,7 +2239,7 @@ async function fetchWithRetry(doFetch, maxAttempts){
 // أكشنز لازم لها جلسة صحيحة — تُرفَق هوية المستخدم الحالي تلقائياً بأي طلب منها
 const AUTH_REQUIRED_ACTIONS = ['getOrders','getDrafts','addOrder','updateOrder','deleteOrder',
   'uploadPhoto','deletePhoto','getInventory','addInventoryPurchase','saveDraft','deleteDraft','clearAllDrafts',
-  'shiftInfo','inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead','inboxOrderChat'];
+  'shiftInfo','shiftGet','shiftSave','inboxList','inboxGetChat','inboxSearch','inboxRefresh','inboxLink','inboxSend','inboxSetStatus','inboxProtect','inboxDeepRead','inboxOrderChat'];
 function withAuth(params){
   if(currentUser && AUTH_REQUIRED_ACTIONS.includes(params.action)){
     return Object.assign({}, params, {authUsername: currentUser.username, authToken: currentUser.token});
@@ -2388,7 +2396,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v163<br>
+       <strong>الإصدار:</strong> v164<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2412,7 +2420,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v163 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v164 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6955,7 +6963,6 @@ async function chLoadList(full){
     CH.syncedAt = r.syncedAt||r.lastRefreshAt||0; CH.dataV = r.dataV||0; CH.syncErr = r.syncErr||''; CH.trig = !!r.trig;
     CH.pausedMsg = r.syncOff ? 'الجلب موقوف من صاحب النظام' : (r.pausedUntil ? (r.pauseWhy ? 'إيقاف مؤقت لحماية الحساب' : 'إيقاف مؤقت لحماية الحساب')+' — باقي '+Math.max(1,Math.ceil((r.pausedUntil-Date.now())/60000))+' د' : '');
     CH.tentH = r.tentativeHours||12; CH.metaUrl = r.metaUrl||'';
-    CH.pending = Array.isArray(r.pending)?r.pending:[]; CH.pendMap = {}; CH.pending.forEach(p=>{ CH.pendMap[p.id]=p; });
     chRenderList(); chUpdateSub(); try{ shRender(); }catch(e){}
   }catch(e){
     document.getElementById('ch-list').innerHTML='<div class="ch-empty">❌ تعذّر تحميل المحادثات<br><span style="font-size:12px">'+chEsc(e.message)+'</span></div>';
@@ -6982,19 +6989,20 @@ function chUpdateSub(){
 
 /* ── الأدمن الحالي: جدول استلام الصفحة (توقيت عمان). يُقرأ من تبويب «Shifts» بالشيت (shiftInfo) — والجدول هون احتياطي لو فشل التحميل.
    s/e = دقائق من منتصف الليل (e>1440 = بعد منتصف الليل)، d = أيام الأسبوع (0=الأحد) أو null = كل الأيام ── */
-let SHIFT_ROWS=[{n:'إيمان العطار',s:480,e:780,d:null},{n:'أم عبود',s:780,e:1020,d:null},{n:'حورية',s:1020,e:1260,d:null},{n:'إيمان العدوان',s:1260,e:1560,d:null}];
+let SHIFT_ROWS=[
+  {n:'أم عبود',s:480,e:780,d:[0,2,4]},{n:'إيمان',s:480,e:780,d:[1,3]},{n:'حورية',s:480,e:780,d:[5,6]},
+  {n:'أم عبود',s:780,e:1020,d:null},{n:'حورية',s:1020,e:1260,d:null},{n:'إيمان',s:1260,e:1560,d:null}];
 let SHIFT_FETCHED=0, SHIFT_BUSY=false;
 const SHIFT_COL=['#D9A441','#C98A4B','#B26B52','#7C4E3C'];
-const SH_WARN=10, SH_LATE=25;   // دقائق: أخضر لحد 10، برتقالي لحد 25، أحمر بعدها
-async function shLoad(){
-  if(SHIFT_BUSY || !currentUser || Date.now()-SHIFT_FETCHED<600000) return;
+const SH_DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+async function shLoad(force){
+  if(SHIFT_BUSY || !currentUser || (!force && Date.now()-SHIFT_FETCHED<600000)) return;
   SHIFT_BUSY=true;
   try{ const r=await apiPost({action:'shiftInfo'}); if(r && Array.isArray(r.shifts) && r.shifts.length){ SHIFT_ROWS=r.shifts; } SHIFT_FETCHED=Date.now(); }
   catch(e){ SHIFT_FETCHED=Date.now()-540000; }   // فشل: نجرّب بعد دقيقة
   SHIFT_BUSY=false; try{ shRender(); }catch(e){}
 }
 function shParts(ms){ const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Amman',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date(ms)); const g=t=>(p.find(x=>x.type===t)||{}).value; return {wd:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')), m:(+g('hour')%24)*60+(+g('minute'))+(+g('second'))/60}; }
-function shMinOf(ms){ return shParts(ms).m; }
 function shDur(m){ m=Math.max(0,Math.round(m)); const h=Math.floor(m/60), mm=m%60; return h?(h+'س'+(mm?' '+mm+'د':'')):(mm+'د'); }
 function shHr(m){ m=m%1440; const h=Math.floor(m/60), ap=h>=12?'م':'ص', h12=h%12||12; return h12+(m%60?':'+String(m%60).padStart(2,'0'):'')+ap; }
 // جدول اليوم: بعد منتصف الليل (قبل 2:00) لسا نفس يوم الدوام السابق
@@ -7004,10 +7012,21 @@ function shToday(now){
   if(!rows.length) rows=SHIFT_ROWS.filter(x=>!x.d);
   rows=rows.slice().sort((a,b)=>a.s-b.s);
   const i=rows.findIndex(x=>mm>=x.s&&mm<x.e);
-  return {rows, mm, m:pr.m, i, cur:i>=0?rows[i]:null};
+  return {rows, mm, m:pr.m, wd, i, cur:i>=0?rows[i]:null};
 }
-function shWaitMin(t,now){ return Math.max(0,(now-t)/60000); }
-function shCls(min){ return min>=SH_LATE?'r':(min>=SH_WARN?'a':'g'); }
+// الجدول الأسبوعي الكامل (يظهر للكل) — الصف الحالي مظلّل
+function shWeekHtml(wd){
+  const slots=[]; SHIFT_ROWS.forEach(x=>{ if(!slots.some(y=>y.s===x.s&&y.e===x.e)) slots.push({s:x.s,e:x.e}); });
+  slots.sort((a,b)=>a.s-b.s);
+  const who=(sl,d)=>{ const r=SHIFT_ROWS.filter(x=>x.s===sl.s&&x.e===sl.e&&(!x.d||x.d.indexOf(d)>=0)).map(x=>x.n); return r.length?chEsc(r.join(' + ')):'—'; };
+  let h='<div class="shw"><table><tr><th>اليوم</th>'+slots.map(sl=>'<th>'+shHr(sl.s)+'–'+shHr(sl.e)+'</th>').join('')+'</tr>';
+  for(let d=0;d<7;d++) h+='<tr'+(d===wd?' class="td"':'')+'><th>'+SH_DAYS[d]+'</th>'+slots.map(sl=>'<td>'+who(sl,d)+'</td>').join('')+'</tr>';
+  h+='</table>';
+  if(currentUser && currentUser.role==='owner') h+='<button class="shw-ed" onclick="shEdit()">✏️ تعديل الجدول</button>';
+  return h+'</div>';
+}
+function shToggle(){ SHIFT_WK=!SHIFT_WK; shRender(); }
+let SHIFT_WK=false;
 function shRender(){
   const hosts=document.querySelectorAll('.shb-host'); if(!hosts.length) return;
   shLoad();
@@ -7030,22 +7049,39 @@ function shRender(){
   });
   const pos=(st.mm>=T0&&st.mm<=T1)?(st.mm-T0)/span*100:null;
   const mk=pos===null?'':'<div class="shb-mk" style="inset-inline-start:'+pos.toFixed(2)+'%"></div>';
-  let pend='';
-  const isOwner=!!currentUser && currentUser.role==='owner';
-  if(isOwner && CH.loaded && Array.isArray(CH.pending)){
-    const rows=CH.pending.map(p=>Object.assign({min:shWaitMin(p.t,now)},p)).filter(p=>p.min>=SH_WARN).sort((a,b)=>b.min-a.min);
-    const red=rows.filter(p=>p.min>=SH_LATE), amb=rows.filter(p=>p.min<SH_LATE);
-    const stale=CH.syncedAt?Math.round((now-CH.syncedAt)/60000):0, sn=stale>=20?' · ⏱ البيانات من قبل '+shDur(stale):'';
-    if(!rows.length) pend='<div class="shb-pend g">✅ ما في رسائل بانتظار رد'+sn+'</div>';
-    else {
-      const txt=(red.length?'⚠️ '+red.length+' بانتظار رد +'+SH_LATE+' د (أطولها '+shDur(rows[0].min)+')':'')+(red.length&&amb.length?' · ':'')+(amb.length?'🟠 '+amb.length+' بانتظار '+SH_WARN+'–'+SH_LATE+' د':'')+sn;
-      const open=!!CH._shOpen;
-      pend='<div class="shb-pend '+(red.length?'r':'a')+'" onclick="CH._shOpen=!CH._shOpen;shRender()">'+txt+' <span style="float:left">'+(open?'▲':'▼')+'</span></div>'
-        +(open?'<div class="shb-pl">'+rows.slice(0,12).map(p=>{ const m=CH_SRC[p.ch]||CH_SRC.ig; return '<div><span>'+chEsc(p.n)+'</span><span class="ch-wt" style="background:'+m[1]+';color:'+m[2]+'">'+m[0]+'</span><b class="ch-wt '+shCls(p.min)+'">'+shDur(p.min)+'</b></div>'; }).join('')+'</div>':'');
-    }
-  }
-  const html='<div class="shb'+(cur?'':' shb-off')+'"><div class="shb-top">'+top+'</div><div class="shb-tl">'+segs+mk+'</div><div class="shb-lb">'+lbs+'</div>'+pend+'</div>';
+  const html='<div class="shb'+(cur?'':' shb-off')+'"><div class="shb-top" onclick="shToggle()" style="cursor:pointer">'+top+'<span class="shb-arr">'+(SHIFT_WK?'▲':'▼')+'</span></div><div class="shb-tl">'+segs+mk+'</div><div class="shb-lb">'+lbs+'</div>'+(SHIFT_WK?shWeekHtml(st.wd):'')+'</div>';
   hosts.forEach(h=>{ if(h.dataset.h!==html){ h.innerHTML=html; h.dataset.h=html; } });
+}
+/* ── محرر الجدول (للمالك): فترات × أيام. يكتب مباشرة بتبويب Shifts ── */
+let SHED=null;
+async function shEdit(){
+  try{
+    const r=await apiPost({action:'shiftGet'});
+    SHED={slots:r.slots||[], grid:r.grid||[], users:r.users||[]};
+    if(!SHED.slots.length){ SHED.slots=[{f:'08:00',t:'13:00'}]; SHED.grid=[['','','','','','','']]; }
+    shEdDraw();
+  }catch(e){ toast('❌ '+(e.message||'تعذّر فتح المحرر')); }
+}
+function shEdDraw(){
+  let o=document.getElementById('shed'); if(!o){ o=document.createElement('div'); o.id='shed'; o.className='shed'; document.body.appendChild(o); }
+  const S=SHED, n=S.slots.length;
+  let t='<div class="shed-box"><div class="shed-h"><b>✏️ تعديل جدول استلام الصفحة</b><span onclick="shEdClose()" style="cursor:pointer;font-size:20px">✕</span></div>'
+   +'<div class="shed-n">الاسم: اكتبي أي اسم أو اختاري من الاقتراحات. اترك الخانة فاضية = ما في أحد. الفترة اللي «إلى» فيها أصغر من «من» تعني بعد منتصف الليل.</div>'
+   +'<div class="shed-sc"><table><tr><th></th>'+S.slots.map((sl,i)=>'<th><input type="time" value="'+sl.f+'" onchange="SHED.slots['+i+'].f=this.value"><br><input type="time" value="'+sl.t+'" onchange="SHED.slots['+i+'].t=this.value">'+(n>1?'<br><a onclick="shEdDel('+i+')">حذف الفترة</a>':'')+'</th>').join('')+'</tr>';
+  for(let d=0;d<7;d++) t+='<tr><th>'+SH_DAYS[d]+'</th>'+S.slots.map((_,i)=>'<td><input list="shed-u" value="'+chEsc((S.grid[i]||[])[d]||'')+'" oninput="SHED.grid['+i+']['+d+']=this.value"></td>').join('')+'</tr>';
+  t+='</table></div><datalist id="shed-u">'+S.users.map(u=>'<option value="'+chEsc(u)+'">').join('')+'</datalist>'
+   +'<div class="shed-f"><button onclick="shEdAdd()"'+(n>=8?' disabled':'')+'>+ فترة</button><span style="flex:1"></span><button onclick="shEdClose()">إلغاء</button><button class="pri" id="shed-sv" onclick="shEdSave()">💾 حفظ</button></div></div>';
+  o.innerHTML=t; o.style.display='flex';
+}
+function shEdAdd(){ SHED.slots.push({f:'',t:''}); SHED.grid.push(['','','','','','','']); shEdDraw(); }
+function shEdDel(i){ SHED.slots.splice(i,1); SHED.grid.splice(i,1); shEdDraw(); }
+function shEdClose(){ const o=document.getElementById('shed'); if(o) o.style.display='none'; }
+async function shEdSave(){
+  const b=document.getElementById('shed-sv'); b.disabled=true; b.textContent='⏳ جاري الحفظ...';
+  try{
+    await apiPost({action:'shiftSave', data:JSON.stringify({slots:SHED.slots, grid:SHED.grid})});
+    shEdClose(); toast('✅ انحفظ الجدول'); SHIFT_FETCHED=0; await shLoad(true);
+  }catch(e){ toast('❌ '+(e.message||'فشل الحفظ')); b.disabled=false; b.textContent='💾 حفظ'; }
 }
 setInterval(()=>{ try{ if(document.visibilityState==='visible') shRender(); }catch(e){} }, 30000);
 setTimeout(()=>{ try{ shRender(); }catch(e){} }, 400);
@@ -7180,9 +7216,7 @@ function chRenderList(){
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
     const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const pw = CH.pendMap && CH.pendMap[c.id], pm = pw ? shWaitMin(pw.t, Date.now()) : 0;
-    const wchip = (pw && pm>=5) ? '<span class="ch-wt '+shCls(pm)+'">⏳ بانتظار رد '+shDur(pm)+'</span>' : '';
-    const chips = wchip+(dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'');
+    const chips = (dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'');
     const kk=kinds.get(c.id);
     return '<div class="ch-row" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
       chDayBlk(c.deliveryDate,kk)+
