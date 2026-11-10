@@ -1133,6 +1133,39 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 #ch-missing{font-size:12.5px;font-weight:800;color:#8A5200;margin-top:8px;text-align:center;line-height:1.6}
 .ch-skel{padding:30px;text-align:center;color:#8B7355;font-size:13px}
 
+
+/* v165 */
+.ch-search{display:flex;gap:8px;align-items:center;margin:0 0 8px}
+.ch-sico{flex:none;width:46px;height:44px;border:1.5px solid #E5D9C7;background:#fff;border-radius:12px;font-size:19px;cursor:pointer;padding:0}
+.ch-sico.on{background:#FFF1D6;border-color:#C9A96E}
+.ch-search .ch-fsel{flex:1 1 0;max-width:none;min-width:0;height:44px;font-size:14px;padding:0 10px}
+.ch-qwrap{display:flex;gap:8px;align-items:center;margin:0 0 8px}
+.ch-qwrap input{flex:1;min-width:0;background:#fff;border:1.5px solid #C9A96E;border-radius:12px;padding:11px 14px;font-family:Tajawal,sans-serif;font-size:15px;color:#1A1410;outline:none}
+.ch-qx{flex:none;width:44px;height:44px;border:1.5px solid #E5D9C7;background:#fff;border-radius:12px;font-size:16px;cursor:pointer;color:#6B5A48}
+.ch-dstrip select.ch-dbox{display:block;appearance:none;-webkit-appearance:none;flex:0 0 62px;width:62px;min-width:62px;max-width:62px;padding:0 4px;text-align:center;text-align-last:center;direction:rtl;font-size:13px;font-weight:800;line-height:1.2;padding-top:17px;overflow:hidden;text-overflow:clip}
+
+/* v165b: قائمة مجمّعة حسب موعد الاستلام + آخر رسالة */
+.ch-gh{display:flex;align-items:baseline;gap:8px;padding:8px 12px;background:#F4EDE0;border-bottom:1px solid #EADFCB;position:sticky;top:0;z-index:2}
+.ch-gh b{font-size:13.5px;font-weight:900;color:#4A3728}
+.ch-gh span{font-size:12px;font-weight:700;color:#8A5200}
+.ch-gh em{margin-inline-start:auto;font-style:normal;font-size:11.5px;font-weight:800;color:#8B7355;background:#fff;border-radius:99px;padding:0 8px;min-width:20px;text-align:center}
+.ch-gh.now{background:#FFF1D6}.ch-gh.now b{color:#8A5200}.ch-gh.past{background:#F1ECE3}.ch-gh.past b,.ch-gh.past span{color:#8B7355}
+.ch-r2{padding:10px 12px;gap:10px;align-items:flex-start}
+.ch-r2 .ch-sdot{margin-top:7px}
+.ch-r2 .ch-main{display:flex;flex-direction:column;gap:3px}
+.ch-r2 .ch-name{font-size:15.5px}
+.ch-r2 .ch-l2.ch-prev{font-size:13px;color:#6B5A48;margin:0}
+.ch-r2 .ch-l2.ours{color:#9A8870}
+.ch-r2 .ch-l3{margin-top:1px;gap:5px}
+.ch-r2 .ch-chip{font-size:11.5px;padding:1px 8px;border-radius:99px}
+.ch-chip.ch-tp{background:#FBF3E4;color:#6B4A12}
+#ch-list{background:#fff;border:1px solid #EFE4D2;border-radius:14px;overflow:hidden}
+
+#ch-refresh.ch-refresh{min-width:0!important;width:auto!important;height:36px;padding:0 14px}
+.ch-toprow{margin-bottom:6px}
+.ch-dstrip .ch-dbox{padding-top:4px;padding-bottom:4px}
+
+#ch-d-chip .ch-chip:first-child{font-size:12.5px;font-weight:900;padding:3px 10px}
 </style>
 </head>
 <body>
@@ -1176,7 +1209,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v164</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v165</span>
   </div>
 </div>
 <div class="tabs">
@@ -1301,11 +1334,11 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 <!-- ══ CHATS TAB ══ -->
 <div class="view" id="view-chats">
   <div id="ch-list-screen">
-    <div class="shb-host"></div>
     <div class="ch-prog" id="ch-prog" style="display:none"><div class="ch-prog-bar"><i id="ch-prog-i"></i></div><div class="ch-prog-t" id="ch-prog-t"></div></div>
     <div class="ch-toprow"><div class="ch-sub" id="ch-sub"></div><button class="ch-refresh" id="ch-refresh" onclick="chRefresh()" title="تحديث">↻ تحديث</button></div>
     <div id="ch-prot-wrap"></div>
-    <div class="ch-search"><input type="search" id="ch-q" placeholder="🔍 ابحثي بالاسم أو الرقم أو أي كلمة" oninput="chSearchInput()" autocomplete="off"><select id="ch-esel" class="ch-fsel" onchange="chEselChange(this.value)" aria-label="الموظفة" style="display:none"></select><select id="ch-fsel" class="ch-fsel" onchange="chFselChange(this.value)" aria-label="الحالة"></select></div>
+    <div class="ch-search"><button class="ch-sico" id="ch-sico" onclick="chSearchOpen()" aria-label="بحث">🔍</button><select id="ch-fsel" class="ch-fsel" onchange="chFselChange(this.value)" aria-label="الحالة"></select><select id="ch-esel" class="ch-fsel" onchange="chEselChange(this.value)" aria-label="الموظفة" style="display:none"></select></div>
+    <div class="ch-qwrap" id="ch-qwrap" style="display:none"><input type="search" id="ch-q" placeholder="ابحثي بالاسم أو الرقم أو أي كلمة" oninput="chSearchInput()" autocomplete="off"><button class="ch-qx" onclick="chSearchClose()" aria-label="إغلاق البحث">✕</button></div>
     <div class="ch-filters" id="ch-filters"></div>
     <div id="ch-list"><div class="ch-skel">⏳ جاري التحميل...</div></div>
   </div>
@@ -2396,7 +2429,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v164<br>
+       <strong>الإصدار:</strong> v165<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2420,7 +2453,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v164 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v165 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -6971,21 +7004,24 @@ async function chLoadList(full){
 function chUpdateSub(){
   const el=document.getElementById('ch-sub'); if(!el) return;
   const sAt=CH.syncedAt||0, age=sAt?(Date.now()-sAt)/1000:Infinity;
+  const tm=sAt?new Date(sAt).toLocaleTimeString('ar-JO',{hour:'numeric',minute:'2-digit',timeZone:'Asia/Amman'}):'';
+  const last=sAt?('آخر تحديث '+tm+' ('+(age<45?'الآن':chAgo(sAt))+')'):'لم يتم التحديث بعد';
   let cls='g', txt;
-  if(CH.pausedMsg){ cls='r'; txt=CH.pausedMsg+(sAt?' — آخر تحديث '+chAgo(sAt):''); }
-  else if(CH.syncing){ cls='a'; txt='جاري التحديث...'; }
-  else if(!CH.checked){ cls='a'; txt='جاري التحقق من الجديد...'; }           // قبل أول رد بهالجلسة: ما نعرض وقتاً قديماً مضلّلاً
-  else if(CH.offHours){ cls='a'; txt='التحديث التلقائي واقف بعد منتصف الليل — اضغطي «تحديث الآن» لو بدك آخر الرسائل'; }
-  else if(!sAt){ cls='a'; txt='لم يتم التحديث بعد'; }
-  else if(age<480){ cls='g'; txt=age<45?'محدّث الآن':'محدّث '+chAgo(sAt); }
-  else if(age<1200){ cls='a'; txt='آخر تحديث '+chAgo(sAt); }
-  else { cls='r'; txt='آخر تحديث '+chAgo(sAt)+' — اضغطي تحديث'; }
+  if(CH.pausedMsg){ cls='r'; txt=CH.pausedMsg+' — '+last; }
+  else if(CH.syncing){ cls='a'; txt='جاري التحديث... — '+last; }
+  else if(!CH.checked){ cls='a'; txt='جاري التحقق من الجديد... — '+last; }
+  else if(CH.offHours){ cls='a'; txt=last+' — التحديث التلقائي واقف بعد منتصف الليل'; }
+  else if(!sAt){ cls='a'; txt=last; }
+  else if(age<480){ cls='g'; txt=last; }
+  else if(age<1200){ cls='a'; txt=last; }
+  else { cls='r'; txt=last+' — اضغطي تحديث'; }
   if(CH.syncErr && !CH.pausedMsg && !CH.syncing) txt+=' — '+CH.syncErr;
   if(CH.note && !CH.pausedMsg && !CH.syncing) txt+=' — '+CH.note;
   el.innerHTML='<span class="ch-sd ch-sd-'+cls+'"></span>'+chEsc(txt);
   const btn=document.getElementById('ch-refresh');
   if(btn && !CH.busy){ btn.disabled=false; btn.textContent='↻ تحديث'; }
 }
+setInterval(()=>{ try{ if(document.visibilityState==='visible' && CH && CH.loaded) chUpdateSub(); }catch(e){} }, 30000);   // الوقت يتجدّد لحاله كل 30 ث
 
 /* ── الأدمن الحالي: جدول استلام الصفحة (توقيت عمان). يُقرأ من تبويب «Shifts» بالشيت (shiftInfo) — والجدول هون احتياطي لو فشل التحميل.
    s/e = دقائق من منتصف الليل (e>1440 = بعد منتصف الليل)، d = أيام الأسبوع (0=الأحد) أو null = كل الأيام ── */
@@ -7179,7 +7215,7 @@ function chRenderList(){
           h+=chipD.map(d=>box(d,dfv===d)).join('');
           if(rest.length||nUnd){
             const inRest=dfv && chipD.indexOf(dfv)<0;
-            h+='<select class="ch-dbox'+(inRest?' on':'')+'" onchange="chSetDay(this.value)"><option value="">'+(inRest?'أخرى':'أخرى ▾')+'</option>'+
+            h+='<select class="ch-dbox'+(inRest?' on':'')+'" onchange="chSetDay(this.value)"><option value="">'+(inRest?'أخرى':'أخرى')+'</option>'+
               rest.map(d=>'<option value="'+d+'"'+(dfv===d?' selected':'')+'>'+chEsc(chDateLbl(d))+(d<tod?' (سابق)':'')+(showCnt?' ('+cnt[d]+')':'')+'</option>').join('')+
               (nUnd?'<option value="none"'+(dfv==='none'?' selected':'')+'>بلا موعد'+(showCnt?' ('+nUnd+')':'')+'</option>':'')+'</select>';
           }
@@ -7213,19 +7249,35 @@ function chRenderList(){
          : '<div class="ch-empty">'+(f==='wait'?'ما في محادثات بانتظار التثبيت 🎉':f==='cancelled'?'ما في محادثات ملغية':'ما في محادثات مثبّتة بعد')+'</div>');
     return;
   }
+  const dayHdr=ymd=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(ymd||'')) return ['بلا موعد',''];
+    const t0=chTodayPlus(0), a=Date.UTC(+ymd.slice(0,4),+ymd.slice(5,7)-1,+ymd.slice(8,10)), b=Date.UTC(+t0.slice(0,4),+t0.slice(5,7)-1,+t0.slice(8,10)), n=Math.round((a-b)/86400000);
+    const rel=n===0?'اليوم':n===1?'غداً':n===2?'بعد يومين':n>2&&n<=10?'بعد '+n+' أيام':n>10?'بعد '+n+' يوم':n===-1?'فات (أمس)':'فات منذ '+(-n)+' يوم';
+    return [chDateLbl(ymd), rel, n];
+  };
+  const grpN={}; arr.forEach(c=>{ const k=c.deliveryDate||''; grpN[k]=(grpN[k]||0)+1; });
+  let prevKey=null;
   el.innerHTML = arr.map(c=>{
     const sub = chSubline(c);
-    const ord = kinds.get(c.id)==='pinned' ? chFindOrder(c) : null;
-    const chips = (dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kinds.get(c.id)==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'');
     const kk=kinds.get(c.id);
-    return '<div class="ch-row" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
-      chDayBlk(c.deliveryDate,kk)+
-      '<div class="ch-main"><div class="ch-l1"><span class="ch-name">'+chEsc(c.customer)+'<span class="ch-src" style="background:'+CH_SRC[chSrcKey(c)][1]+';color:'+CH_SRC[chSrcKey(c)][2]+'">'+CH_SRC[chSrcKey(c)][0]+'</span>'+(c.employeeName?'<span class="ch-emp-in">'+chEsc(c.employeeName)+'</span>':'')+'</span><span class="ch-time">'+chTimeLbl(c.lastMsgAt)+'</span></div>'+
-      (sub?'<div class="ch-l2">'+chEsc(sub)+'</div>':'')+
-      (chips?'<div class="ch-l3">'+chips+'</div>':'')+'</div><span class="ch-sdot '+(kk==='pinned'?'pin':kk==='wait'?'':kk==='cancelled'?'can':'oth')+'" title="'+(kk==='pinned'?'مثبّتة':kk==='wait'?'بانتظار التثبيت':'')+'"></span></div>';
+    const key=c.deliveryDate||'';
+    let hdr='';
+    if(key!==prevKey){ const h=dayHdr(key); hdr='<div class="ch-gh'+(h[2]===0?' now':(h[2]<0?' past':''))+'"><b>'+chEsc(h[0])+'</b>'+(h[1]?'<span>'+chEsc(h[1])+'</span>':'')+'<em>'+grpN[key]+'</em></div>'; prevKey=key; }
+    const delChip = dels.has(c.id)?'<span class="ch-chip ch-emp">'+(kk==='cancelled'?'ملغي قديم':(chDelivered(c)?'تم التسليم':'موعده فات'))+'</span>':'';
+    const pv=String(c.preview||'').replace(/\s+/g,' ').trim();
+    const ours=/^أنتِ:/.test(pv);
+    const prevHtml=pv?'<div class="ch-l2 ch-prev'+(ours?' ours':'')+'">'+chEsc(pv)+'</div>':'';
+    const chips=(sub?'<span class="ch-chip ch-tp">'+chEsc(sub)+'</span>':'')+(kk==='pinned'?'<span class="ch-chip ch-pinned">✓ مثبّتة</span>':'')+(c.employeeName?'<span class="ch-chip ch-emp">👤 '+chEsc(c.employeeName)+'</span>':'')+delChip;
+    return hdr+'<div class="ch-row ch-r2'+(kk==='pinned'?' ch-row-pin':'')+'" onclick="chOpen(\''+chEsc(c.id)+'\')">'+
+      '<span class="ch-sdot '+(kk==='pinned'?'pin':kk==='wait'?'':kk==='cancelled'?'can':'oth')+'"></span>'+
+      '<div class="ch-main"><div class="ch-l1"><span class="ch-name">'+chEsc(c.customer)+'</span><span class="ch-time">'+chTimeLbl(c.lastMsgAt)+'</span></div>'+prevHtml+
+      (chips?'<div class="ch-l3">'+chips+'</div>':'')+'</div></div>';
   }).join('');
 }
+function chSearchOpen(){ const w=document.getElementById('ch-qwrap'); w.style.display='flex'; document.getElementById('ch-sico').classList.add('on'); setTimeout(()=>{ try{ document.getElementById('ch-q').focus(); }catch(e){} },30); }
+function chSearchClose(){ const q=document.getElementById('ch-q'); q.value=''; document.getElementById('ch-qwrap').style.display='none'; document.getElementById('ch-sico').classList.remove('on'); chSearchInput(); }
 function chSearchInput(){
+  try{ document.getElementById('ch-sico').classList.toggle('on', !!document.getElementById('ch-q').value.trim() || document.getElementById('ch-qwrap').style.display!=='none'); }catch(e){}
   chRenderList();
   clearTimeout(CH.qTimer);
   const q=document.getElementById('ch-q').value.trim();
