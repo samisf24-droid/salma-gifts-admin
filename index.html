@@ -1208,7 +1208,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v172</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v174</span>
   </div>
 </div>
 <div class="tabs">
@@ -1834,7 +1834,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
       </div>
       <div id="print-from-info" style="background:#F6EEDC;border-radius:10px;padding:9px 10px;font-size:13px;color:#4A3318;line-height:1.7;margin:2px 0 6px"></div>
       <div style="display:flex;gap:10px;align-items:center;padding:2px 2px 6px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5A3F1E;font-weight:700;flex:1"><input id="print-unp-chk" type="checkbox" onchange="sgRangeDirty()" style="width:18px;height:18px"> غير المطبوع فقط</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5A3F1E;font-weight:700;flex:1"><input id="print-unp-chk" type="checkbox" onchange="sgApplyRange()" style="width:18px;height:18px"> غير المطبوع فقط</label>
         <button type="button" onclick="sgApplyRange()" style="padding:9px 18px;border:none;border-radius:8px;background:#8A5A1E;color:#fff;font-family:Tajawal,sans-serif;font-size:13px;font-weight:800;cursor:pointer">✓ تطبيق</button>
       </div>
       <div id="print-range-status" style="font-size:12px;color:#2E7D32;font-weight:700;padding:0 2px 4px"></div>
@@ -2444,7 +2444,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v172<br>
+       <strong>الإصدار:</strong> v174<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2468,7 +2468,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v172 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v174 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5436,6 +5436,13 @@ function doPrint(){
   if(!html){toast('❌ ما في أوردرات للطباعة');return;}
   document.getElementById('print-container').innerHTML=html;
   window._sgLastPrintIds=orders.map(o=>o['Order ID']);
+  (function(){
+    const t=id=>{ const e=document.getElementById(id); return e?e.textContent.trim():''; };
+    const dTxt=t('ms-days-summary'), tTxt=t('ms-type-summary');
+    const nos=orders.map(sgOrderNo).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    window._sgPrintDesc='سيُطبع <b>'+orders.length+'</b> أوردر<br>'+(dTxt&&dTxt.indexOf('اختر')<0?dTxt:'كل الأيام')+' — '+(tTxt||'كل الأنواع')
+      +(nos.length?'<br><span style="font-weight:600">'+sgFmtNo(nos[0])+(nos.length>1?' ← '+sgFmtNo(nos[nos.length-1]):'')+(onlyUnp?' · غير المطبوع فقط':'')+'</span>':'');
+  })();
   sgPrintFlow('print-container');
 }
 
@@ -5445,18 +5452,20 @@ function sgIsStandalone(){
   try{ return window.navigator.standalone===true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; }
 }
 function sgPrintClose(){ const o=document.getElementById('sg-print-ov'); if(o) o.remove(); }
+window.addEventListener('afterprint',()=>{ setTimeout(sgPrintClose,200); });
 function sgPrintOv(html){
   let o=document.getElementById('sg-print-ov');
   if(!o){
     o=document.createElement('div'); o.id='sg-print-ov';
     o.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(20,14,8,.92);display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Tajawal',sans-serif;direction:rtl";
     document.body.appendChild(o);
+    o.addEventListener('click',e=>{ if(e.target===o) sgPrintClose(); });
   }
   o.innerHTML='<div style="background:#FBF6EC;border-radius:16px;padding:22px 18px;max-width:340px;width:100%;text-align:center;color:#2A1D10">'+html+'</div>';
   return o;
 }
 function sgBtn(label,onclick,primary){
-  return '<button onclick="'+onclick+'" style="width:100%;margin-top:10px;padding:13px;border-radius:12px;border:'+(primary?'none':'1.5px solid #C9A96E')+';background:'+(primary?'#8A5A1E':'transparent')+';color:'+(primary?'#fff':'#5A3F1E')+';font-family:inherit;font-size:16px;font-weight:800;cursor:pointer">'+label+'</button>';
+  return '<button type="button" onclick="'+onclick+'" ontouchend="event.preventDefault();'+onclick+'" style="width:100%;margin-top:10px;padding:13px;border-radius:12px;border:'+(primary?'none':'1.5px solid #C9A96E')+';background:'+(primary?'#8A5A1E':'transparent')+';color:'+(primary?'#fff':'#5A3F1E')+';font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation">'+label+'</button>';
 }
 function sgLoadImg(img){
   return new Promise(res=>{
@@ -5479,8 +5488,7 @@ async function sgPrintFlow(containerId){
   const cont=document.getElementById(containerId);
   const imgs=cont?[...cont.querySelectorAll('img')]:[];
   const standalone=sgIsStandalone();
-  if(!imgs.length && !standalone){ sgMarkPrinted(); setTimeout(()=>window.print(),150); return; }
-  if(standalone && !imgs.length){ sgShowReady(0,0,true); return; }
+  if(!imgs.length){ sgShowReady(0,0,standalone,containerId); return; }
   let doneN=0, bad=0, idx=0;
   const total=imgs.length;
   sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاري تجهيز الأوردرات للطباعة…</div><div id="sg-prog" style="margin-top:8px;font-size:15px;color:#6B4A25">0 / '+total+'</div>'+sgBtn('إلغاء','sgPrintClose()',false));
@@ -5503,7 +5511,7 @@ function sgShowReady(total,bad,standalone,containerId){
     return;
   }
   const warn = bad>0 ? '<div style="margin-top:8px;color:#B3261E;font-size:14px;font-weight:700">⚠️ '+bad+' من الأوردرات ما اكتمل تجهيزها</div>' : '<div style="margin-top:6px;color:#2E7D32;font-size:14px;font-weight:700">✅ الأوردرات جاهزة'+''+'</div>';
-  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاهز للطباعة</div>'+warn+sgBtn('🖨️ طباعة وتحديد كمطبوع','sgDoPrint(true)',true)+sgBtn('🖨️ طباعة فقط','sgDoPrint(false)',false)+(bad>0?sgBtn('🔄 إعادة المحاولة','sgRetryImgs()',false):'')+sgBtn('إغلاق','sgPrintClose()',false));
+  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاهز للطباعة</div>'+(window._sgPrintDesc&&containerId==='print-container'?'<div style="margin-top:8px;background:#F1E6CF;border-radius:10px;padding:9px 10px;font-size:14px;line-height:1.7;color:#3E2A12;font-weight:700">'+window._sgPrintDesc+'</div>':'')+warn+(containerId==='names-print-container'?sgBtn('🖨️ طباعة','sgDoPrint(false)',true):sgBtn('🖨️ طباعة وتحديد كمطبوع','sgDoPrint(true)',true)+sgBtn('🖨️ طباعة فقط','sgDoPrint(false)',false))+(bad>0?sgBtn('🔄 إعادة المحاولة','sgRetryImgs()',false):'')+sgBtn('إغلاق','sgPrintClose()',false));
 }
 async function sgRetryImgs(){
   const cont=document.getElementById(window._sgPrintCid||'print-container');
@@ -5524,7 +5532,7 @@ function sgOrderNo(o){ const m=String(o['Order ID']||'').match(/(\d+)/); return 
 function sgMarkPrinted(){
   const ids=window._sgLastPrintIds; if(!ids||!ids.length) return;
   const m=sgPrintedMap(), t=Date.now(); window._sgLastMarked=[];
-  ids.forEach(id=>{ if(!m[id]){ m[id]=t; window._sgLastMarked.push(id); } });
+  ids.forEach(id=>{ m[id]=t; window._sgLastMarked.push(id); });
   sgSavePrinted(m); sgRefreshFromInfo();
 }
 function sgDoPrint(mark){
@@ -5574,25 +5582,27 @@ function sgRefreshFromInfo(){
 function sgRangeDirty(){
   window._sgRange=null;
   const st=document.getElementById('print-range-status'); if(st) st.textContent='';
-  const l=document.getElementById('print-main-lbl'); if(l) l.textContent='طباعة الكاردات الآن';
+}
+function sgSetRangeStatus(txt,ok){
+  const st=document.getElementById('print-range-status'); if(!st) return;
+  st.textContent=txt; st.style.color=ok?'#2E7D32':'#B26A00';
 }
 function sgApplyRange(){
   const f=document.getElementById('print-from-no'), t=document.getElementById('print-to-no'), c=document.getElementById('print-unp-chk');
   let from=String(f.value).trim()!==''?parseInt(f.value,10):null, to=String(t.value).trim()!==''?parseInt(t.value,10):null, unp=!!c.checked;
-  if(from===null && to===null && !unp){ sgRangeDirty(); toast('بدون تحديد — بتنطبع كل أوردرات الاختيارات'); return; }
+  if(from===null && to===null && !unp){ window._sgRange=null; sgSetRangeStatus('ℹ️ بدون تحديد — بتنطبع كل أوردرات الاختيارات',false); return; }
+  const matched=sgMatchedForInfo(), m=sgPrintedMap();
   if(unp && from===null){
-    const m=sgPrintedMap(), matched=sgMatchedForInfo();
     const pn=matched.filter(o=>m[o['Order ID']]).map(sgOrderNo);
     const last=pn.length?Math.max.apply(null,pn):null;
     const un=matched.filter(o=>!m[o['Order ID']] && (last===null || sgOrderNo(o)>last)).map(sgOrderNo).sort((x,y)=>x-y);
-    if(!un.length){ sgRangeDirty(); toast('✅ لا يوجد أوردرات غير مطبوعة ضمن اختياراتك'); return; }
-    from=un[0]; f.value=from;
+    if(!un.length){ window._sgRange=null; sgSetRangeStatus('ℹ️ لا يوجد أوردرات غير مطبوعة ضمن اختياراتك',false); return; }
+    from=un[0]; f.value=from; to=un[un.length-1]; t.value=to;
   }
+  const cnt=matched.filter(o=>{ const n=sgOrderNo(o); return (from===null||n>=from)&&(to===null||n<=to)&&!(unp&&m[o['Order ID']]); }).length;
+  if(!cnt){ window._sgRange=null; sgSetRangeStatus('ℹ️ لا يوجد أوردرات ضمن هالرقم والاختيارات',false); return; }
   window._sgRange={from:from,to:to,unp:unp};
-  const desc='من '+(from!==null?from:'البداية')+' إلى '+(to!==null?to:'نهاية الأوردرات')+(unp?' (غير المطبوع فقط)':'');
-  const st=document.getElementById('print-range-status'); if(st) st.textContent='✓ مفعّل: '+desc;
-  const l=document.getElementById('print-main-lbl'); if(l) l.textContent='طباعة الكاردات الآن ('+desc+')';
-  toast('✓ تم الحفظ — اضغطي طباعة');
+  sgSetRangeStatus('✓ مفعّل: من '+(from!==null?from:'البداية')+' إلى '+(to!==null?to:'نهاية الأوردرات')+' — '+cnt+' أوردر'+(unp?' (غير المطبوع فقط)':''),true);
 }
 function sgMarkAllShownPrinted(){
   const m=sgPrintedMap(), t=Date.now();
