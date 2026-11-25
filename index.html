@@ -1208,7 +1208,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v169</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v170</span>
   </div>
 </div>
 <div class="tabs">
@@ -1833,7 +1833,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
         <input id="print-to-no" type="number" inputmode="numeric" placeholder="اختياري" style="flex:1;min-width:0;padding:9px;border:1.5px solid #D9C9A8;border-radius:8px;font-family:Tajawal,sans-serif;font-size:14px;text-align:center">
       </div>
       <div id="print-from-info" style="background:#F6EEDC;border-radius:10px;padding:9px 10px;font-size:13px;color:#4A3318;line-height:1.7;margin:2px 0 6px"></div>
-      <div style="font-size:11px;color:#8B7355;padding:0 2px 4px">يطبع الأوردرات برقم ≥ «من» (وحتى «إلى» إن حدّدتيه)، مع بقاء فلاتر الأيام والحالات والأنواع. المطبوع يُسجَّل عند ضغط «اطبعي الآن» (على هذا الجهاز).</div>
+      <div style="font-size:11px;color:#8B7355;padding:0 2px 4px">يطبع الأوردرات برقم ≥ «من» (وحتى «إلى» إن حدّدتيه)، مع بقاء فلاتر الأيام والحالات والأنواع. اختاري «طباعة وتحديد كمطبوع» ليُسجَّل المطبوع (على هذا الجهاز).</div>
     </details>
 
     <button class="popt" onclick="doCourierExcel()" style="width:100%;margin-top:6px">
@@ -2440,7 +2440,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v169<br>
+       <strong>الإصدار:</strong> v170<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2464,7 +2464,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v169 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v170 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5500,7 +5500,7 @@ function sgShowReady(total,bad,standalone,containerId){
     return;
   }
   const warn = bad>0 ? '<div style="margin-top:8px;color:#B3261E;font-size:14px;font-weight:700">⚠️ '+bad+' من الأوردرات ما اكتمل تجهيزها</div>' : '<div style="margin-top:6px;color:#2E7D32;font-size:14px;font-weight:700">✅ الأوردرات جاهزة'+''+'</div>';
-  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاهز للطباعة</div>'+warn+sgBtn('🖨️ اطبعي الآن','sgDoPrint()',true)+'<div id="sg-undo" style="display:none">'+sgBtn('↩︎ ما انطبعت؟ ألغي تسجيلها كمطبوعة','sgUnmarkPrinted()',false)+'</div>'+(bad>0?sgBtn('🔄 إعادة المحاولة','sgRetryImgs()',false):'')+sgBtn('إغلاق','sgPrintClose()',false));
+  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاهز للطباعة</div>'+warn+sgBtn('🖨️ طباعة وتحديد كمطبوع','sgDoPrint(true)',true)+sgBtn('🖨️ طباعة فقط','sgDoPrint(false)',false)+(bad>0?sgBtn('🔄 إعادة المحاولة','sgRetryImgs()',false):'')+sgBtn('إغلاق','sgPrintClose()',false));
 }
 async function sgRetryImgs(){
   const cont=document.getElementById(window._sgPrintCid||'print-container');
@@ -5524,9 +5524,8 @@ function sgMarkPrinted(){
   ids.forEach(id=>{ if(!m[id]){ m[id]=t; window._sgLastMarked.push(id); } });
   sgSavePrinted(m); sgRefreshFromInfo();
 }
-function sgDoPrint(){
-  sgMarkPrinted();
-  const u=document.getElementById('sg-undo'); if(u) u.style.display='block';
+function sgDoPrint(mark){
+  if(mark) sgMarkPrinted();
   window.print();
 }
 function sgUnmarkPrinted(){
@@ -5549,28 +5548,24 @@ function sgMatchedForInfo(){
 function sgFmtNo(n){ return 'SG-'+String(n).padStart(4,'0'); }
 function sgRefreshFromInfo(){
   const box=document.getElementById('print-from-info'); if(!box) return;
+  const txt=id=>{ const e=document.getElementById(id); return e?e.textContent.trim():''; };
+  const dayTxt=txt('ms-days-summary'), typeTxt=txt('ms-type-summary');
+  const label='📌 '+(dayTxt&&dayTxt.indexOf('اختر')<0?dayTxt:'كل الأيام')+' — '+(typeTxt||'كل الأنواع');
   const matched=sgMatchedForInfo(), m=sgPrintedMap();
-  if(!matched.length){ box.innerHTML='ما في أوردرات تطابق الفلاتر الحالية.'; return; }
-  const printed=matched.filter(o=>m[o['Order ID']]), un=matched.filter(o=>!m[o['Order ID']]);
-  const nos=a=>a.map(sgOrderNo).sort((x,y)=>x-y);
-  let h='';
-  if(printed.length){
-    const pn=nos(printed), last=pn[pn.length-1];
-    const lastT=Math.max.apply(null,printed.map(o=>m[o['Order ID']]));
-    const d=new Date(lastT);
+  let h='<div style="font-weight:800;margin-bottom:4px">'+label+'</div>';
+  if(!matched.length){ box.innerHTML=h+'ما في أوردرات تطابق هالاختيارات.'; return; }
+  const printed=matched.filter(o=>m[o['Order ID']]);
+  const pn=printed.map(sgOrderNo).sort((x,y)=>x-y);
+  const last=pn.length?pn[pn.length-1]:null;
+  if(last!==null){
+    const lastT=Math.max.apply(null,printed.map(o=>m[o['Order ID']])), d=new Date(lastT);
     h+='🖨️ آخر مطبوع: <b>'+sgFmtNo(last)+'</b> <span style="color:#8B7355;font-size:12px">('+d.getDate()+'/'+(d.getMonth()+1)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+')</span><br>';
   } else {
-    h+='ما في سجل طباعة سابق لهالفلاتر على هذا الجهاز.<br>';
+    h+='🖨️ آخر مطبوع: <span style="color:#8B7355">لا يوجد بعد</span><br>';
   }
-  if(un.length){
-    const un2=nos(un);
-    h+='⏳ غير مطبوع: <b>'+un.length+'</b> أوردر <span style="color:#8B7355;font-size:12px">('+sgFmtNo(un2[0])+(un2.length>1?' ← '+sgFmtNo(un2[un2.length-1]):'')+')</span>';
-    h+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button type="button" onclick="sgFillFromUnprinted()" style="flex:1;padding:8px;border:none;border-radius:8px;background:#8A5A1E;color:#fff;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer">ابدئي من '+un2[0]+'</button>';
-  } else {
-    h+='✅ كل الأوردرات المطابقة مطبوعة.<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
-  }
-  h+='<button type="button" onclick="sgMarkAllShownPrinted()" style="padding:8px;border:1.5px solid #C9A96E;border-radius:8px;background:transparent;color:#5A3F1E;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">اعتبار الظاهر كله مطبوع</button>';
-  h+='<button type="button" onclick="sgClearPrinted()" style="padding:8px;border:1.5px solid #D9C9A8;border-radius:8px;background:transparent;color:#8B7355;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">تصفير السجل</button></div>';
+  const un=matched.filter(o=>!m[o['Order ID']] && (last===null || sgOrderNo(o)>last)).map(sgOrderNo).sort((x,y)=>x-y);
+  if(un.length) h+='⏳ غير مطبوع: <b>'+un.length+'</b> أوردر <span style="color:#8B7355;font-size:12px">('+sgFmtNo(un[0])+(un.length>1?' ← '+sgFmtNo(un[un.length-1]):'')+')</span>';
+  else h+='✅ لا يوجد غير مطبوع';
   box.innerHTML=h;
 }
 function sgFillFromUnprinted(){
