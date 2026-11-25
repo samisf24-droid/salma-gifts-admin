@@ -8,7 +8,6 @@
 <link rel="apple-touch-icon" href="logo.png">
 <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
 <link rel="icon" type="image/png" href="logo.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="هدايا سلمى">
 <meta name="theme-color" content="#1A1410">
@@ -364,7 +363,7 @@ body.staff-view:not(.prep-view) .cal-day-block-cnt{display:none}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;margin:0;padding:0}
   body{background:#fff!important;font-family:'Tajawal',sans-serif;direction:rtl;font-size:9px}
-  #sticky-hdr-wrap,.hdr,.tabs,.main,#welcome-bar,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
+  #sg-print-ov,#sticky-hdr-wrap,.hdr,.tabs,.main,#welcome-bar,#view-print,.pmodal-bg,.panel-bg,.edit-bg,.toast,#date-warn,#orphan-sec{display:none!important}
   #print-container{display:block!important}
   #names-print-container{display:block!important;padding:10mm}
   .names-print-item{margin-bottom:9mm;text-align:center;break-inside:avoid;padding-bottom:6mm;border-bottom:1px dashed #999}
@@ -1134,7 +1133,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 .ch-skel{padding:30px;text-align:center;color:#8B7355;font-size:13px}
 
 
-/* v165 */
+/* v166 */
 .ch-search{display:flex;gap:8px;align-items:center;margin:0 0 8px}
 .ch-sico{flex:none;width:46px;height:44px;border:1.5px solid #E5D9C7;background:#fff;border-radius:12px;font-size:19px;cursor:pointer;padding:0}
 .ch-sico.on{background:#FFF1D6;border-color:#C9A96E}
@@ -1144,7 +1143,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
 .ch-qx{flex:none;width:44px;height:44px;border:1.5px solid #E5D9C7;background:#fff;border-radius:12px;font-size:16px;cursor:pointer;color:#6B5A48}
 .ch-dstrip select.ch-dbox{display:block;appearance:none;-webkit-appearance:none;flex:0 0 62px;width:62px;min-width:62px;max-width:62px;padding:0 4px;text-align:center;text-align-last:center;direction:rtl;font-size:13px;font-weight:800;line-height:1.2;padding-top:17px;overflow:hidden;text-overflow:clip}
 
-/* v165b: قائمة مجمّعة حسب موعد الاستلام + آخر رسالة */
+/* v166b: قائمة مجمّعة حسب موعد الاستلام + آخر رسالة */
 .ch-gh{display:flex;align-items:baseline;gap:8px;padding:8px 12px;background:#F4EDE0;border-bottom:1px solid #EADFCB;position:sticky;top:0;z-index:2}
 .ch-gh b{font-size:13.5px;font-weight:900;color:#4A3728}
 .ch-gh span{font-size:12px;font-weight:700;color:#8A5200}
@@ -1209,7 +1208,7 @@ body.ch-in-detail #sticky-hdr-wrap{position:static}
   <div class="hdr-status" style="opacity:.65">
     <div class="hdr-dot" id="conn-dot"></div>
     <span id="conn-lbl" style="font-size:11px">جاري التحميل...</span>
-    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v165</span>
+    <span onclick="showDiag()" style="margin-right:4px;background:rgba(201,169,110,.18);color:#C9A96E;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;cursor:pointer">v167</span>
   </div>
 </div>
 <div class="tabs">
@@ -2429,7 +2428,7 @@ function showDiag(){
   }).join('');
   document.getElementById('diag-body').innerHTML =
     `<div style="background:#FAF5EC;border:1px solid #E8D5B0;border-radius:8px;padding:10px 12px;margin-bottom:12px">
-       <strong>الإصدار:</strong> v165<br>
+       <strong>الإصدار:</strong> v167<br>
        <strong>محمّل:</strong> ${allOrders.length} أوردر<br>
        <strong>نشط:</strong> ${active.length} &nbsp;·&nbsp; <strong>تواريخ مختلفة:</strong> ${keys.length}
      </div>`
@@ -2453,7 +2452,7 @@ function logDiag(){
     const k = d ? fmtFull(d) : '❌ غير مقروء';
     (byDate[k] = byDate[k] || []).push(o['Order ID']);
   });
-  console.log('%c هدايا سلمى v165 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
+  console.log('%c هدايا سلمى v167 ', 'background:#C9A96E;color:#1A1410;font-weight:bold');
   console.log('إجمالي محمّل:', allOrders.length, '| نشط:', active.length);
   console.table(Object.keys(byDate).sort().map(k=>({التاريخ:k, العدد:byDate[k].length, الأوردرات:byDate[k].join(', ')})));
 }
@@ -5242,7 +5241,7 @@ function printNamesList(){
       </div>`).join('');
   document.getElementById('print-container').innerHTML = ''; // تفضية حاوية الكاردات لتفادي التداخل
   document.getElementById('names-print-container').innerHTML = html;
-  setTimeout(()=>window.print(), 100);
+  sgPrintFlow('names-print-container');
 }
 
 
@@ -5411,7 +5410,83 @@ function doPrint(){
   document.getElementById('print-container').innerHTML='';
   if(!html){toast('❌ ما في أوردرات للطباعة');return;}
   document.getElementById('print-container').innerHTML=html;
-  setTimeout(()=>window.print(),200);
+  sgPrintFlow('print-container');
+}
+
+
+// ═══ تدفّق الطباعة الموثوق: ينتظر تحميل كل الصور، ثم زر طباعة بضغطة مستخدم مباشرة (iOS يمنع print() بعد انتظار طويل) ═══
+function sgIsStandalone(){
+  try{ return window.navigator.standalone===true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; }
+}
+function sgPrintClose(){ const o=document.getElementById('sg-print-ov'); if(o) o.remove(); }
+function sgPrintOv(html){
+  let o=document.getElementById('sg-print-ov');
+  if(!o){
+    o=document.createElement('div'); o.id='sg-print-ov';
+    o.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(20,14,8,.92);display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Tajawal',sans-serif;direction:rtl";
+    document.body.appendChild(o);
+  }
+  o.innerHTML='<div style="background:#FBF6EC;border-radius:16px;padding:22px 18px;max-width:340px;width:100%;text-align:center;color:#2A1D10">'+html+'</div>';
+  return o;
+}
+function sgBtn(label,onclick,primary){
+  return '<button onclick="'+onclick+'" style="width:100%;margin-top:10px;padding:13px;border-radius:12px;border:'+(primary?'none':'1.5px solid #C9A96E')+';background:'+(primary?'#8A5A1E':'transparent')+';color:'+(primary?'#fff':'#5A3F1E')+';font-family:inherit;font-size:16px;font-weight:800;cursor:pointer">'+label+'</button>';
+}
+function sgLoadImg(img){
+  return new Promise(res=>{
+    const src0=img.getAttribute('data-src0')||img.src; img.setAttribute('data-src0',src0);
+    if(img.complete && img.naturalWidth>0){ res(true); return; }
+    let tries=0;
+    const attempt=()=>{
+      tries++;
+      let done=false;
+      const finish=ok=>{ if(done) return; done=true; clearTimeout(t); if(ok) res(true); else if(tries<3) setTimeout(attempt,600*tries); else res(false); };
+      const t=setTimeout(()=>finish(false),10000);
+      img.onload=()=>finish(img.naturalWidth>0);
+      img.onerror=()=>finish(false);
+      img.src = tries===1 ? src0 : src0+(src0.indexOf('?')>-1?'&':'?')+'_r='+Date.now();
+    };
+    attempt();
+  });
+}
+async function sgPrintFlow(containerId){
+  const cont=document.getElementById(containerId);
+  const imgs=cont?[...cont.querySelectorAll('img')]:[];
+  const standalone=sgIsStandalone();
+  if(!imgs.length && !standalone){ setTimeout(()=>window.print(),150); return; }
+  if(standalone && !imgs.length){ sgShowReady(0,0,true); return; }
+  let doneN=0, bad=0, idx=0;
+  const total=imgs.length;
+  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاري تجهيز الأوردرات للطباعة…</div><div id="sg-prog" style="margin-top:8px;font-size:15px;color:#6B4A25">0 / '+total+'</div>'+sgBtn('إلغاء','sgPrintClose()',false));
+  const worker=async()=>{
+    while(idx<total){
+      const im=imgs[idx++];
+      const ok=await sgLoadImg(im);
+      doneN++; if(!ok) bad++;
+      const pg=document.getElementById('sg-prog'); if(pg) pg.textContent=Math.round(doneN*100/total)+'%';
+    }
+  };
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  if(!document.getElementById('sg-print-ov')) return; // المستخدم ألغى
+  sgShowReady(total,bad,standalone,containerId);
+}
+function sgShowReady(total,bad,standalone,containerId){
+  window._sgPrintCid=containerId||'print-container';
+  if(standalone){
+    sgPrintOv('<div style="font-size:34px">⚠️</div><div style="font-size:16px;font-weight:800;margin-top:6px;line-height:1.6">الطباعة ما بتشتغل من أيقونة الشاشة الرئيسية (قيد من آبل).<br>افتحي النظام من Safari أو Chrome وبتشتغل عادي.</div><div style="font-size:13px;margin-top:10px;color:#6B4A25;line-height:1.6">للحل النهائي: احذفي الأيقونة وأعيدي إضافتها من Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية (بعد آخر تحديث بتفتح بالمتصفح ويشتغل الطباعة).</div>'+sgBtn('إغلاق','sgPrintClose()',true));
+    return;
+  }
+  const warn = bad>0 ? '<div style="margin-top:8px;color:#B3261E;font-size:14px;font-weight:700">⚠️ '+bad+' من الأوردرات ما اكتمل تجهيزها</div>' : '<div style="margin-top:6px;color:#2E7D32;font-size:14px;font-weight:700">✅ الأوردرات جاهزة'+''+'</div>';
+  sgPrintOv('<div style="font-size:34px">🖨️</div><div style="font-size:17px;font-weight:800;margin-top:6px">جاهز للطباعة</div>'+warn+sgBtn('🖨️ اطبعي الآن','window.print()',true)+(bad>0?sgBtn('🔄 إعادة المحاولة','sgRetryImgs()',false):'')+sgBtn('إغلاق','sgPrintClose()',false));
+}
+async function sgRetryImgs(){
+  const cont=document.getElementById(window._sgPrintCid||'print-container');
+  const imgs=cont?[...cont.querySelectorAll('img')].filter(i=>!(i.complete&&i.naturalWidth>0)):[];
+  sgPrintOv('<div style="font-size:17px;font-weight:800">جاري إعادة المحاولة…</div>');
+  let bad=0;
+  for(const im of imgs){ im.removeAttribute('data-src0'); const ok=await sgLoadImg(im); if(!ok) bad++; }
+  if(!document.getElementById('sg-print-ov')) return;
+  sgShowReady(cont?cont.querySelectorAll('img').length:0,bad,false,window._sgPrintCid);
 }
 
 
